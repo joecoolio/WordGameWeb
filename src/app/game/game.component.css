@@ -1,0 +1,10 @@
+section {
+  width: 600px;
+  display: flex;
+  flex-flow: row;
+  /* justify-content: space-evenly;
+  align-content: space-between;
+  align-items: center; */
+  margin: 7% auto 50px auto;
+  flex-wrap: nowrap;
+}

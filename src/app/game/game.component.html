@@ -1,0 +1,5 @@
+<section w-full>
+  <div *ngFor="let word of gameService.board">
+    <word [word]="word.word" [index]="word.id" border-blue> </word>
+  </div>
+</section>
