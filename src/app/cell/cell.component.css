@@ -15,3 +15,7 @@
 .filled-box {
   border: 2px solid black;
 }
+
+.highlighted-box {
+  background-color: green;
+}

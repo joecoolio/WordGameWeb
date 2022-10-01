@@ -10,4 +10,10 @@ export class GameComponent implements OnInit {
   constructor(public gameService: GameService) {}
 
   ngOnInit() {}
+
+  selectedWord = 0;
+
+  public setSelectedWord(_index: number) {
+    this.selectedWord = _index;
+  }
 }

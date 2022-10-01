@@ -1,3 +1,7 @@
 .letter-row {
   display: flex;
 }
+
+.highlight {
+  background-color: green;
+}

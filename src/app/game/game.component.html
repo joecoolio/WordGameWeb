@@ -1,5 +1,9 @@
 <div class="game-board">
-  <div *ngFor="let word of gameService.board">
+  <div
+    *ngFor="let word of gameService.board; let i = index"
+    (click)="setSelectedWord(i)"
+    [ngClass]="{ highlight: selectedWord === i }"
+  >
     <word [wordArray]="word" border-blue> </word>
   </div>
 </div>

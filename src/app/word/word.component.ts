@@ -7,8 +7,13 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class WordComponent implements OnInit {
   @Input() wordArray;
+  selectedLetter = 0;
 
   constructor() {}
 
   ngOnInit() {}
+
+  public setSeletedLetter(_index: number) {
+    this.selectedLetter = _index;
+  }
 }
