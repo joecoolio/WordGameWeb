@@ -1,3 +1,5 @@
-<div class="word-container" *ngFor="let letter of word | split; word">
-  <cell [letter]="letter"> </cell>
+<div class="letter-row">
+  <div *ngFor="let letter of wordArray">
+    <cell [letter]="letter"> </cell>
+  </div>
 </div>

@@ -1,5 +1,3 @@
-.word-container {
+.letter-row {
   display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
 }

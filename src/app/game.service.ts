@@ -18,13 +18,21 @@ export class GameService {
     let startWord = 'VIM';
     let endWord = 'OAT';
 
-    // Create a board holding (numHops + 1) words
+    // Create a 2d board holding (numHops + 1) words of numLetters each / all nulls
     let board = [];
-    board.push({ id: 0, word: startWord });
-    // for (let i = 1; i < this.numHops; i++) {
-    //   board.push({ id: i, word: 'xxx' });
-    // }
-    // board.push({ id: this.numHops, word: endWord });
+    for (let i = 0; i < this.numHops + 1; i++) {
+      board[i] = [];
+      for (let j = 0; j < this.numLetters; j++) {
+        board[i].push(null);
+      }
+    }
+
+    // Put the first & last words in
+    for (let j = 0; j < this.numLetters; j++) {
+      board[0][j] = startWord.charAt(j);
+      board[this.numHops][j] = endWord.charAt(j);
+    }
+
     return board;
   }
 

@@ -6,8 +6,7 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./word.component.css'],
 })
 export class WordComponent implements OnInit {
-  @Input() index;
-  @Input() word;
+  @Input() wordArray;
 
   constructor() {}
 

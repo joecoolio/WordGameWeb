@@ -1,10 +1,5 @@
-section {
-  width: 600px;
+.game-board {
   display: flex;
-  flex-flow: row;
-  /* justify-content: space-evenly;
-  align-content: space-between;
-  align-items: center; */
-  margin: 7% auto 50px auto;
-  flex-wrap: nowrap;
+  align-items: center;
+  flex-direction: column;
 }

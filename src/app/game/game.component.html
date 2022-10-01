@@ -1,5 +1,5 @@
-<section w-full>
+<div class="game-board">
   <div *ngFor="let word of gameService.board">
-    <word [word]="word.word" [index]="word.id" border-blue> </word>
+    <word [wordArray]="word" border-blue> </word>
   </div>
-</section>
+</div>
