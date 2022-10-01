@@ -1,9 +1,21 @@
 <div class="game-board">
   <div
     *ngFor="let word of gameService.board; let i = index"
-    (click)="setSelectedWord(i)"
-    [ngClass]="{ highlight: selectedWord === i }"
+    [ngClass]="{ 'highlighted-row': gameService.selectedWord === i }"
   >
-    <word [wordArray]="word" border-blue> </word>
+    <div class="letter-row">
+      <div
+        *ngFor="let letter of word; let j = index"
+        (click)="setSelectedCell(i, j)"
+        [ngClass]="{
+          'highlighted-box':
+            gameService.selectedWord === i && gameService.selectedLetter === j
+        }"
+      >
+        <div class="letter-box">
+          {{ letter }}
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -1,5 +1,6 @@
-import { Component, VERSION } from '@angular/core';
+import { Component, HostListener, VERSION } from '@angular/core';
 import Keyboard from 'simple-keyboard';
+import { GameService } from './game.service';
 
 @Component({
   selector: 'my-app',
@@ -11,6 +12,11 @@ export class AppComponent {
 
   value = '';
   keyboard: Keyboard;
+  game: GameService;
+
+  constructor() {
+    this.game = new GameService();
+  }
 
   ngAfterViewInit() {
     this.keyboard = new Keyboard({
@@ -19,6 +25,16 @@ export class AppComponent {
     });
   }
 
+  // Computer keyboard events
+  @HostListener('window:keyup', ['$event'])
+  keyEvent(event: KeyboardEvent) {
+    console.log(event.key);
+
+    // Pass to game
+    this.game.letterEntered(event.key);
+  }
+
+  // Onscreen keyboard events
   onChange = (input: string) => {
     this.value = input;
     console.log('Input changed', input);
@@ -31,6 +47,9 @@ export class AppComponent {
      * If you want to handle the shift and caps lock buttons
      */
     if (button === '{shift}' || button === '{lock}') this.handleShift();
+
+    // Pass to game
+    this.game.letterEntered(button);
   };
 
   onInputChange = (event: any) => {

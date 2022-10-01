@@ -3,8 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
-import { CellComponent } from './cell/cell.component';
-import { WordComponent } from './word/word.component';
 import { GameComponent } from './game/game.component';
 
 //Tutorial
@@ -20,7 +18,7 @@ import { GameService } from './game.service';
     ReactiveFormsModule,
   ],
 
-  declarations: [AppComponent, CellComponent, WordComponent, GameComponent],
+  declarations: [AppComponent, GameComponent],
   bootstrap: [AppComponent],
   providers: [GameService],
 })

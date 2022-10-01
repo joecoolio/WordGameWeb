@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { GameService } from '../game.service';
 
 @Component({
@@ -7,13 +7,14 @@ import { GameService } from '../game.service';
   styleUrls: ['./game.component.css'],
 })
 export class GameComponent implements OnInit {
-  constructor(public gameService: GameService) {}
+  @Input() gameService: GameService;
+
+  constructor() {}
 
   ngOnInit() {}
 
-  selectedWord = 0;
-
-  public setSelectedWord(_index: number) {
-    this.selectedWord = _index;
+  public setSelectedCell(i: number, j: number) {
+    this.gameService.selectedWord = i;
+    this.gameService.selectedLetter = j;
   }
 }
