@@ -6,7 +6,6 @@ import { AppComponent } from './app.component';
 import { CellComponent } from './cell/cell.component';
 import { WordComponent } from './word/word.component';
 import { GameComponent } from './game/game.component';
-import { KeyboardComponent } from './keyboard/keyboard.component';
 
 //Tutorial
 import { ReactiveFormsModule } from '@angular/forms';
@@ -21,13 +20,7 @@ import { GameService } from './game.service';
     ReactiveFormsModule,
   ],
 
-  declarations: [
-    AppComponent,
-    CellComponent,
-    WordComponent,
-    GameComponent,
-    KeyboardComponent,
-  ],
+  declarations: [AppComponent, CellComponent, WordComponent, GameComponent],
   bootstrap: [AppComponent],
   providers: [GameService],
 })

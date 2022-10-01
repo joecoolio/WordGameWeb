@@ -1,3 +1,10 @@
 <p>Start editing to see some magic happen :)</p>
 <game></game>
-<keyboard></keyboard>
+
+<input
+  (input)="onInputChange($event)"
+  class="input"
+  value="{{ value }}"
+  placeholder="Tap on the virtual keyboard to start"
+/>
+<div class="simple-keyboard"></div>
