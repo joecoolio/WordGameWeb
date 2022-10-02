@@ -9,7 +9,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { GameService } from './game.service';
 
 // import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
-// import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { GameService } from '../game.service';
-import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
+import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'game',
@@ -9,8 +9,7 @@ import { faThumbsUp, faThumbsDown } from '@fortawesome/free-solid-svg-icons';
 })
 export class GameComponent implements OnInit {
   @Input() gameService: GameService;
-  faThumbsUp = faThumbsUp;
-  faThumbsDown = faThumbsDown;
+  faCircleCheck = faCircleCheck;
 
   constructor() {}
 
