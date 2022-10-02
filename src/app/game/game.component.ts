@@ -26,9 +26,8 @@ export class GameComponent implements OnInit {
     this.gameService.letterEntered('Enter');
   }
 
-  // Move the highlighted/current cell
+  // Change the highlighted/current cell
   public setSelectedCell(i: number, j: number) {
-    this.gameService.selectedWord = i;
-    this.gameService.selectedLetter = j;
+    this.gameService.setSelectedCell(i, j);
   }
 }
