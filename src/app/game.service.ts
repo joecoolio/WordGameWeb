@@ -11,8 +11,8 @@ export class GameService {
   private _board = [];
 
   // Parameters of the game
-  private numLetters: number = 3;
-  private numHops: number = 4;
+  private numLetters: number = 4;
+  private numHops: number = 3;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -24,7 +24,7 @@ export class GameService {
 
   // Get a new pair of words to play
   private getPair(numLetters: number, numHops: number): string[] {
-    return ['VIM', 'OAT'];
+    return ['ABUT', 'APEX'];
   }
   // Test the whole puzzle
   testPuzzle(words: any[]): boolean {
@@ -190,6 +190,10 @@ export class GameService {
       this._selectedLetter = letter;
     }
   }
+
+  /////
+  // Getters
+  /////
 
   get board() {
     return this._board;
