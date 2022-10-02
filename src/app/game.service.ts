@@ -2,7 +2,11 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class GameService {
-  // The game board
+  // The game board - array of words
+  // Each word has:
+  //   .letters = array of the letters of the word
+  //   .locked = true if this word cannot be changed
+  //   .solved = true if this word is verified
   public board = [];
 
   // Parameters of the game
@@ -28,16 +32,22 @@ export class GameService {
     // Create a 2d board holding (numHops + 1) words of numLetters each / all nulls
     let board = [];
     for (let i = 0; i < this.numHops + 1; i++) {
-      board[i] = [];
+      board[i] = {
+        letters: [],
+        locked: false,
+        solved: false,
+      };
       for (let j = 0; j < this.numLetters; j++) {
-        board[i].push(null);
+        board[i].letters.push(null);
       }
     }
 
-    // Put the first & last words in
+    // Fill in the first & last words
+    board[0].locked = true; // Can't change these
+    board[this.numHops].locked = true;
     for (let j = 0; j < this.numLetters; j++) {
-      board[0][j] = startWord.charAt(j);
-      board[this.numHops][j] = endWord.charAt(j);
+      board[0].letters[j] = startWord.charAt(j);
+      board[this.numHops].letters[j] = endWord.charAt(j);
     }
 
     return board;
@@ -46,7 +56,7 @@ export class GameService {
   // Keyboard entry occurred
   letterEntered(letter: string) {
     // Draw the letter in the box
-    this.board[this.selectedWord][this.selectedLetter] = letter;
+    this.board[this.selectedWord].letters[this.selectedLetter] = letter;
 
     // Move to the next box
     if (this.selectedLetter == this.numLetters - 1) {
