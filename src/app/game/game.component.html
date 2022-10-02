@@ -18,8 +18,17 @@
               gameService.selectedWord === i && gameService.selectedLetter === j
           }"
         >
-          {{ letter }} <fa-icon [icon]="faCircleCheck"></fa-icon>
+          {{ letter }}
         </div>
+      </div>
+      <div
+        *ngIf="word.locked == false"
+        [ngClass]="{
+          'check-unverified': word.solved == false,
+          'check-verified': word.solved == true
+        }"
+      >
+        <fa-icon [icon]="faCircleCheck"></fa-icon>
       </div>
     </div>
   </div>

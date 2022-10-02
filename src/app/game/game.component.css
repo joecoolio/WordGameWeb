@@ -45,3 +45,11 @@
 .highlighted-box {
   background-color: green;
 }
+
+.check-unverified {
+  color: grey;
+}
+
+.check-verified {
+  color: green;
+}
