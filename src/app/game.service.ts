@@ -7,6 +7,7 @@ export class GameService {
   //   .letters = array of the letters of the word
   //   .locked = true if this word cannot be changed
   //   .solved = true if this word is verified
+  //   .wrong = word was tested and is wrong
   public board = [];
 
   // Parameters of the game
@@ -14,7 +15,7 @@ export class GameService {
   numHops: number = 4;
 
   // Selected row/cell indexes
-  selectedWord = 0;
+  selectedWord = 1;
   selectedLetter = 0;
 
   constructor() {
@@ -36,6 +37,7 @@ export class GameService {
         letters: [],
         locked: false,
         solved: false,
+        wrong: false,
       };
       for (let j = 0; j < this.numLetters; j++) {
         board[i].letters.push(null);
@@ -53,25 +55,91 @@ export class GameService {
     return board;
   }
 
+  // Test the whole puzzle
+  testPuzzle(words: any[]): boolean {
+    return true;
+  }
+
+  // Test a single word
+  testWord(word: string): boolean {
+    return true;
+  }
+
   // Keyboard entry occurred
   letterEntered(letter: string) {
-    if (letter === 'Backspace') {
+    // Backspace & Delete (mostly shared logic)
+    if (letter === 'Backspace' || letter === '{bksp}' || letter === 'Delete') {
       // Remove the letter from the current cell
       this.board[this.selectedWord].letters[this.selectedLetter] = null;
 
-      // Back up to the previous cell
-      if (this.selectedLetter > 0) {
-        // Same word, 1 char backwards
-        this.selectedLetter--;
+      // When you delete or backspace, this word + all subsequent are no longer solved
+      for (let i = this.selectedWord; i < this.numHops; i++) {
+        this.board[i].solved = false;
+      }
+
+      // When you delete or backspace, this word is no longer wrong
+      this.board[this.selectedWord].wrong = false;
+
+      // Backspace moves the current cell where delete doesn't
+      if (letter === 'Backspace' || letter === '{bksp}') {
+        // Back up to the previous cell
+        if (this.selectedLetter > 0) {
+          // Same word, 1 char backwards
+          this.selectedLetter--;
+        }
       }
 
       return;
     }
 
-    // if (letter === "Enter") {
-    //     checkGuess()
-    //     return
-    // }
+    if (letter === 'Enter') {
+      // If all letters of this word are filled in, test the word
+      let filledIn = true;
+      for (const letter of this.board[this.selectedWord].letters) {
+        if (letter == null) {
+          filledIn = false;
+        }
+      }
+      if (filledIn) {
+        // Test this word to see if it's valid
+        let validWord = this.testWord(
+          this.board[this.selectedWord].letters.join('')
+        );
+        if (validWord) {
+          this.board[this.selectedWord].solved = true;
+
+          // Move to the next word
+          if (this.selectedWord < this.numHops - 1) {
+            this.selectedWord++;
+            this.selectedLetter = 0;
+          }
+        } else {
+          this.board[this.selectedWord].wrong = true;
+        }
+
+        // If all words are valid, run the whole puzzle validation
+        let puzzleFilledIn = true;
+        for (const word of this.board) {
+          if (word.locked == false && word.solved == false) {
+            puzzleFilledIn = false;
+          }
+        }
+        if (puzzleFilledIn) {
+          // Validate the whole puzzle
+          let validPuzzle = this.testPuzzle(this.board);
+          if (validPuzzle) {
+            console.log('YOU WIN!'); //TODO
+          } else {
+            // All words are marked valid but the puzzle is borked
+            // This shouldn't happen but if it does, everything goes to invalid
+            for (const word of this.board) {
+              word.solved = true;
+            }
+          }
+        }
+        return;
+      }
+    }
 
     let found = letter.match(/[a-z]/gi);
     if (!found || found.length > 1) {
@@ -80,6 +148,9 @@ export class GameService {
     } else {
       // Valid letter, put it in the appropriate cell
       this.board[this.selectedWord].letters[this.selectedLetter] = letter;
+
+      // When you change a letter, this word is no longer wrong
+      this.board[this.selectedWord].wrong = false;
 
       // Move the input to the next appropriate cell
       if (this.selectedLetter === this.numLetters - 1) {

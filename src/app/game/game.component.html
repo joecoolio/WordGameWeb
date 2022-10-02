@@ -12,8 +12,9 @@
         <div
           class="letter-box"
           [ngClass]="{
-            'locked-word': word.locked == true,
-            'solved-word': word.solved == true,
+            'locked-box': word.locked == true,
+            'solved-box': word.solved == true,
+            'wrong-box': word.wrong == true,
             'highlighted-box':
               gameService.selectedWord === i && gameService.selectedLetter === j
           }"
@@ -21,14 +22,37 @@
           {{ letter }}
         </div>
       </div>
+
+      <!-- Locked word -->
+      <div *ngIf="word.locked == true" class="icon-box unverified"></div>
+
+      <!-- Unverified word -->
       <div
-        *ngIf="word.locked == false"
-        [ngClass]="{
-          'check-unverified': word.solved == false,
-          'check-verified': word.solved == true
-        }"
+        *ngIf="
+          word.locked == false && word.solved == false && word.wrong == false
+        "
+        class="icon-box unverified"
+        (click)="testWord(i)"
+      >
+        <fa-icon [icon]="faCircleQuestion"></fa-icon>
+      </div>
+
+      <!-- Solved word -->
+      <div
+        *ngIf="word.locked == false && word.solved == true"
+        class="icon-box solved"
+        (click)="testWord(i)"
       >
         <fa-icon [icon]="faCircleCheck"></fa-icon>
+      </div>
+
+      <!-- Wrong word -->
+      <div
+        *ngIf="word.locked == false && word.wrong == true"
+        class="icon-box wrong"
+        (click)="testWord(i)"
+      >
+        <fa-icon [icon]="faCircleExclamation"></fa-icon>
       </div>
     </div>
   </div>

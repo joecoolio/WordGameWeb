@@ -5,7 +5,7 @@
 }
 
 .highlighted-row {
-  border: 2px solid red;
+  /* border: 2px solid red; */
 }
 
 .letter-row {
@@ -13,6 +13,7 @@
 }
 
 .letter-box {
+  box-sizing: border-box;
   border: 2px solid gray;
   border-radius: 3px;
   margin: 2px;
@@ -26,30 +27,43 @@
   text-transform: uppercase;
 }
 
-.locked-word {
+.locked-box {
   background-color: grey;
 }
 
-.solved-word {
-  background-color: green;
+.solved-box {
+  background-color: lightgreen;
 }
 
-.error-box {
+.wrong-box {
   background-color: red;
 }
 
-.filled-box {
-  border: 2px solid black;
-}
-
 .highlighted-box {
-  background-color: green;
+  /* background-color: purple; */
+  border: 5px solid purple;
 }
 
-.check-unverified {
+.icon-box {
+  border-radius: 3px;
+  margin: 2px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  height: 3rem;
+  width: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+}
+
+.unverified {
   color: grey;
 }
 
-.check-verified {
+.solved {
   color: green;
 }
+
+.wrong {
+  color: red}
