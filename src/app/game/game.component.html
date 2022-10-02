@@ -7,16 +7,15 @@
       <div
         *ngFor="let letter of word.letters; let j = index"
         (click)="setSelectedCell(i, j)"
-        [ngClass]="{
-          'highlighted-box':
-            gameService.selectedWord === i && gameService.selectedLetter === j
-        }"
+        [ngClass]="{}"
       >
         <div
           class="letter-box"
           [ngClass]="{
             'locked-word': word.locked == true,
-            'solved-word': word.solved == true
+            'solved-word': word.solved == true,
+            'highlighted-box':
+              gameService.selectedWord === i && gameService.selectedLetter === j
           }"
         >
           {{ letter }}
