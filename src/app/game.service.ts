@@ -55,15 +55,39 @@ export class GameService {
 
   // Keyboard entry occurred
   letterEntered(letter: string) {
-    // Draw the letter in the box
-    this.board[this.selectedWord].letters[this.selectedLetter] = letter;
+    if (letter === 'Backspace') {
+      // Remove the letter from the current cell
+      this.board[this.selectedWord].letters[this.selectedLetter] = null;
 
-    // Move to the next box
-    if (this.selectedLetter == this.numLetters - 1) {
-      this.selectedWord++;
-      this.selectedLetter = 0;
+      // Back up to the previous cell
+      if (this.selectedLetter > 0) {
+        // Same word, 1 char backwards
+        this.selectedLetter--;
+      }
+
+      return;
+    }
+
+    // if (letter === "Enter") {
+    //     checkGuess()
+    //     return
+    // }
+
+    let found = letter.match(/[a-z]/gi);
+    if (!found || found.length > 1) {
+      // Invalid character
+      return;
     } else {
-      this.selectedLetter++;
+      // Valid letter, put it in the appropriate cell
+      this.board[this.selectedWord].letters[this.selectedLetter] = letter;
+
+      // Move the input to the next appropriate cell
+      if (this.selectedLetter === this.numLetters - 1) {
+        // Move to check button
+      } else {
+        // Move 1 to the right
+        this.selectedLetter++;
+      }
     }
   }
 

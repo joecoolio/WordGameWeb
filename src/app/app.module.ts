@@ -5,18 +5,15 @@ import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
 
-//Tutorial
 import { ReactiveFormsModule } from '@angular/forms';
 import { GameService } from './game.service';
 
-@NgModule({
-  imports: [
-    BrowserModule,
-    FormsModule,
+// import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
+// import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
-    //Tutorial
-    ReactiveFormsModule,
-  ],
+@NgModule({
+  imports: [BrowserModule, FormsModule, ReactiveFormsModule, FontAwesomeModule],
 
   declarations: [AppComponent, GameComponent],
   bootstrap: [AppComponent],

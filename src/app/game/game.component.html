@@ -12,13 +12,13 @@
         <div
           class="letter-box"
           [ngClass]="{
-            'locked-word': word.locked == true,
+            'locked-word': word.locked == true,d
             'solved-word': word.solved == true,
             'highlighted-box':
               gameService.selectedWord === i && gameService.selectedLetter === j
           }"
         >
-          {{ letter }}
+          {{ letter }} <fa-icon [icon]="faThumbsUp"></fa-icon>
         </div>
       </div>
     </div>
