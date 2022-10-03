@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DataService } from './data.service';
 
 @Injectable()
 export class GameService {
@@ -11,36 +12,14 @@ export class GameService {
   private _board = [];
 
   // Parameters of the game
-  private numLetters: number = 4;
-  private numHops: number = 3;
+  private numLetters: number = 3;
+  private numHops: number = 5;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
   private _selectedLetter: number = 0;
 
-  /////
-  // REST calls
-  /////
-
-  // Get a new pair of words to play
-  private getPair(numLetters: number, numHops: number): string[] {
-    return ['ABUT', 'APEX'];
-  }
-  // Test the whole puzzle
-  testPuzzle(words: any[]): boolean {
-    return true;
-  }
-
-  // Test a single word
-  testWord(word: string): boolean {
-    return true;
-  }
-
-  /////
-  // End REST calls
-  /////
-
-  constructor() {
+  constructor(private dataService: DataService) {
     this.newGame();
   }
 
@@ -50,7 +29,7 @@ export class GameService {
 
   createBoard() {
     // Get a pair of words from the server
-    let pairArray = this.getPair(this.numLetters, this.numHops);
+    let pairArray = this.dataService.getPair(this.numLetters, this.numHops);
     let startWord = pairArray[0];
     let endWord = pairArray[1];
 
@@ -121,7 +100,7 @@ export class GameService {
         }
         if (filledIn) {
           // Test this word to see if it's valid
-          let validWord = this.testWord(
+          let validWord = this.dataService.testWord(
             this._board[this._selectedWord].letters.join('')
           );
           if (validWord) {
@@ -145,7 +124,7 @@ export class GameService {
           }
           if (puzzleFilledIn) {
             // Validate the whole puzzle
-            let validPuzzle = this.testPuzzle(this._board);
+            let validPuzzle = this.dataService.testPuzzle(this._board);
             if (validPuzzle) {
               console.log('YOU WIN!'); //TODO
             } else {

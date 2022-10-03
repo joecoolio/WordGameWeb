@@ -1,5 +1,6 @@
 import { Component, HostListener, VERSION } from '@angular/core';
 import Keyboard from 'simple-keyboard';
+import { DataService } from './data.service';
 import { GameService } from './game.service';
 
 @Component({
@@ -14,8 +15,8 @@ export class AppComponent {
   keyboard: Keyboard;
   game: GameService;
 
-  constructor() {
-    this.game = new GameService();
+  constructor(private dataService: DataService) {
+    this.game = new GameService(this.dataService);
   }
 
   ngAfterViewInit() {
