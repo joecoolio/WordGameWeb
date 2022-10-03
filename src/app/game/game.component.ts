@@ -3,6 +3,7 @@ import { GameService } from '../game.service';
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'game',
@@ -14,6 +15,7 @@ export class GameComponent implements OnInit {
   faCircleCheck = faCircleCheck;
   faCircleQuestion = faCircleQuestion;
   faCircleExclamation = faCircleExclamation;
+  faSpinner = faSpinner;
 
   constructor() {}
 

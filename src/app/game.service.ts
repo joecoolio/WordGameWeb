@@ -9,6 +9,7 @@ export class GameService {
   //   .locked = true if this word cannot be changed
   //   .solved = true if this word is verified
   //   .wrong = word was tested and is wrong
+  //   .testing = word is currently being tested
   private _board = [];
 
   // Parameters of the game
@@ -53,6 +54,7 @@ export class GameService {
         locked: false,
         solved: false,
         wrong: false,
+        testing: false,
       };
       for (let j = 0; j < this.wordPair.letters; j++) {
         board[i].letters.push(null);
@@ -111,65 +113,10 @@ export class GameService {
           }
         }
         if (filledIn) {
-          // Output from remote call
-          let testedWord: TestedWord;
-
-          // Inputs to remote call
-          let wordArray = [];
-          for (const word of this._board) {
-            wordArray.push(word.letters.join(''));
-          }
-          let testWord = this._board[this._selectedWord].letters.join('');
-          let testPosition = this._selectedWord;
-
-          // Make the remote call
-          this.dataService
-            .testWord(wordArray, testWord, testPosition)
-            .subscribe((resp) => {
-              testedWord = { ...resp };
-
-              console.log('Word Test: ' + testedWord.valid);
-              this._board = this.createBoard();
-            });
-
-          // Test this word to see if it's valid
-          let validWord = true;
-          // let validWord = this.dataService.testWord(
-          //   this._board[this._selectedWord].letters.join('')
-          // );
-          if (validWord) {
-            this._board[this._selectedWord].solved = true;
-
-            // Move to the next word
-            if (this._selectedWord < this.numHops - 1) {
-              this._selectedWord++;
-              this._selectedLetter = 0;
-            }
-          } else {
-            this._board[this._selectedWord].wrong = true;
-          }
-
-          // If all words are valid, run the whole puzzle validation
-          let puzzleFilledIn = true;
-          for (const word of this._board) {
-            if (word.locked == false && word.solved == false) {
-              puzzleFilledIn = false;
-            }
-          }
-          if (puzzleFilledIn) {
-            // Validate the whole puzzle
-            let validPuzzle = this.dataService.testPuzzle(this._board);
-            if (validPuzzle) {
-              console.log('YOU WIN!'); //TODO
-            } else {
-              // All words are marked valid but the puzzle is borked
-              // This shouldn't happen but if it does, everything goes to invalid
-              for (const word of this._board) {
-                word.solved = true;
-              }
-            }
-          }
-          return;
+          // We know the current word is filled in
+          // Need to determine if you test 1 word or all of them
+          // Validate a single word
+          this.testSingleWord();
         }
       }
 
@@ -179,7 +126,8 @@ export class GameService {
         return;
       } else {
         // Valid letter, put it in the appropriate cell
-        this._board[this._selectedWord].letters[this._selectedLetter] = letter;
+        this._board[this._selectedWord].letters[this._selectedLetter] =
+          letter.toUpperCase();
 
         // When you change a letter, this word is no longer wrong
         this._board[this._selectedWord].wrong = false;
@@ -193,6 +141,84 @@ export class GameService {
         }
       }
     }
+  }
+
+  // Async call to test a single word
+  private testSingleWord() {
+    // Output from remote call
+    let testedWord: TestedWord;
+
+    // Inputs to remote call
+    let wordArray = [];
+    for (const word of this._board) {
+      wordArray.push(word.letters.join(''));
+    }
+    let testWord = this._board[this._selectedWord].letters.join('');
+    let testPosition = this._selectedWord;
+
+    // Mark the word as currently being tested, not solved, not wrong
+    this._board[this._selectedWord].testing = true;
+    this._board[this._selectedWord].solved = false;
+    this._board[this._selectedWord].wrong = false;
+
+    // Make the remote call
+    this.dataService
+      .testWord(wordArray, testWord, testPosition)
+      .subscribe((resp) => {
+        testedWord = { ...resp };
+
+        console.log('Word Test: ' + testedWord.testPosition);
+
+        // Test is done
+        this._board[testedWord.testPosition].testing = false;
+
+        if (testedWord.valid) {
+          // Word is solved, not wrong
+          this._board[testedWord.testPosition].solved = true;
+          this._board[testedWord.testPosition].wrong = false;
+
+          // If all words are solved, you win
+          let puzzleFilledIn = true;
+          for (const word of this._board) {
+            if (word.solved == false) {
+              puzzleFilledIn = false;
+            }
+          }
+          if (puzzleFilledIn) {
+            // You win!  Call this to report the completion.
+            this.testEntirePuzzle();
+          } else {
+            // Move to the next word (unless the user has already moved)
+            if (this._selectedWord == testedWord.testPosition) {
+              if (this._selectedWord < this.numHops - 1) {
+                // Need to avoid moving to a solved word.
+                // Start at the next word and move forwards.
+                for (
+                  let i = testedWord.testPosition + 1;
+                  i < this.numHops - 1;
+                  i++
+                ) {
+                  this._board[i].solved == false;
+                  this._selectedWord = i;
+                  this._selectedLetter = 0;
+                  break;
+                }
+              }
+            }
+          }
+          return;
+        } else {
+          // Word is wrong, not solved
+          this._board[testedWord.testPosition].solved = false;
+          this._board[testedWord.testPosition].wrong = true;
+        }
+      });
+  }
+
+  // Async call to test the whole puzzle
+  // I think I'm going to use this to report a completion
+  private testEntirePuzzle() {
+    // TODO
   }
 
   // Set the selected cell

@@ -29,7 +29,10 @@
       <!-- Unverified word -->
       <div
         *ngIf="
-          word.locked == false && word.solved == false && word.wrong == false
+          word.locked == false &&
+          word.solved == false &&
+          word.wrong == false &&
+          word.testing == false
         "
         class="icon-box unverified"
         (click)="testWord(i)"
@@ -53,6 +56,15 @@
         (click)="testWord(i)"
       >
         <fa-icon [icon]="faCircleExclamation"></fa-icon>
+      </div>
+
+      <!-- Testing word -->
+      <div
+        *ngIf="word.locked == false && word.testing == true"
+        class="icon-box testing fa-spin"
+        (click)="testWord(i)"
+      >
+        <fa-icon [icon]="faSpinner"></fa-icon>
       </div>
     </div>
   </div>
