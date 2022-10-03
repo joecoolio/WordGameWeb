@@ -16,7 +16,7 @@ export class GameService {
 
   // Parameters of the game
   private numLetters: number = 3;
-  private numHops: number = 3;
+  private numHops: number = 4;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -156,7 +156,6 @@ export class GameService {
           }
         }
         if (populated) this._board[this._selectedWord].populated = true;
-        console.log('Word is populated' + populated);
 
         // When you change a letter, the previous message goes away
         this._message = '';
