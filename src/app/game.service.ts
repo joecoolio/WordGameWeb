@@ -10,6 +10,7 @@ export class GameService {
   //   .solved = true if this word is verified
   //   .wrong = word was tested and is wrong
   //   .testing = word is currently being tested
+  //   .loading = word is being loaded
   private _board = [];
 
   // Parameters of the game
@@ -32,10 +33,9 @@ export class GameService {
 
   newGame() {
     console.log('Requesting word pair...');
-    this.dataService
-      .getPair(this.numLetters, this.numHops)
-      // clone the data object, using its known Config shape
-      .subscribe((data: WordPair) => (this.wordPair = { ...data }));
+
+    this._board = this.createEmptyBoard();
+    this._message = 'Requesting a pair of words...';
 
     this.dataService
       .getPair(this.numLetters, this.numHops)
@@ -44,35 +44,48 @@ export class GameService {
         this.wordPair = { ...wordpair };
 
         console.log('Got wordpair: ' + JSON.stringify(this.wordPair));
-        this._board = this.createBoard();
+        this.populateBoard();
+        this._message = '';
       });
   }
 
-  private createBoard() {
+  private createEmptyBoard() {
     // Create a 2d board holding correct number words and letters each / all nulls
     let board = [];
-    for (let i = 0; i < this.wordPair.words; i++) {
+    for (let i = 0; i < this.numHops + 1; i++) {
       board[i] = {
         letters: [],
         locked: false,
         solved: false,
         wrong: false,
         testing: false,
+        loading: false,
       };
-      for (let j = 0; j < this.wordPair.letters; j++) {
+      for (let j = 0; j < this.numLetters; j++) {
         board[i].letters.push(null);
       }
     }
+    // First and last words are locked
+    board[0].locked = true;
+    board[this.numHops].locked = true;
 
-    // Fill in the first & last words on the board
-    board[0].locked = true; // Can't change the start word
-    board[this.wordPair.hops].locked = true; // Can't change the end word
-    for (let j = 0; j < this.numLetters; j++) {
-      board[0].letters[j] = this.wordPair.startWord.charAt(j);
-      board[this.numHops].letters[j] = this.wordPair.endWord.charAt(j);
-    }
+    // First and last words are loading
+    board[0].loading = true;
+    board[this.numHops].loading = true;
 
     return board;
+  }
+
+  private populateBoard() {
+    // Fill in the first & last words on the board
+    for (let j = 0; j < this.numLetters; j++) {
+      this.board[0].letters[j] = this.wordPair.startWord.charAt(j);
+      this.board[this.numHops].letters[j] = this.wordPair.endWord.charAt(j);
+    }
+
+    // First and last words are not loading
+    this.board[0].loading = false;
+    this.board[this.numHops].loading = false;
   }
 
   // Keyboard entry occurred

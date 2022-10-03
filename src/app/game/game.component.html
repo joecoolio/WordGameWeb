@@ -20,6 +20,10 @@
           }"
         >
           {{ letter }}
+          <!-- Spinner while the letter is loading -->
+          <div *ngIf="word.loading == true" class="icon-box testing fa-spin">
+            <fa-icon [icon]="faSpinner"></fa-icon>
+          </div>
         </div>
       </div>
 
