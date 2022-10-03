@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DataService } from './data.service';
+import { DataService, WordPair, TestedWord } from './data.service';
 
 @Injectable()
 export class GameService {
@@ -23,36 +23,48 @@ export class GameService {
     this.newGame();
   }
 
+  // Word pair retrieved from the server
+  wordPair: WordPair | undefined;
+
   newGame() {
-    this._board = this.createBoard();
+    console.log('Requesting word pair...');
+    this.dataService
+      .getPair(this.numLetters, this.numHops)
+      // clone the data object, using its known Config shape
+      .subscribe((data: WordPair) => (this.wordPair = { ...data }));
+
+    this.dataService
+      .getPair(this.numLetters, this.numHops)
+      // resp is of type `HttpResponse<WordPair>`
+      .subscribe((wordpair) => {
+        this.wordPair = { ...wordpair };
+
+        console.log('Got wordpair: ' + JSON.stringify(this.wordPair));
+        this._board = this.createBoard();
+      });
   }
 
-  createBoard() {
-    // Get a pair of words from the server
-    let pairArray = this.dataService.getPair(this.numLetters, this.numHops);
-    let startWord = pairArray[0];
-    let endWord = pairArray[1];
-
-    // Create a 2d board holding (numHops + 1) words of numLetters each / all nulls
+  private createBoard() {
+    // Create a 2d board holding correct number words and letters each / all nulls
     let board = [];
-    for (let i = 0; i < this.numHops + 1; i++) {
+    for (let i = 0; i < this.wordPair.words; i++) {
       board[i] = {
         letters: [],
         locked: false,
         solved: false,
         wrong: false,
       };
-      for (let j = 0; j < this.numLetters; j++) {
+      for (let j = 0; j < this.wordPair.letters; j++) {
         board[i].letters.push(null);
       }
     }
 
     // Fill in the first & last words on the board
     board[0].locked = true; // Can't change the start word
-    board[this.numHops].locked = true; // Can't change the end word
+    board[this.wordPair.hops].locked = true; // Can't change the end word
     for (let j = 0; j < this.numLetters; j++) {
-      board[0].letters[j] = startWord.charAt(j);
-      board[this.numHops].letters[j] = endWord.charAt(j);
+      board[0].letters[j] = this.wordPair.startWord.charAt(j);
+      board[this.numHops].letters[j] = this.wordPair.endWord.charAt(j);
     }
 
     return board;
@@ -99,10 +111,32 @@ export class GameService {
           }
         }
         if (filledIn) {
+          // Output from remote call
+          let testedWord: TestedWord;
+
+          // Inputs to remote call
+          let wordArray = [];
+          for (const word of this._board) {
+            wordArray.push(word.letters.join(''));
+          }
+          let testWord = this._board[this._selectedWord].letters.join('');
+          let testPosition = this._selectedWord;
+
+          // Make the remote call
+          this.dataService
+            .testWord(wordArray, testWord, testPosition)
+            .subscribe((resp) => {
+              testedWord = { ...resp };
+
+              console.log('Word Test: ' + testedWord.valid);
+              this._board = this.createBoard();
+            });
+
           // Test this word to see if it's valid
-          let validWord = this.dataService.testWord(
-            this._board[this._selectedWord].letters.join('')
-          );
+          let validWord = true;
+          // let validWord = this.dataService.testWord(
+          //   this._board[this._selectedWord].letters.join('')
+          // );
           if (validWord) {
             this._board[this._selectedWord].solved = true;
 
