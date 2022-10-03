@@ -11,6 +11,7 @@ export class GameService {
   //   .wrong = word was tested and is wrong
   //   .testing = word is currently being tested
   //   .loading = word is being loaded
+  //   .populated = word is fully populated (all letters)
   private _board = [];
 
   // Parameters of the game
@@ -60,6 +61,7 @@ export class GameService {
         wrong: false,
         testing: false,
         loading: false,
+        populated: false,
       };
       for (let j = 0; j < this.numLetters; j++) {
         board[i].letters.push(null);
@@ -83,6 +85,10 @@ export class GameService {
       this.board[this.numHops].letters[j] = this.wordPair.endWord.charAt(j);
     }
 
+    // First and last words are populated
+    this.board[0].populated = true;
+    this.board[this.numHops].populated = true;
+
     // First and last words are not loading
     this.board[0].loading = false;
     this.board[this.numHops].loading = false;
@@ -99,6 +105,9 @@ export class GameService {
       ) {
         // Remove the letter from the current cell
         this._board[this._selectedWord].letters[this._selectedLetter] = null;
+
+        // The word is no longer fully populated
+        this._board[this._selectedWord].populated = false;
 
         // When you delete or backspace, this word + all subsequent are no longer solved
         for (let i = this._selectedWord; i < this.numHops; i++) {
@@ -123,13 +132,7 @@ export class GameService {
       // Enter key
       if (letter === 'Enter' || letter === '{enter}') {
         // If all letters of this word are filled in, test the word
-        let filledIn = true;
-        for (const letter of this._board[this._selectedWord].letters) {
-          if (letter == null) {
-            filledIn = false;
-          }
-        }
-        if (filledIn) {
+        if (this._board[this._selectedWord].populated) {
           // We know the current word is filled in
           // Need to determine if you test 1 word or all of them
           // Validate a single word
@@ -146,6 +149,16 @@ export class GameService {
 
         // When you change a letter, this word is no longer wrong
         this._board[this._selectedWord].wrong = false;
+
+        // Check to see if the word is fully populated
+        let populated = true;
+        for (const letter of this._board[this._selectedWord].letters) {
+          if (letter == null) {
+            populated = false;
+          }
+        }
+        if (populated) this._board[this._selectedWord].populated = true;
+        console.log("Word is populated" + populated);
 
         // When you change a letter, the previous message goes away
         this._message = '';

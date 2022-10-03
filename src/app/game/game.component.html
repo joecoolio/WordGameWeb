@@ -41,7 +41,7 @@
         class="icon-box unverified"
         (click)="testWord(i)"
       >
-        <fa-icon [icon]="faCircleQuestion"></fa-icon>
+        <fa-icon *ngIf="word.populated == true" [icon]="faCircleQuestion"></fa-icon>
       </div>
 
       <!-- Solved word -->
@@ -50,7 +50,7 @@
         class="icon-box solved"
         (click)="testWord(i)"
       >
-        <fa-icon [icon]="faCircleCheck"></fa-icon>
+        <fa-icon *ngIf="word.populated == true" [icon]="faCircleCheck"></fa-icon>
       </div>
 
       <!-- Wrong word -->
@@ -59,7 +59,7 @@
         class="icon-box wrong"
         (click)="testWord(i)"
       >
-        <fa-icon [icon]="faCircleExclamation"></fa-icon>
+        <fa-icon *ngIf="word.populated == true" [icon]="faCircleExclamation"></fa-icon>
       </div>
 
       <!-- Testing word -->
@@ -68,7 +68,7 @@
         class="icon-box testing fa-spin"
         (click)="testWord(i)"
       >
-        <fa-icon [icon]="faSpinner"></fa-icon>
+        <fa-icon *ngIf="word.populated == true" [icon]="faSpinner"></fa-icon>
       </div>
     </div>
   </div>
