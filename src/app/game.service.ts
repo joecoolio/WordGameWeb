@@ -149,17 +149,16 @@ export class GameService {
       // Arrow keys
       if (letter === 'ArrowUp') {
         if (this._selectedWord > 1) this._selectedWord--;
-      }      
+      }
       if (letter === 'ArrowDown') {
         if (this._selectedWord < this.numHops - 1) this._selectedWord++;
-      }      
+      }
       if (letter === 'ArrowLeft') {
         if (this._selectedLetter > 0) this._selectedLetter--;
-      }      
+      }
       if (letter === 'ArrowRight') {
         if (this._selectedLetter < this.numLetters - 1) this._selectedLetter++;
-      }      
-
+      }
     }
   }
 
