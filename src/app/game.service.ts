@@ -16,7 +16,7 @@ export class GameService {
 
   // Parameters of the game
   private numLetters: number = 3;
-  private numHops: number = 5;
+  private numHops: number = 3;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -109,10 +109,8 @@ export class GameService {
         // The word is no longer fully populated
         this._board[this._selectedWord].populated = false;
 
-        // When you delete or backspace, this word + all subsequent are no longer solved
-        for (let i = this._selectedWord; i < this.numHops; i++) {
-          this._board[i].solved = false;
-        }
+        // When you delete or backspace, this word is no longer solved
+        this._board[this._selectedWord].solved = false;
 
         // When you delete or backspace, this word is no longer wrong
         this._board[this._selectedWord].wrong = false;
@@ -158,7 +156,7 @@ export class GameService {
           }
         }
         if (populated) this._board[this._selectedWord].populated = true;
-        console.log("Word is populated" + populated);
+        console.log('Word is populated' + populated);
 
         // When you change a letter, the previous message goes away
         this._message = '';
@@ -212,8 +210,6 @@ export class GameService {
       .subscribe((resp) => {
         testedWord = { ...resp };
 
-        console.log('Word Test: ' + testedWord.testPosition);
-
         // Test is done
         this._board[testedWord.testPosition].testing = false;
 
@@ -225,13 +221,13 @@ export class GameService {
           // If all words are solved, you win
           let puzzleFilledIn = true;
           for (const word of this._board) {
-            if (word.solved == false) {
+            if (!word.locked && !word.solved) {
               puzzleFilledIn = false;
             }
           }
           if (puzzleFilledIn) {
             // You win!  Call this to report the completion.
-            this.testEntirePuzzle();
+            this.win();
           } else {
             // Move to the next word (unless the user has already moved)
             if (this._selectedWord == testedWord.testPosition) {
@@ -240,7 +236,7 @@ export class GameService {
                 // Start at the next word and move forwards.
                 for (
                   let i = testedWord.testPosition + 1;
-                  i < this.numHops - 1;
+                  i < this.numHops;
                   i++
                 ) {
                   this._board[i].solved == false;
@@ -263,8 +259,8 @@ export class GameService {
 
   // Async call to test the whole puzzle
   // I think I'm going to use this to report a completion
-  private testEntirePuzzle() {
-    // TODO
+  private win() {
+    this._message = '!!! YOU WIN !!!';
   }
 
   // Set the selected cell

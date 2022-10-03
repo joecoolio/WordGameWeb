@@ -4,6 +4,10 @@
     [ngClass]="{ 'highlighted-row': gameService.selectedWord === i }"
   >
     <div class="letter-row">
+      <!-- An invisible icon box just for spacing evenly -->
+      <div class="icon-box"></div>
+
+      <!-- The letters of the word -->
       <div
         *ngFor="let letter of word.letters; let j = index"
         (click)="setSelectedCell(i, j)"
@@ -27,8 +31,10 @@
         </div>
       </div>
 
-      <!-- Locked word -->
+      <!-- Locked word, invisible icon -->
       <div *ngIf="word.locked == true" class="icon-box unverified"></div>
+
+      <!-- The rest of these are icons depending on the word -->
 
       <!-- Unverified word -->
       <div
@@ -41,7 +47,10 @@
         class="icon-box unverified"
         (click)="testWord(i)"
       >
-        <fa-icon *ngIf="word.populated == true" [icon]="faCircleQuestion"></fa-icon>
+        <fa-icon
+          *ngIf="word.populated == true"
+          [icon]="faCircleQuestion"
+        ></fa-icon>
       </div>
 
       <!-- Solved word -->
@@ -50,7 +59,10 @@
         class="icon-box solved"
         (click)="testWord(i)"
       >
-        <fa-icon *ngIf="word.populated == true" [icon]="faCircleCheck"></fa-icon>
+        <fa-icon
+          *ngIf="word.populated == true"
+          [icon]="faCircleCheck"
+        ></fa-icon>
       </div>
 
       <!-- Wrong word -->
@@ -59,7 +71,10 @@
         class="icon-box wrong"
         (click)="testWord(i)"
       >
-        <fa-icon *ngIf="word.populated == true" [icon]="faCircleExclamation"></fa-icon>
+        <fa-icon
+          *ngIf="word.populated == true"
+          [icon]="faCircleExclamation"
+        ></fa-icon>
       </div>
 
       <!-- Testing word -->
