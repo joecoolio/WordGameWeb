@@ -1,5 +1,9 @@
-<p>Super Awesome Word Game</p>
+<div class="game">
+  <p>Super Awesome Word Game</p>
 
-<game [gameService]="game"></game>
+  <game [gameService]="game"></game>
 
-<div class="simple-keyboard"></div>
+  <label class="errormessage">{{ game.message }}</label>
+
+  <div class="simple-keyboard"></div>
+</div>

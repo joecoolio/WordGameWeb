@@ -23,14 +23,19 @@ export class AppComponent {
     this.keyboard = new Keyboard({
       onChange: (input) => this.onChange(input),
       onKeyPress: (button) => this.onKeyPress(button),
+      layout: {
+        default: [
+          'Q W E R T Y U I O P',
+          'A S D F G H J K L',
+          'Z X C V B N M ? {enter}',
+        ],
+      },
     });
   }
 
   // Computer keyboard events
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
-    console.log(event.key);
-
     // Pass to game
     this.game.letterEntered(event.key);
   }
@@ -38,12 +43,9 @@ export class AppComponent {
   // Onscreen keyboard events
   onChange = (input: string) => {
     this.value = input;
-    console.log('Input changed', input);
   };
 
   onKeyPress = (button: string) => {
-    console.log('Button pressed', button);
-
     /**
      * If you want to handle the shift and caps lock buttons
      */

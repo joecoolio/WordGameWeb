@@ -20,6 +20,9 @@ export class GameService {
   private _selectedWord: number = 1;
   private _selectedLetter: number = 0;
 
+  // Message back from the validation routines
+  private _message: string = '';
+
   constructor(private dataService: DataService) {
     this.newGame();
   }
@@ -104,7 +107,8 @@ export class GameService {
         return;
       }
 
-      if (letter === 'Enter') {
+      // Enter key
+      if (letter === 'Enter' || letter === '{enter}') {
         // If all letters of this word are filled in, test the word
         let filledIn = true;
         for (const letter of this._board[this._selectedWord].letters) {
@@ -120,17 +124,18 @@ export class GameService {
         }
       }
 
-      let found = letter.match(/[a-z]/gi);
-      if (!found || found.length > 1) {
-        // Invalid character
-        return;
-      } else {
+      // Letters
+      let found = letter.match(/^[a-z]$/gi);
+      if (found) {
         // Valid letter, put it in the appropriate cell
         this._board[this._selectedWord].letters[this._selectedLetter] =
           letter.toUpperCase();
 
         // When you change a letter, this word is no longer wrong
         this._board[this._selectedWord].wrong = false;
+
+        // When you change a letter, the previous message goes away
+        this._message = '';
 
         // Move the input to the next appropriate cell
         if (this._selectedLetter === this.numLetters - 1) {
@@ -140,6 +145,21 @@ export class GameService {
           this._selectedLetter++;
         }
       }
+
+      // Arrow keys
+      if (letter === 'ArrowUp') {
+        if (this._selectedWord > 1) this._selectedWord--;
+      }      
+      if (letter === 'ArrowDown') {
+        if (this._selectedWord < this.numHops - 1) this._selectedWord++;
+      }      
+      if (letter === 'ArrowLeft') {
+        if (this._selectedLetter > 0) this._selectedLetter--;
+      }      
+      if (letter === 'ArrowRight') {
+        if (this._selectedLetter < this.numLetters - 1) this._selectedLetter++;
+      }      
+
     }
   }
 
@@ -211,6 +231,7 @@ export class GameService {
           // Word is wrong, not solved
           this._board[testedWord.testPosition].solved = false;
           this._board[testedWord.testPosition].wrong = true;
+          this._message = testedWord.error;
         }
       });
   }
@@ -241,8 +262,18 @@ export class GameService {
   get selectedWord() {
     return this._selectedWord;
   }
+  set selectedWord(index: number) {
+    this._selectedWord = index;
+  }
 
   get selectedLetter() {
     return this._selectedLetter;
+  }
+  set selectedLetter(index: number) {
+    this._selectedLetter = index;
+  }
+
+  get message() {
+    return this._message;
   }
 }

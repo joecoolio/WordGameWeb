@@ -25,6 +25,12 @@ export class GameComponent implements OnInit {
   // Just send an enter key press
   testWord(index: number) {
     console.log('Icon clicked: ' + index);
+
+    // If the word clicked isn't the selected word, change to it
+    if (this.gameService.selectedWord != index) {
+      this.gameService.selectedWord = index;
+      this.gameService.selectedLetter = 0;
+    }
     this.gameService.letterEntered('Enter');
   }
 

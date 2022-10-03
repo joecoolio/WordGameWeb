@@ -1,9 +1,15 @@
+.game {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
 p {
   font-family: Lato;
 }
 
-input {
-  width: 100%;
+.errormessage {
+  width: 60%;
   height: 100px;
   padding: 20px;
   font-size: 20px;
