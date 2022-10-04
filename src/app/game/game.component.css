@@ -92,6 +92,11 @@
   color: darkred;
 }
 
+.win {
+  color: green;
+}
+
+
 /* Animations */
 
 /* Shake sideways */

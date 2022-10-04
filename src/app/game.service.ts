@@ -179,8 +179,9 @@ export class GameService {
         this._board[this._selectedWord].letters[this._selectedLetter] =
           letter.toUpperCase();
 
-        // When you change a letter, this word is no longer wrong
+        // When you change a letter, this word is no longer wrong or solved
         this._board[this._selectedWord].wrong = false;
+        this._board[this._selectedWord].solved = false;
 
         // Check to see if the word is fully populated
         let populated = true;
