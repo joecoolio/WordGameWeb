@@ -43,8 +43,19 @@
 
       <!-- The rest of these are icons depending on the word -->
       <div class="icon-container">
-        <!-- Locked word, invisible icon -->
-        <div *ngIf="word.locked == true" class="icon-box unverified"></div>
+        <!-- Locked word, either invisible icon (at bottom) or reload icon (at top) -->
+        <div *ngIf="word.locked" class="icon-box">
+          <fa-icon
+            *ngIf="i === 0"
+            [ngClass]="{
+              win: gameService.gameStatus === 'win',
+              broken: gameService.gameStatus === 'broken',
+              unverified: gameService.gameStatus === 'running'
+            }"
+            (click)="newGame()"
+            [icon]="faRepeat"
+          ></fa-icon>
+        </div>
 
         <!-- Unverified word -->
         <div

@@ -6,6 +6,7 @@ import { faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faFaceFrown } from '@fortawesome/free-solid-svg-icons';
+import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 
 import { WinDialogComponent } from '../win-dialog/win-dialog.component';
@@ -22,6 +23,7 @@ export class GameComponent implements OnInit {
   faCircleExclamation = faCircleExclamation;
   faSpinner = faSpinner;
   faFaceFrown = faFaceFrown;
+  faRepeat = faRepeat;
   faCircleXmark = faCircleXmark;
 
   constructor(private dialog: MatDialog) {}
@@ -37,6 +39,11 @@ export class GameComponent implements OnInit {
       this.gameService.selectedLetter = 0;
     }
     this.gameService.letterEntered('Enter');
+  }
+
+  // Start over with new words
+  newGame() {
+    this.gameService.newGame();
   }
 
   // Change the highlighted/current cell
