@@ -19,10 +19,10 @@
   border: 2px solid gray;
   border-radius: 5px;
   margin: 2px;
-  font-size: min(12vh, 12vw);
+  font-size: 12vmin;
   font-weight: bold;
-  height: min(13vh, 13vw);
-  width: min(13vh, 13vw);
+  height: 13vmin;
+  width: 13vmin;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -47,8 +47,8 @@
 }
 
 .icon-container {
-  height: min(13vh, 13vw);
-  width: min(11vh, 11vw);
+  height: 13vmin;
+  width: 11vmin;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -58,10 +58,10 @@
 .icon-box {
   border-radius: 3px;
   margin: 2px;
-  font-size: min(9vh, 9vw);
+  font-size: 9vmin;
   font-weight: 700;
-  height: min(11vh, 11vw);
-  width: min(11vh, 11vw);
+  height: 11vmin;
+  width: 11vmin;
   display: flex;
   justify-content: center;
   align-items: center;

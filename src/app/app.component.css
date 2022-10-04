@@ -9,14 +9,17 @@ p {
 }
 
 .errormessage {
+  display: flex;
   width: 60%;
   height: 10vh;
   padding: 2px;
-  font-size: 4vh;
+  font-size: 4vmin;
   box-sizing: border-box;
   text-align: center;
   border: none;
   /* border: 2px solid red; */
+  align-items: center;
+  justify-content: center;
 }
 
 .simple-keyboard {
