@@ -192,8 +192,13 @@ export class GameService {
 
     // Inputs to remote call
     let wordArray = [];
-    for (const word of this._board) {
-      wordArray.push(word.letters.join(''));
+    for (let i = 0; i < this._board.length; i++) {
+      // WordArray includes everything except the testing word
+      if (i != this._selectedWord) {
+        wordArray.push(this._board[i].letters.join(''));
+      } else {
+        wordArray.push('');
+      }
     }
     let testWord = this._board[this._selectedWord].letters.join('');
     let testPosition = this._selectedWord;
