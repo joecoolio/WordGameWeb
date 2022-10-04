@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  border: 2px solid red;
+  /* border: 2px solid red; */
 }
 
 .highlighted-row {
@@ -11,6 +11,7 @@
 
 .letter-row {
   display: flex;
+  /* border: 2px solid blue; */
 }
 
 .letter-box {
@@ -18,14 +19,15 @@
   border: 2px solid gray;
   border-radius: 5px;
   margin: 2px;
-  font-size: 12vw;
+  font-size: min(12vh, 12vw);
   font-weight: bold;
-  height: 13vw;
-  width: 13vw;
+  height: min(13vh, 13vw);
+  width: min(13vh, 13vw);
   display: flex;
   justify-content: center;
   align-items: center;
   text-transform: uppercase;
+  /* border: 2px solid green; */
 }
 
 .locked-box {
@@ -45,9 +47,8 @@
 }
 
 .icon-container {
-  margin: 2px;
-  height: 13vw;
-  width: 11vw;
+  height: min(13vh, 13vw);
+  width: min(11vh, 11vw);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -57,13 +58,14 @@
 .icon-box {
   border-radius: 3px;
   margin: 2px;
-  font-size: 2.5rem;
+  font-size: min(9vh, 9vw);
   font-weight: 700;
-  height: 11vw;
-  width: 11vw;
+  height: min(11vh, 11vw);
+  width: min(11vh, 11vw);
   display: flex;
   justify-content: center;
   align-items: center;
+  /* border: 2px solid orange; */
 }
 
 .icon {

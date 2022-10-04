@@ -10,12 +10,13 @@ p {
 
 .errormessage {
   width: 60%;
-  height: 100px;
-  padding: 20px;
-  font-size: 20px;
-  border: none;
+  height: 10vh;
+  padding: 2px;
+  font-size: 4vh;
   box-sizing: border-box;
   text-align: center;
+  border: none;
+  /* border: 2px solid red; */
 }
 
 .simple-keyboard {

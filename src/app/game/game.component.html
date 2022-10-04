@@ -5,7 +5,9 @@
   >
     <div class="letter-row">
       <!-- An invisible icon box just for spacing evenly -->
-      <div class="icon-box"></div>
+      <div class="icon-container">
+        <div class="icon-box"></div>
+      </div>
 
       <!-- The letters of the word -->
       <div
@@ -25,69 +27,70 @@
         >
           {{ letter }}
           <!-- Spinner while the letter is loading -->
-          <div *ngIf="word.loading == true" class="icon-box testing fa-spin">
-            <fa-icon class="icon" [icon]="faSpinner"></fa-icon>
-          </div>
+          <!-- <div *ngIf="word.loading == true" class="icon-container"> -->
+            <div *ngIf="word.loading == true" class="icon-box testing fa-spin">
+              <fa-icon class="icon" [icon]="faSpinner"></fa-icon>
+            </div>
+          <!-- </div> -->
         </div>
       </div>
 
       <!-- The rest of these are icons depending on the word -->
       <div class="icon-container">
+        <!-- Locked word, invisible icon -->
+        <div *ngIf="word.locked == true" class="icon-box unverified"></div>
 
-      <!-- Locked word, invisible icon -->
-      <div *ngIf="word.locked == true" class="icon-box unverified"></div>
+        <!-- Unverified word -->
+        <div
+          *ngIf="
+            word.locked == false &&
+            word.solved == false &&
+            word.wrong == false &&
+            word.testing == false
+          "
+          class="icon-box unverified"
+          (click)="testWord(i)"
+        >
+          <fa-icon
+            *ngIf="word.populated == true"
+            [icon]="faCircleQuestion"
+          ></fa-icon>
+        </div>
 
-      <!-- Unverified word -->
-      <div
-        *ngIf="
-          word.locked == false &&
-          word.solved == false &&
-          word.wrong == false &&
-          word.testing == false
-        "
-        class="icon-box unverified"
-        (click)="testWord(i)"
-      >
-        <fa-icon
-          *ngIf="word.populated == true"
-          [icon]="faCircleQuestion"
-        ></fa-icon>
-      </div>
+        <!-- Solved word -->
+        <div
+          *ngIf="word.locked == false && word.solved == true"
+          class="icon-box solved"
+          (click)="testWord(i)"
+        >
+          <fa-icon
+            *ngIf="word.populated == true"
+            [icon]="faCircleCheck"
+          ></fa-icon>
+        </div>
 
-      <!-- Solved word -->
-      <div
-        *ngIf="word.locked == false && word.solved == true"
-        class="icon-box solved"
-        (click)="testWord(i)"
-      >
-        <fa-icon
-          *ngIf="word.populated == true"
-          [icon]="faCircleCheck"
-        ></fa-icon>
-      </div>
+        <!-- Wrong word -->
+        <div
+          *ngIf="word.locked == false && word.wrong == true"
+          class="icon-box wrong"
+          (click)="testWord(i)"
+        >
+          <fa-icon
+            *ngIf="word.populated == true"
+            [icon]="faCircleExclamation"
+          ></fa-icon>
+        </div>
 
-      <!-- Wrong word -->
-      <div
-        *ngIf="word.locked == false && word.wrong == true"
-        class="icon-box wrong"
-        (click)="testWord(i)"
-      >
-        <fa-icon
-          *ngIf="word.populated == true"
-          [icon]="faCircleExclamation"
-        ></fa-icon>
-      </div>
-
-      <!-- Testing word -->
-      <div
-        *ngIf="word.locked == false && word.testing == true"
-        class="icon-box testing fa-spin"
-        (click)="testWord(i)"
-      >
-        <fa-icon *ngIf="word.populated == true" [icon]="faSpinner"></fa-icon>
+        <!-- Testing word -->
+        <div
+          *ngIf="word.locked == false && word.testing == true"
+          class="icon-box testing fa-spin"
+          (click)="testWord(i)"
+        >
+          <fa-icon *ngIf="word.populated == true" [icon]="faSpinner"></fa-icon>
+        </div>
       </div>
     </div>
   </div>
-</div>
   <!-- <div (click)="openDialog()">HEY BABY</div> -->
 </div>

@@ -2,6 +2,7 @@ import { Component, HostListener, VERSION } from '@angular/core';
 import Keyboard from 'simple-keyboard';
 import { DataService } from './data.service';
 import { GameService } from './game.service';
+import { faDeleteLeft } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'wordgame-app',
@@ -14,6 +15,7 @@ export class AppComponent {
   value = '';
   keyboard: Keyboard;
   game: GameService;
+  faDeleteLeft = faDeleteLeft;
 
   constructor(private dataService: DataService) {
     this.game = new GameService(this.dataService);
