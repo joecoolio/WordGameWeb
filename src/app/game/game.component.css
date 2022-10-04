@@ -72,3 +72,48 @@
 .testing {
   color: purple;
 }
+
+/* Fireworks Stuff */
+
+body {
+  background-color: #000000;
+  margin: 0px;
+  overflow: hidden;
+}
+.trigger_fworks {
+  width: 275px;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px 10px;
+  margin: 30px auto;
+  background: blue;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.fireworks {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  height: 100vh;
+  width: 100vw;
+}
+
+.fireworks canvas {
+  top: 0px;
+  position: absolute;
+  z-index: 1;
+}
+
+#ya-message {
+  position: relative;
+  z-index: 2;
+  background-color: #ffffff;
+  border-radius: 10px;
+  width: 300px;
+  margin: 0 auto;
+  padding: 40px;
+  top: 25%;
+}

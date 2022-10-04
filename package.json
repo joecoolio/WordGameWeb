@@ -21,6 +21,8 @@
     "@angular/forms": "^14.2.4",
     "@angular/localize": "^14.2.4",
     "@angular/material": "^14.2.3",
+    "@angular/material/dialog": "*",
+    "@angular/material/form": "*",
     "@angular/platform-browser": "^14.2.4",
     "@angular/platform-browser-dynamic": "^14.2.4",
     "@angular/router": "^14.2.4",
