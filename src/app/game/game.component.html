@@ -50,7 +50,8 @@
             [ngClass]="{
               win: gameService.gameStatus === 'win',
               broken: gameService.gameStatus === 'broken',
-              unverified: gameService.gameStatus === 'running'
+              unverified: gameService.gameStatus === 'running',
+              'fa-spin': gameService.gameStatus === 'initialize'
             }"
             (click)="newGame()"
             [icon]="faRepeat"
