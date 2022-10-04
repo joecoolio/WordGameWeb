@@ -4,7 +4,7 @@ import { DataService } from './data.service';
 import { GameService } from './game.service';
 
 @Component({
-  selector: 'my-app',
+  selector: 'wordgame-app',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })

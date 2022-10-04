@@ -26,15 +26,16 @@
           {{ letter }}
           <!-- Spinner while the letter is loading -->
           <div *ngIf="word.loading == true" class="icon-box testing fa-spin">
-            <fa-icon [icon]="faSpinner"></fa-icon>
+            <fa-icon class="icon" [icon]="faSpinner"></fa-icon>
           </div>
         </div>
       </div>
 
+      <!-- The rest of these are icons depending on the word -->
+      <div class="icon-container">
+
       <!-- Locked word, invisible icon -->
       <div *ngIf="word.locked == true" class="icon-box unverified"></div>
-
-      <!-- The rest of these are icons depending on the word -->
 
       <!-- Unverified word -->
       <div
@@ -87,5 +88,6 @@
       </div>
     </div>
   </div>
-  <div (click)="openDialog()">HEY BABY</div>
+</div>
+  <!-- <div (click)="openDialog()">HEY BABY</div> -->
 </div>
