@@ -103,6 +103,9 @@ export class GameService {
         letter === '{bksp}' ||
         letter === 'Delete'
       ) {
+        // When you change a letter, the previous message goes away
+        this._message = '';
+
         // Remove the letter from the current cell
         this._board[this._selectedWord].letters[this._selectedLetter] = null;
 
@@ -131,6 +134,9 @@ export class GameService {
       if (letter === 'Enter' || letter === '{enter}') {
         // If all letters of this word are filled in, test the word
         if (this._board[this._selectedWord].populated) {
+          // When you hit enter, the previous message goes away
+          this._message = '';
+
           // We know the current word is filled in
           // Need to determine if you test 1 word or all of them
           // Validate a single word

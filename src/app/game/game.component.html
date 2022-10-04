@@ -13,7 +13,7 @@
       <div
         *ngFor="let letter of word.letters; let j = index"
         (click)="setSelectedCell(i, j)"
-        [ngClass]="{}"
+        [ngClass]="{ shake: word.wrong, bounceSize: word.solved }"
       >
         <div
           class="letter-box"
