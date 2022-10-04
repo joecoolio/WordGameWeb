@@ -3,8 +3,7 @@ import { DataService, WordPair, TestedWord } from './data.service';
 
 @Injectable()
 export class GameService {
-  // The game board - array of words
-  // Each word has:
+  // The game board - array of words each of which has:
   //   .letters = array of the letters of the word
   //   .locked = true if this word cannot be changed
   //   .solved = true if this word is verified
@@ -12,7 +11,11 @@ export class GameService {
   //   .testing = word is currently being tested
   //   .loading = word is being loaded
   //   .populated = word is fully populated (all letters)
+  //   .broken = server problem, try again
   private _board = [];
+
+  // Status of the game:  run, win, broken, initialize
+  private _gameStatus: string = 'initialize';
 
   // Parameters of the game
   private numLetters: number = 3;
@@ -33,6 +36,8 @@ export class GameService {
   wordPair: WordPair | undefined;
 
   newGame() {
+    this._gameStatus = 'initialize';
+
     console.log('Requesting word pair...');
 
     this._board = this.createEmptyBoard();
@@ -41,12 +46,31 @@ export class GameService {
     this.dataService
       .getPair(this.numLetters, this.numHops)
       // resp is of type `HttpResponse<WordPair>`
-      .subscribe((wordpair) => {
-        this.wordPair = { ...wordpair };
+      .subscribe({
+        next: (wordpair) => {
+          this.wordPair = { ...wordpair };
 
-        console.log('Got wordpair: ' + JSON.stringify(this.wordPair));
-        this.populateBoard();
-        this._message = '';
+          console.log('Got wordpair: ' + JSON.stringify(this.wordPair));
+          this.populateBoard();
+          this._message = '';
+        },
+        error: (err) => {
+          // An error happened trying to get words
+
+          // The game is broken
+          this._gameStatus = 'broken';
+
+          // The words are no longer loading
+          for (const word of this._board) {
+            word.loading = false;
+          }
+
+          // Show a message
+          this._message =
+            'Failed to communicate with the server, please try again later.';
+
+          console.log('Error getting words: ' + JSON.stringify(err));
+        },
       });
   }
 
@@ -62,6 +86,7 @@ export class GameService {
         testing: false,
         loading: false,
         populated: false,
+        broken: false,
       };
       for (let j = 0; j < this.numLetters; j++) {
         board[i].letters.push(null);
@@ -92,6 +117,9 @@ export class GameService {
     // First and last words are not loading
     this.board[0].loading = false;
     this.board[this.numHops].loading = false;
+
+    // Game is ready to go
+    this._gameStatus = 'run';
   }
 
   // Keyboard entry occurred
@@ -215,13 +243,12 @@ export class GameService {
     this._board[this._selectedWord].wrong = false;
 
     // Make the remote call
-    this.dataService
-      .testWord(wordArray, testWord, testPosition)
-      .subscribe((resp) => {
-        testedWord = { ...resp };
-
+    this.dataService.testWord(wordArray, testWord, testPosition).subscribe({
+      next: (testedWord) => {
         // Test is done
         this._board[testedWord.testPosition].testing = false;
+        // The test word is not broken
+        this._board[testedWord.testPosition].broken = false;
 
         if (testedWord.valid) {
           // Word is solved, not wrong
@@ -264,12 +291,29 @@ export class GameService {
           this._board[testedWord.testPosition].wrong = true;
           this._message = testedWord.error;
         }
-      });
+      },
+      error: (err) => {
+        // An error happened trying to get words
+
+        // Test is done
+        this._board[testPosition].testing = false;
+
+        // The test word is broken
+        this._board[testPosition].broken = true;
+
+        // Show a message
+        this._message =
+          'Failed to communicate with the server, please try again later.';
+
+        console.log('Error testing word: ' + JSON.stringify(err));
+      },
+    });
   }
 
   // Async call to test the whole puzzle
   // I think I'm going to use this to report a completion
   private win() {
+    this._gameStatus = 'win';
     this._message = '!!! YOU WIN !!!';
   }
 
@@ -288,6 +332,10 @@ export class GameService {
 
   get board() {
     return this._board;
+  }
+
+  get gameStatus() {
+    return this._gameStatus;
   }
 
   get selectedWord() {

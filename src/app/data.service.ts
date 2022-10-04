@@ -25,7 +25,7 @@ export class DataService {
   getPair(numLetters: number, numHops: number): Observable<WordPair> {
     const body = { letters: numLetters, hops: numHops };
     return this.http.post<WordPair>(
-      'https://wordgame.mikebillings.com/api/v1/getWordPair',
+      'https://wordgameapi.mikebillings.com/api/v1/getWordPair',
       body
     );
   }
@@ -45,9 +45,8 @@ export class DataService {
       testPosition: testPosition,
       testWord: testWord,
     };
-    console.log(JSON.stringify(body));
     return this.http.post<TestedWord>(
-      'https://wordgame.mikebillings.com/api/v1/testWord',
+      'https://wordgameapi.mikebillings.com/api/v1/testWord',
       body
     );
   }

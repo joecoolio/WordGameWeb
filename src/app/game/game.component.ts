@@ -5,6 +5,9 @@ import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faFaceFrown } from '@fortawesome/free-solid-svg-icons';
+import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+
 import { WinDialogComponent } from '../win-dialog/win-dialog.component';
 
 @Component({
@@ -18,6 +21,8 @@ export class GameComponent implements OnInit {
   faCircleQuestion = faCircleQuestion;
   faCircleExclamation = faCircleExclamation;
   faSpinner = faSpinner;
+  faFaceFrown = faFaceFrown;
+  faCircleXmark = faCircleXmark;
 
   constructor(private dialog: MatDialog) {}
 
@@ -26,8 +31,6 @@ export class GameComponent implements OnInit {
   // Test the word (click on the icons)
   // Just send an enter key press
   testWord(index: number) {
-    console.log('Icon clicked: ' + index);
-
     // If the word clicked isn't the selected word, change to it
     if (this.gameService.selectedWord != index) {
       this.gameService.selectedWord = index;
