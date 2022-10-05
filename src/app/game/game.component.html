@@ -9,7 +9,7 @@
         <div class="icon-box">
           <fa-icon
             class="hint"
-            *ngIf="word.failedAttempts >= 3"
+            *ngIf="gameService.selectedWord === i"
             [icon]="faLightbulb"
             (click)="hint()"
           ></fa-icon>

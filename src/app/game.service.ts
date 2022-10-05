@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DataService, WordPair, TestedWord } from './data.service';
+import { DataService, WordPair, TestedWord, WordHint } from './data.service';
 
 @Injectable()
 export class GameService {
@@ -12,7 +12,6 @@ export class GameService {
   //   .loading = word is being loaded
   //   .populated = word is fully populated (all letters)
   //   .broken = server problem, try again
-  //   .failedAttempts = how many tries has the player done
   private _board = [];
 
   // Status of the game:  run, win, broken, initialize
@@ -88,7 +87,6 @@ export class GameService {
         loading: false,
         populated: false,
         broken: false,
-        failedAttempts: 0,
       };
       for (let j = 0; j < this.numLetters; j++) {
         board[i].letters.push(null);
@@ -258,9 +256,6 @@ export class GameService {
           this._board[testedWord.testPosition].solved = true;
           this._board[testedWord.testPosition].wrong = false;
 
-          // Reset the number of failed tries
-          this._board[testedWord.testPosition].failedAttempts = 0;
-
           // If all words are solved, you win
           let puzzleFilledIn = true;
           for (const word of this._board) {
@@ -296,9 +291,6 @@ export class GameService {
           this._board[testedWord.testPosition].solved = false;
           this._board[testedWord.testPosition].wrong = true;
 
-          // Increment the number of failed tries
-          this._board[testedWord.testPosition].failedAttempts++;
-
           this._message = testedWord.error;
         }
       },
@@ -330,7 +322,73 @@ export class GameService {
   // Get a hint for the current word
   // Send the request in without the current word.  When the reply comes back, clear
   // the word and put that letter in the right place.
-  public getHint() {}
+  public getHint() {
+    // Output from remote call
+    let wordHint: WordHint;
+
+    // Inputs to remote call
+    let wordArray = [];
+    for (let i = 0; i < this._board.length; i++) {
+      // WordArray includes everything including the partial word (spaces filled in)
+      // Handle an incomplete word
+      let incWord = '';
+      for (const letter of this._board[i].letters) {
+        if (letter != null) {
+          incWord += letter;
+        } else {
+          incWord += ' ';
+        }
+      }
+      wordArray.push(incWord);
+    }
+    let hintPosition = this._selectedWord;
+
+    // Mark the word as currently being tested, not solved, not wrong
+    this._board[this._selectedWord].testing = true;
+    this._board[this._selectedWord].solved = false;
+    this._board[this._selectedWord].wrong = false;
+
+    // Make the remote call
+    this.dataService.getHint(wordArray, hintPosition).subscribe({
+      next: (wordHint) => {
+        console.log('Got hint: ' + JSON.stringify(wordHint));
+        // Test is done
+        this._board[wordHint.hintWord].testing = false;
+        // The test word is not broken
+        this._board[wordHint.hintWord].broken = false;
+
+        if (wordHint.valid) {
+          // Word is solved, not wrong
+          this._board[wordHint.hintWord].solved = false;
+          this._board[wordHint.hintWord].wrong = false;
+
+          // Plug in the hint by moving to the cell and typing (to get other events)
+          this.setSelectedCell(wordHint.hintWord, wordHint.hintPosition);
+          this.letterEntered(wordHint.hintLetter);
+
+          return;
+        } else {
+          // Couldn't get a hint, tell the player
+          this._message = wordHint.error;
+        }
+      },
+      error: (err) => {
+        // An error happened trying to get words
+
+        // Test is done
+        this._board[hintPosition].testing = false;
+
+        // The test word is broken
+        this._board[hintPosition].broken = true;
+
+        // Show a message
+        this._message =
+          'Failed to communicate with the server, please try again later.';
+
+        console.log('Error testing word: ' + JSON.stringify(err));
+      },
+    });
+  }
 
   // Set the selected cell
   public setSelectedCell(word, letter) {

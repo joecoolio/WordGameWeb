@@ -17,6 +17,14 @@ export interface TestedWord {
   error: string;
 }
 
+export interface WordHint {
+  hintWord: number;
+  hintPosition: number;
+  hintLetter: string;
+  valid: boolean;
+  error: string;
+}
+
 @Injectable()
 export class DataService {
   constructor(private http: HttpClient) {}
@@ -47,6 +55,18 @@ export class DataService {
     };
     return this.http.post<TestedWord>(
       'https://wordgameapi.mikebillings.com/api/v1/testWord',
+      body
+    );
+  }
+
+  getHint(wordArray: string[], hintPosition: number): Observable<WordHint> {
+    const body = {
+      puzzle: wordArray,
+      hintPosition: hintPosition,
+    };
+    console.log('Ask Hint: ' + JSON.stringify(body));
+    return this.http.post<WordHint>(
+      'https://wordgameapi.mikebillings.com/api/v1/getHint',
       body
     );
   }
