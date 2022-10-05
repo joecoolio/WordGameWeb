@@ -12,6 +12,7 @@ export class GameService {
   //   .loading = word is being loaded
   //   .populated = word is fully populated (all letters)
   //   .broken = server problem, try again
+  //   .failedAttempts = how many tries has the player done
   private _board = [];
 
   // Status of the game:  run, win, broken, initialize
@@ -87,6 +88,7 @@ export class GameService {
         loading: false,
         populated: false,
         broken: false,
+        failedAttempts: 0,
       };
       for (let j = 0; j < this.numLetters; j++) {
         board[i].letters.push(null);
@@ -256,6 +258,9 @@ export class GameService {
           this._board[testedWord.testPosition].solved = true;
           this._board[testedWord.testPosition].wrong = false;
 
+          // Reset the number of failed tries
+          this._board[testedWord.testPosition].failedAttempts = 0;
+
           // If all words are solved, you win
           let puzzleFilledIn = true;
           for (const word of this._board) {
@@ -290,6 +295,10 @@ export class GameService {
           // Word is wrong, not solved
           this._board[testedWord.testPosition].solved = false;
           this._board[testedWord.testPosition].wrong = true;
+
+          // Increment the number of failed tries
+          this._board[testedWord.testPosition].failedAttempts++;
+
           this._message = testedWord.error;
         }
       },
@@ -317,6 +326,11 @@ export class GameService {
     this._gameStatus = 'win';
     this._message = '!!! YOU WIN !!!';
   }
+
+  // Get a hint for the current word
+  // Send the request in without the current word.  When the reply comes back, clear
+  // the word and put that letter in the right place.
+  public getHint() {}
 
   // Set the selected cell
   public setSelectedCell(word, letter) {

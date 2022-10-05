@@ -8,6 +8,7 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faFaceFrown } from '@fortawesome/free-solid-svg-icons';
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 
 import { WinDialogComponent } from '../win-dialog/win-dialog.component';
 
@@ -25,6 +26,7 @@ export class GameComponent implements OnInit {
   faFaceFrown = faFaceFrown;
   faRepeat = faRepeat;
   faCircleXmark = faCircleXmark;
+  faLightbulb = faLightbulb;
 
   constructor(private dialog: MatDialog) {}
 
@@ -44,6 +46,11 @@ export class GameComponent implements OnInit {
   // Start over with new words
   newGame() {
     this.gameService.newGame();
+  }
+
+  // Get a hint for this word
+  hint() {
+    this.gameService.getHint();
   }
 
   // Change the highlighted/current cell

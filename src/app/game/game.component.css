@@ -37,11 +37,9 @@
 .solved-box {
   background-color: lightgreen;
 }
-
 .wrong-box {
   background-color: red;
 }
-
 .highlighted-box {
   border: 5px solid purple;
 }
@@ -75,27 +73,24 @@
 .unverified {
   color: grey;
 }
-
 .solved {
   color: green;
 }
-
 .wrong {
   color: red;
 }
-
 .testing {
   color: purple;
 }
-
 .broken {
   color: darkred;
 }
-
 .win {
   color: green;
 }
-
+.hint {
+  color: yellow;
+}
 
 /* Animations */
 

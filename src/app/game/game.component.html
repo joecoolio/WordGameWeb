@@ -4,9 +4,16 @@
     [ngClass]="{ 'highlighted-row': gameService.selectedWord === i }"
   >
     <div class="letter-row">
-      <!-- An invisible icon box just for spacing evenly -->
+      <!-- Left side holds the hint button -->
       <div class="icon-container">
-        <div class="icon-box"></div>
+        <div class="icon-box">
+          <fa-icon
+            class="hint"
+            *ngIf="word.failedAttempts >= 3"
+            [icon]="faLightbulb"
+            (click)="hint()"
+          ></fa-icon>
+        </div>
       </div>
 
       <!-- The letters of the word -->
