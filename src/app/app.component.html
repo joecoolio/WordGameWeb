@@ -1,17 +1,13 @@
 <!-- <p>Super Awesome Word Game</p> -->
 
+<app-header></app-header>
+
 <!-- Full screen height & width -->
 <div style="height: 100vh; width: 100vw; border: 1px solid green">
   <!-- Bootstrap flex container with 100% height  -->
   <div class="container d-flex h-100" style="border: 1px solid green">
     <!-- Flex column holder -->
     <div class="col d-flex flex-column">
-      <!-- Header -->
-      <div class="row justify-content-center">
-        <div style="border: 2px solid blue;">
-          <app-header></app-header>
-        </div>
-      </div>
       <!-- Game Board (grows to fill the screen) -->
       <div class="row flex-grow-1 justify-content-center">
         <div style="border: 2px solid blue;">
@@ -30,12 +26,8 @@
           <div class="simple-keyboard"></div>
         </div>
       </div>
-      <!-- Footer -->
-      <div class="row justify-content-center">
-        <div style="border: 2px solid blue;">
-          <app-footer></app-footer>
-        </div>
-      </div>
     </div>
   </div>
+
+  <app-footer></app-footer>
 </div>
