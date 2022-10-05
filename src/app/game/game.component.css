@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  /* border: 2px solid red; */
+  border: 2px solid red;
 }
 
 .highlighted-row {
@@ -11,7 +11,7 @@
 
 .letter-row {
   display: flex;
-  /* border: 2px solid blue; */
+  border: 2px solid blue;
 }
 
 .letter-box {
@@ -19,14 +19,28 @@
   border: 2px solid gray;
   border-radius: 5px;
   margin: 2px;
-  font-size: 9vmin;
+  /* font-size: 9vmin; */
   font-weight: bold;
-  height: 10vmin;
-  width: 10vmin;
+  /* height: 10vmin; */
+  /* width: 10vmin; */
   display: flex;
   justify-content: center;
   align-items: center;
   text-transform: uppercase;
+}
+
+/* Sizing based on letters & hops */
+/*   3 Letters */
+.size-3letter-2hop {
+}
+.size-3letter-3hop {
+}
+.size-3letter-4hop {
+}
+.size-3letter-5hop {
+  height: min(10vh, 20vw);
+  width: min(10vh, 20vw);
+  font-size: min(7vh, 14vw);
 }
 
 .locked-box {

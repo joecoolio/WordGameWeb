@@ -18,8 +18,8 @@ export class GameService {
   private _gameStatus: string = 'initialize';
 
   // Parameters of the game
-  private numLetters: number = 3;
-  private numHops: number = 5;
+  private _numLetters: number = 3;
+  private _numHops: number = 5;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -44,7 +44,7 @@ export class GameService {
     this._message = 'Requesting a pair of words...';
 
     this.dataService
-      .getPair(this.numLetters, this.numHops)
+      .getPair(this.numLetters, this._numHops)
       // resp is of type `HttpResponse<WordPair>`
       .subscribe({
         next: (wordpair) => {
@@ -81,7 +81,7 @@ export class GameService {
   private createEmptyBoard() {
     // Create a 2d board holding correct number words and letters each / all nulls
     let board = [];
-    for (let i = 0; i < this.numHops + 1; i++) {
+    for (let i = 0; i < this._numHops + 1; i++) {
       board[i] = {
         letters: [],
         locked: false,
@@ -92,35 +92,35 @@ export class GameService {
         populated: false,
         broken: false,
       };
-      for (let j = 0; j < this.numLetters; j++) {
+      for (let j = 0; j < this._numLetters; j++) {
         board[i].letters.push(null);
       }
     }
     // First and last words are locked
     board[0].locked = true;
-    board[this.numHops].locked = true;
+    board[this._numHops].locked = true;
 
     // First and last words are loading
     board[0].loading = true;
-    board[this.numHops].loading = true;
+    board[this._numHops].loading = true;
 
     return board;
   }
 
   private populateBoard() {
     // Fill in the first & last words on the board
-    for (let j = 0; j < this.numLetters; j++) {
+    for (let j = 0; j < this._numLetters; j++) {
       this.board[0].letters[j] = this.wordPair.startWord.charAt(j);
-      this.board[this.numHops].letters[j] = this.wordPair.endWord.charAt(j);
+      this.board[this._numHops].letters[j] = this.wordPair.endWord.charAt(j);
     }
 
     // First and last words are populated
     this.board[0].populated = true;
-    this.board[this.numHops].populated = true;
+    this.board[this._numHops].populated = true;
 
     // First and last words are not loading
     this.board[0].loading = false;
-    this.board[this.numHops].loading = false;
+    this.board[this._numHops].loading = false;
 
     // Game is ready to go
     this._gameStatus = 'run';
@@ -200,7 +200,7 @@ export class GameService {
         this._message = '';
 
         // Move the input to the next appropriate cell
-        if (this._selectedLetter === this.numLetters - 1) {
+        if (this._selectedLetter === this._numLetters - 1) {
           // Move to check button
         } else {
           // Move 1 to the right
@@ -213,13 +213,13 @@ export class GameService {
         if (this._selectedWord > 1) this._selectedWord--;
       }
       if (letter === 'ArrowDown') {
-        if (this._selectedWord < this.numHops - 1) this._selectedWord++;
+        if (this._selectedWord < this._numHops - 1) this._selectedWord++;
       }
       if (letter === 'ArrowLeft') {
         if (this._selectedLetter > 0) this._selectedLetter--;
       }
       if (letter === 'ArrowRight') {
-        if (this._selectedLetter < this.numLetters - 1) this._selectedLetter++;
+        if (this._selectedLetter < this._numLetters - 1) this._selectedLetter++;
       }
     }
   }
@@ -273,12 +273,12 @@ export class GameService {
           } else {
             // Move to the next word (unless the user has already moved)
             if (this._selectedWord == testedWord.testPosition) {
-              if (this._selectedWord < this.numHops - 1) {
+              if (this._selectedWord < this._numHops - 1) {
                 // Need to avoid moving to a solved word.
                 // Start at the next word and move forwards.
                 for (
                   let i = testedWord.testPosition + 1;
-                  i < this.numHops;
+                  i < this._numHops;
                   i++
                 ) {
                   this._board[i].solved == false;
@@ -427,6 +427,14 @@ export class GameService {
   }
   set selectedLetter(index: number) {
     this._selectedLetter = index;
+  }
+
+  get numLetters() {
+    return this._numLetters;
+  }
+
+  get numHops() {
+    return this._numHops;
   }
 
   get message() {

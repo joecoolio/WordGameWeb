@@ -29,7 +29,32 @@
             'solved-box': word.solved == true,
             'wrong-box': word.wrong == true,
             'highlighted-box':
-              gameService.selectedWord === i && gameService.selectedLetter === j
+              gameService.selectedWord === i &&
+              gameService.selectedLetter === j,
+            'size-3letter-2hop':
+              gameService.numLetters == 3 && gameService.numHops == 2,
+            'size-3letter-3hop':
+              gameService.numLetters == 3 && gameService.numHops == 3,
+            'size-3letter-4hop':
+              gameService.numLetters == 3 && gameService.numHops == 4,
+            'size-3letter-5hop':
+              gameService.numLetters == 3 && gameService.numHops == 5,
+            'size-4letter-2hop':
+              gameService.numLetters == 4 && gameService.numHops == 2,
+            'size-4letter-3hop':
+              gameService.numLetters == 4 && gameService.numHops == 3,
+            'size-4letter-4hop':
+              gameService.numLetters == 4 && gameService.numHops == 4,
+            'size-4letter-5hop':
+              gameService.numLetters == 4 && gameService.numHops == 5,
+            'size-5letter-2hop':
+              gameService.numLetters == 5 && gameService.numHops == 2,
+            'size-5letter-3hop':
+              gameService.numLetters == 5 && gameService.numHops == 3,
+            'size-5letter-4hop':
+              gameService.numLetters == 5 && gameService.numHops == 4,
+            'size-5letter-5hop':
+              gameService.numLetters == 5 && gameService.numHops == 5
           }"
         >
           {{ letter }}
