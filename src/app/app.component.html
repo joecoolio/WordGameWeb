@@ -1,9 +1,19 @@
-<div class="game">
-  <p>Super Awesome Word Game</p>
+  <!-- <p>Super Awesome Word Game</p> -->
 
-  <game [gameService]="game"></game>
-
-  <label class="errormessage">{{ game.message }}</label>
-
-  <div class="simple-keyboard"></div>
+<div class="row">
+  <div class="bg-success"><app-header></app-header></div>
+</div>
+<div class="row flex-grow-1">
+  <div class="bg-success"><game [gameService]="game"></game></div>
+</div>
+<div class="row">
+  <div class="bg-success">
+    <label class="errormessage">{{ game.message }}</label>
+  </div>
+</div>
+<div class="row">
+  <div class="bg-success"><div class="simple-keyboard"></div></div>
+</div>
+<div class="row">
+  <div class="bg-success"><app-footer></app-footer></div>
 </div>
