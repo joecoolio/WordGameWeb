@@ -10,8 +10,6 @@ import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 
-import { WinDialogComponent } from '../win-dialog/win-dialog.component';
-
 @Component({
   selector: 'game',
   templateUrl: './game.component.html',
@@ -56,25 +54,5 @@ export class GameComponent implements OnInit {
   // Change the highlighted/current cell
   public setSelectedCell(i: number, j: number) {
     this.gameService.setSelectedCell(i, j);
-  }
-
-  openDialog() {
-    const dialogConfig = new MatDialogConfig();
-
-    dialogConfig.disableClose = true;
-    dialogConfig.autoFocus = true;
-
-    dialogConfig.data = {
-      id: 1,
-      title: 'Angular For Beginners',
-    };
-
-    this.dialog.open(WinDialogComponent, dialogConfig);
-
-    const dialogRef = this.dialog.open(WinDialogComponent, dialogConfig);
-
-    dialogRef
-      .afterClosed()
-      .subscribe((data) => console.log('Dialog output:', data));
   }
 }
