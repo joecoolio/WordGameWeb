@@ -1,19 +1,27 @@
-  <!-- <p>Super Awesome Word Game</p> -->
+<!-- <p>Super Awesome Word Game</p> -->
 
-<div class="row">
-  <div class="bg-success"><app-header></app-header></div>
-</div>
-<div class="row flex-grow-1">
-  <div class="bg-success"><game [gameService]="game"></game></div>
-</div>
-<div class="row">
-  <div class="bg-success">
-    <label class="errormessage">{{ game.message }}</label>
+<div class="row flex-grow-0">
+  <div style="border: 2px solid blue;" class="bg-success">
+    <app-header></app-header>
   </div>
 </div>
-<div class="row">
-  <div class="bg-success"><div class="simple-keyboard"></div></div>
+<div class="row flex-grow-1">
+  <div style="border: 2px solid blue;" class="bg-success">
+    <game [gameService]="game"></game>
+  </div>
 </div>
-<div class="row">
-  <div class="bg-success"><app-footer></app-footer></div>
+<div class="row flex-grow-0">
+  <label style="border: 2px solid blue;" class="errormessage">{{
+    game.message
+  }}</label>
+</div>
+<div class="row flex-grow-0">
+  <div style="border: 2px solid blue;" class="bg-success">
+    <div class="simple-keyboard"></div>
+  </div>
+</div>
+<div class="row flex-grow-0">
+  <div style="border: 2px solid blue;" class="bg-success">
+    <app-footer></app-footer>
+  </div>
 </div>
