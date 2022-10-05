@@ -53,6 +53,10 @@ export class GameService {
           console.log('Got wordpair: ' + JSON.stringify(this.wordPair));
           this.populateBoard();
           this._message = '';
+
+          // Reset the current word/cell to the top
+          this._selectedWord = 1;
+          this._selectedLetter = 0;
         },
         error: (err) => {
           // An error happened trying to get words
