@@ -19,7 +19,7 @@ export class GameService {
 
   // Parameters of the game
   private numLetters: number = 3;
-  private numHops: number = 4;
+  private numHops: number = 5;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
