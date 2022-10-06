@@ -28,7 +28,7 @@ export class AppComponent {
 
   openSettings() {
     const modalRef = this.modalService.open(SettingsComponent);
-    // modalRef.componentInstance.name = 'World';
+    modalRef.componentInstance.gameService = this.game;
   }
 
   ngAfterViewInit() {

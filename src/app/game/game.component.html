@@ -32,12 +32,9 @@
               gameService.selectedWord === i &&
               gameService.selectedLetter === j,
             'path-letter':
-              (i < gameService.numHops &&
-                gameService.board[i + 1].letters[j] &&
-                letter != gameService.board[i + 1].letters[j]) ||
-              (i > 0 &&
-                gameService.board[i - 1].letters[j] &&
-                letter != gameService.board[i - 1].letters[j]),
+              i > 0 &&
+              gameService.board[i - 1].letters[j] &&
+              letter != gameService.board[i - 1].letters[j],
             'size-3letter-2hop':
               gameService.numLetters == 3 && gameService.numHops == 2,
             'size-3letter-3hop':

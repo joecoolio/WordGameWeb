@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
 import { DataService, WordPair, TestedWord, WordHint } from './data.service';
 
+export interface GameSettings {
+  letters: number;
+}
+
+// If we have no idea what to set these to, use these defaults
+const DEFAULT_NUM_LETTERS: number = 3;
+const DEFAULT_NUM_HOPS: number = 3;
+
 @Injectable()
 export class GameService {
   // The game board - array of words each of which has:
@@ -18,8 +26,12 @@ export class GameService {
   private _gameStatus: string = 'initialize';
 
   // Parameters of the game
-  private _numLetters: number = 3;
-  private _numHops: number = 5;
+  private _numLetters: number;
+  private _numHops: number;
+
+  // If something has requested a change to these values, store them until the next game starts
+  private _numLettersForNextGame: number = DEFAULT_NUM_LETTERS;
+  private _numHopsForNextGame: number = DEFAULT_NUM_HOPS;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -37,6 +49,16 @@ export class GameService {
 
   newGame() {
     this._gameStatus = 'initialize';
+
+    // Reset the number of letters / hops to any stored value
+    this._numLetters = this._numLettersForNextGame;
+    this._numHops = this._numHopsForNextGame;
+    console.log(
+      'Initialize new game: letters = ' +
+        this._numLetters +
+        ' / hops = ' +
+        this._numHops
+    );
 
     console.log('Requesting word pair...');
 
@@ -432,9 +454,15 @@ export class GameService {
   get numLetters() {
     return this._numLetters;
   }
+  set numLetters(n: number) {
+    this._numLettersForNextGame = n;
+  }
 
   get numHops() {
     return this._numHops;
+  }
+  set numHops(n: number) {
+    this._numHopsForNextGame = n;
   }
 
   get message() {
