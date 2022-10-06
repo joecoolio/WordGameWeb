@@ -16,13 +16,14 @@ p {
   font-size: 4vmin;
   box-sizing: border-box;
   text-align: center;
-  border: none;
   /* border: 2px solid red; */
   align-items: center;
   justify-content: center;
+  padding-bottom: 10px;
 }
 
 .simple-keyboard {
   max-width: 850px;
   align-items: center;
+  /* border: 2px solid blue; */
 }

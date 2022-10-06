@@ -10,15 +10,16 @@
     <div class="col d-flex flex-column">
       <!-- Game Board (grows to fill the screen) -->
       <div class="row flex-grow-1 justify-content-center">
-        <div style="border: 2px solid blue;">
+        <div>
           <game [gameService]="game"></game>
         </div>
       </div>
       <!-- Message Box -->
       <div class="row justify-content-center">
-        <label style="border: 2px solid blue;" class="errormessage">{{
-          game.message
-        }}</label>
+        <label class="errormessage">{{ game.message }}</label>
+
+        <!-- Spacer -->
+        <div style="height: 5px"></div>
 
         <!-- Keyboard -->
         <div class="simple-keyboard"></div>
