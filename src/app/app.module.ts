@@ -25,7 +25,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 // Bootstrap stuff
-// import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
@@ -40,7 +39,6 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    // TooltipModule.forRoot(),
     NgbModule,
   ],
 

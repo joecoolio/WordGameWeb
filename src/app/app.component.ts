@@ -27,7 +27,6 @@ export class AppComponent {
   }
 
   openSettings() {
-    alert('parent component function.');
     const modalRef = this.modalService.open(SettingsComponent);
     // modalRef.componentInstance.name = 'World';
   }
