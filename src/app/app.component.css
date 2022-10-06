@@ -24,4 +24,5 @@ p {
 
 .simple-keyboard {
   max-width: 850px;
+  align-items: center;
 }
