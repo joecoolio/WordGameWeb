@@ -105,6 +105,9 @@
 .highlighted-box {
   border: 5px solid purple;
 }
+.path-letter {
+  color: yellow;
+}
 
 .icon-container {
   height: 10vmin;
