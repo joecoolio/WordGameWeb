@@ -1,15 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnInit {
+  @Output() parentOpenSettings = new EventEmitter();
 
-  constructor() { }
+  public isCollapsed = false;
 
-  ngOnInit() {
+  constructor() {}
+
+  ngOnInit() {}
+
+  openSettings() {
+    this.parentOpenSettings.emit();
   }
-
 }

@@ -26,6 +26,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 // Bootstrap stuff
 // import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   imports: [
@@ -40,6 +41,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     MatInputModule,
     MatButtonModule,
     // TooltipModule.forRoot(),
+    NgbModule,
   ],
 
   declarations: [
