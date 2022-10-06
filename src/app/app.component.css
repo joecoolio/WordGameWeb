@@ -25,5 +25,5 @@ p {
 .simple-keyboard {
   max-width: 850px;
   align-items: center;
-  border: 2px solid blue;
+  /* border: 2px solid blue; */
 }
