@@ -32,7 +32,7 @@
               gameService.selectedWord === i &&
               gameService.selectedLetter === j,
             'path-letter':
-              (i == 0 &&
+              (i < gameService.numHops &&
                 gameService.board[i + 1].letters[j] &&
                 letter != gameService.board[i + 1].letters[j]) ||
               (i > 0 &&
