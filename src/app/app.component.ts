@@ -3,6 +3,8 @@ import Keyboard from 'simple-keyboard';
 import { DataService } from './data.service';
 import { GameService } from './game.service';
 import { faDeleteLeft } from '@fortawesome/free-solid-svg-icons';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { SettingsComponent } from './settings/settings.component';
 
 @Component({
   selector: 'wordgame-app',
@@ -17,8 +19,16 @@ export class AppComponent {
   game: GameService;
   faDeleteLeft = faDeleteLeft;
 
-  constructor(private dataService: DataService) {
+  constructor(
+    private dataService: DataService,
+    private modalService: NgbModal
+  ) {
     this.game = new GameService(this.dataService);
+  }
+
+  openSettings() {
+    const modalRef = this.modalService.open(SettingsComponent);
+    // modalRef.componentInstance.name = 'World';
   }
 
   ngAfterViewInit() {

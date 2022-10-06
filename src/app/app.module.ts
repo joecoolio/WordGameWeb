@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
+import { SettingsComponent } from './settings/settings.component';
 
 import { ReactiveFormsModule } from '@angular/forms';
 import { GameService } from './game.service';
@@ -23,6 +24,9 @@ import { MatButtonModule } from '@angular/material/button';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+// Bootstrap stuff
+// import { TooltipModule } from 'ngx-bootstrap/tooltip';
+
 @NgModule({
   imports: [
     BrowserModule,
@@ -35,9 +39,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    // TooltipModule.forRoot(),
   ],
 
-  declarations: [AppComponent, GameComponent, HeaderComponent, FooterComponent],
+  declarations: [
+    AppComponent,
+    GameComponent,
+    HeaderComponent,
+    FooterComponent,
+    SettingsComponent,
+  ],
   bootstrap: [AppComponent],
   providers: [GameService, DataService],
   entryComponents: [],
