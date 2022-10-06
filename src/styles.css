@@ -1,7 +1,7 @@
 /* Add application styles & imports to this file! */
+@import '~bootstrap/dist/css/bootstrap.min.css';
 @import 'simple-keyboard/build/css/index.css';
 @import '@angular/material/prebuilt-themes/deeppurple-amber.css';
-@import '~bootstrap/dist/css/bootstrap.min.css';
 
 /* global styling for sticky footer*/
 html, body, app-root {
