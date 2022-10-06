@@ -18,7 +18,7 @@ export class GameService {
   private _gameStatus: string = 'initialize';
 
   // Parameters of the game
-  private _numLetters: number = 4;
+  private _numLetters: number = 5;
   private _numHops: number = 5;
 
   // Selected row/cell indexes
