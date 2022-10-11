@@ -40,6 +40,9 @@ export class GameService {
   // Message back from the validation routines
   private _message: string = '';
 
+  // Execution time of the last api call
+  private _lastExecutionTime: number;
+
   constructor(private dataService: DataService) {
     this.newGame();
   }
@@ -71,6 +74,7 @@ export class GameService {
       .subscribe({
         next: (wordpair) => {
           this.wordPair = { ...wordpair };
+          this._lastExecutionTime = this.wordPair.executionTime;
 
           console.log('Got wordpair: ' + JSON.stringify(this.wordPair));
           this.populateBoard();
@@ -277,6 +281,8 @@ export class GameService {
         // The test word is not broken
         this._board[testedWord.testPosition].broken = false;
 
+        this._lastExecutionTime = testedWord.executionTime;
+
         if (testedWord.valid) {
           // Word is solved, not wrong
           this._board[testedWord.testPosition].solved = true;
@@ -383,6 +389,8 @@ export class GameService {
         // The test word is not broken
         this._board[wordHint.hintWord].broken = false;
 
+        this._lastExecutionTime = wordHint.executionTime;
+
         if (wordHint.valid) {
           // Word is solved, not wrong
           this._board[wordHint.hintWord].solved = false;
@@ -467,5 +475,9 @@ export class GameService {
 
   get message() {
     return this._message;
+  }
+
+  get lastExecutionTime() {
+    return this._lastExecutionTime;
   }
 }

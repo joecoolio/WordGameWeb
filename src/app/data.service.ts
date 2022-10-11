@@ -9,12 +9,14 @@ export interface WordPair {
   letters: number;
   hops: number;
   words: number;
+  executionTime: number;
 }
 
 export interface TestedWord {
   testPosition: number;
   valid: boolean;
   error: string;
+  executionTime: number;
 }
 
 export interface WordHint {
@@ -23,6 +25,7 @@ export interface WordHint {
   hintLetter: string;
   valid: boolean;
   error: string;
+  executionTime: number;
 }
 
 @Injectable()

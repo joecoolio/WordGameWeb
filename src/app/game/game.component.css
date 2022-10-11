@@ -15,6 +15,12 @@
   align-items: center;
 }
 
+.sub-row {
+  display: flex;
+  border: 2px solid blue;
+  align-items: center;
+}
+
 .letter-box {
   box-sizing: border-box;
   border: 2px solid gray;
