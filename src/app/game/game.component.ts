@@ -10,8 +10,6 @@ import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 
-import '../../assets/gameboard.js';
-
 declare var test: any;
 
 @Component({
