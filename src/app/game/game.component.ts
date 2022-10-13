@@ -59,6 +59,6 @@ export class GameComponent implements OnInit {
   }
 
   f() {
-    new test();
+    test();
   }
 }
