@@ -12,6 +12,8 @@ import { SettingsComponent } from './settings/settings.component';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
+  declare MultipleSelect: any;
+
   name = 'Angular ' + VERSION.major;
 
   value = '';
@@ -24,6 +26,10 @@ export class AppComponent {
     private modalService: NgbModal
   ) {
     this.game = new GameService(this.dataService);
+  }
+
+  ngOnInit() {
+    MultipleSelect('one', 'two');
   }
 
   openSettings() {
