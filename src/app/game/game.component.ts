@@ -10,6 +10,10 @@ import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 
+import '../../assets/gameboard.js';
+
+declare var test: any;
+
 @Component({
   selector: 'game',
   templateUrl: './game.component.html',
@@ -54,5 +58,9 @@ export class GameComponent implements OnInit {
   // Change the highlighted/current cell
   public setSelectedCell(i: number, j: number) {
     this.gameService.setSelectedCell(i, j);
+  }
+
+  f() {
+    new test();
   }
 }
