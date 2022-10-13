@@ -6,10 +6,6 @@ import { faDeleteLeft } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
 
-import { sayHello } from 'src/assets/js/gameboard';
-
-declare function sayHello(name: string): void;
-
 @Component({
   selector: 'wordgame-app',
   templateUrl: './app.component.html',
@@ -28,10 +24,6 @@ export class AppComponent {
     private modalService: NgbModal
   ) {
     this.game = new GameService(this.dataService);
-  }
-
-  ngOnInit() {
-    sayHello('mike');
   }
 
   openSettings() {

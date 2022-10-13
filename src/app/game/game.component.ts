@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
+import { fromEvent, Observable, Subscription } from "rxjs";
+import { MatDialog } from '@angular/material/dialog';
 import { GameService } from '../game.service';
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
@@ -10,7 +11,7 @@ import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 
-declare function test(): void;
+import { resizeGameboard } from 'src/assets/js/gameboard';
 
 @Component({
   selector: 'game',
@@ -28,9 +29,27 @@ export class GameComponent implements OnInit {
   faCircleXmark = faCircleXmark;
   faLightbulb = faLightbulb;
 
+  // Stuff for catching and dealing with window resizes (to adjust the board's size)
+  resizeObservable$: Observable<Event>
+  resizeSubscription$: Subscription
+ 
   constructor(private dialog: MatDialog) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.resizeObservable$ = fromEvent(window, 'resize')
+    this.resizeSubscription$ = this.resizeObservable$.subscribe( evt => {
+      // Handle window resize events here
+      // console.log('event: ', evt)
+
+      resizeGameboard (this.gameService.numLetters, this.gameService.numHops);
+    })
+
+    resizeGameboard (this.gameService.numLetters, this.gameService.numHops);
+  }
+
+  ngOnDestroy() {
+    this.resizeSubscription$.unsubscribe()
+  }
 
   // Test the word (click on the icons)
   // Just send an enter key press
@@ -56,9 +75,5 @@ export class GameComponent implements OnInit {
   // Change the highlighted/current cell
   public setSelectedCell(i: number, j: number) {
     this.gameService.setSelectedCell(i, j);
-  }
-
-  f() {
-    test();
   }
 }

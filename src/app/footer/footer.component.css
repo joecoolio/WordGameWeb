@@ -1,0 +1,8 @@
+footer {
+    background-color: grey;
+    padding: 1em;
+    -moz-flex-shrink: 0;
+    -webkit-flex-shrink: 0;
+    -ms-flex-shrink: 0;
+    flex-shrink: 0;
+}

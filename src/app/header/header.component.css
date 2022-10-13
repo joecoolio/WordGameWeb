@@ -1,0 +1,12 @@
+.alignleft {
+    flex: 1;
+    text-align: left;
+}
+.aligncenter {
+    flex: 1;
+    text-align: center;
+}
+.alignright {
+    flex: 1;
+    text-align: right;
+}

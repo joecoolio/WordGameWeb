@@ -1,24 +1,37 @@
 .game-board {
+  width: 100%;
+  height: 100%;
+  position:relative;
+ 
   display: flex;
-  align-items: center;
   flex-direction: column;
-  /* border: 2px solid red; */
-}
-
-.highlighted-row {
-  /* border: 2px solid red; */
-}
-
-.letter-row {
-  display: flex;
-  /* border: 2px solid blue; */
   align-items: center;
+  justify-content: center;
+  
+  box-sizing: border-box;
+  border: 5px solid purple;
 }
 
-.sub-row {
+.word-row {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 20%;
+
+  box-sizing: border-box;
   border: 2px solid blue;
-  align-items: center;
+}
+
+.word-row.highlighted {
+  /* border: 2px solid red; */
+}
+
+.diagnostic-message {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font: italic;
 }
 
 .letter-box {
@@ -33,71 +46,24 @@
   text-transform: uppercase;
 }
 
-/* Letter box sizing & font varies based on letters & hops */
-/*   3 Letters */
-.size-3letter-2hop {
-  /* These are min(height, width) */
-  height: min(17.5vh, 20vw);
-  width: min(17.5vh, 20vw);
-  font-size: min(14vh, 16vw);
+.letter-box.letter {
+/*   border: 2px solid purple; */
+  width: 20%;
+  height: 100%;
 }
-.size-3letter-3hop {
-  height: min(13vh, 20vw);
-  width: min(13vh, 20vw);
-  font-size: min(10.5vh, 16vw);
+
+.letter-box.icon {
+/*   border: 2px solid yellow; */
+  width: 15%;
+  height: 85%;
+/*   Do I need to JS some padding in here? */
 }
-.size-3letter-4hop {
-  height: min(10vh, 20vw);
-  width: min(10vh, 20vw);
-  font-size: min(8.4vh, 16vw);
-}
-.size-3letter-5hop {
-  height: min(8vh, 20vw);
-  width: min(8vh, 20vw);
-  font-size: min(7vh, 16vw);
-}
-/*   4 Letters */
-.size-4letter-2hop {
-  height: min(17.5vh, 16vw);
-  width: min(17.5vh, 16vw);
-  font-size: min(14vh, 12.8vw);
-}
-.size-4letter-3hop {
-  height: min(13vh, 16vw);
-  width: min(13vh, 16vw);
-  font-size: min(10.5vh, 12.8vw);
-}
-.size-4letter-4hop {
-  height: min(10vh, 16vw);
-  width: min(10vh, 16vw);
-  font-size: min(8.4vh, 12.8vw);
-}
-.size-4letter-5hop {
-  height: min(8vh, 16vw);
-  width: min(8vh, 16vw);
-  font-size: min(7vh, 12.8vw);
-}
-/*   5 Letters */
-.size-5letter-2hop {
-  height: min(17.5vh, 13.5vw);
-  width: min(17.5vh, 13.5vw);
-  font-size: min(14vh, 10.8vw);
-}
-.size-5letter-3hop {
-  height: min(13vh, 13.5vw);
-  width: min(13vh, 13.5vw);
-  font-size: min(10.5vh, 10.8vw);
-}
-.size-5letter-4hop {
-  height: min(10vh, 13.5vw);
-  width: min(10vh, 13.5vw);
-  font-size: min(8.4vh, 10.8vw);
-}
-.size-5letter-5hop {
-  height: min(8vh, 13.5vw);
-  width: min(8vh, 13.5vw);
-  font-size: min(7vh, 10.8vw);
-}
+
+
+
+
+
+
 
 .locked-box {
   background-color: grey;
@@ -114,31 +80,6 @@
 }
 .path-letter {
   color: yellow;
-}
-
-.icon-container {
-  height: 8vmin;
-  width: 9vmin;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-transform: uppercase;
-  /* border: 2px solid green; */
-}
-
-.icon-box {
-  font-size: 7vmin;
-  font-weight: 700;
-  height: 8vmin;
-  width: 9vmin;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /* border: 2px solid orange; */
-}
-
-.icon {
-  font-size: 7vwin;
 }
 
 .unverified {

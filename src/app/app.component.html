@@ -1,31 +1,20 @@
-<!-- <p>Super Awesome Word Game</p> -->
+<div class="fullscreen_panel">
 
-<app-header (parentOpenSettings)="openSettings()"></app-header>
+  <app-header (parentOpenSettings)="openSettings()"></app-header>
 
-<!-- Full screen height & width -->
-<div style="height: calc(100vh - 100px); width: 100vw">
-  <!-- Bootstrap flex container with 100% height  -->
-  <div class="container d-flex h-100">
-    <!-- Flex column holder -->
-    <div class="col d-flex flex-column">
-      <!-- Game Board (grows to fill the screen) -->
-      <div class="row flex-grow-1 justify-content-center">
-        <div>
-          <game [gameService]="game"></game>
-        </div>
-      </div>
-      <!-- Message Box -->
-      <div class="row justify-content-center">
-        <label class="errormessage">{{ game.message }}</label>
+  <div class="body">
 
-        <!-- Spacer -->
-        <div style="height: 5px"></div>
-
-        <!-- Keyboard -->
-        <div class="simple-keyboard"></div>
-      </div>
+    <div class="game-container">
+      <game [gameService]="game"></game>
     </div>
-  </div>
-</div>
 
-<!-- <app-footer></app-footer> -->
+  </div>
+
+  <div class="bottom-of-screen">
+    <label class="errormessage">{{ game.message}}</label>
+    <div class="simple-keyboard"></div>
+  </div>
+
+  <app-footer></app-footer>
+
+</div>
