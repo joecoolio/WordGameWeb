@@ -6,14 +6,16 @@ import { faDeleteLeft } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
 
+import { sayHello } from 'src/assets/js/gameboard';
+
+declare function sayHello(name: string): void;
+
 @Component({
   selector: 'wordgame-app',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  declare MultipleSelect: any;
-
   name = 'Angular ' + VERSION.major;
 
   value = '';
@@ -29,7 +31,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
-    MultipleSelect('one', 'two');
+    sayHello('mike');
   }
 
   openSettings() {
