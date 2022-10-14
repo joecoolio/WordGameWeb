@@ -14,9 +14,17 @@ export function resizeGameboard (numLetters, numHops) {
   var hBoard = cellHV * numHCells;
   var vBoard = cellHV * numVCells;
 
+  // Calc the font size for letters and icons
+  var fontSize = cellHV * 0.7;
+  var iconSize = cellHV * 0.5;
+
   // Resize the board
   $(".game-board").css ({"width": hBoard, "height": vBoard});
 
   // Resize the word rows to the proper % based on numHops
   $(".word-row").css ({"height": (100/numVCells) + "%"});
+
+  // Resize the font of the letter boxes
+  $(".letter-box.letter").css ({"font-size": fontSize});
+  $(".letter-box.icon").css ({"font-size": iconSize});
 }
