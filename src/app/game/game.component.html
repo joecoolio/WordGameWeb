@@ -3,24 +3,25 @@
     <div class="word-row" *ngFor="let word of gameService.board; let i = index" [style.height.%]="wordRowHeight"
       [ngClass]="{ 'highlighted': gameService.selectedWord === i }">
       <!-- Left side holds the hint button -->
-      <div class="letter-box icon" [style.font-size.px]="iconFontSize">
-        <fa-icon class="hint" *ngIf="gameService.selectedWord === i" [icon]="faLightbulb" (click)="hint()"></fa-icon>
+      <div class="letter-box icon hint" [style.font-size.px]="iconFontSize">
+        <fa-icon *ngIf="gameService.selectedWord === i" [icon]="faLightbulb" (click)="hint()"></fa-icon>
       </div>
 
       <!-- The letters of the word -->
       <div class="letter-box letter" [style.font-size.px]="letterFontSize"
         *ngFor="let letter of word.letters; let j = index" (click)="setSelectedCell(i, j)"
         [ngClass]="{ shake: word.wrong, bounceSize: word.solved,
-          'locked-box': word.locked == true,
-          'solved-box': word.solved == true,
-          'wrong-box': word.wrong == true,
-          'highlighted-box':
+          'locked': word.locked == true,
+          'solved': word.solved == true,
+          'wrong': word.wrong == true,
+          'highlighted':
             gameService.selectedWord === i &&
             gameService.selectedLetter === j,
-          'path-letter':
+          'on-path':
             i > 0 &&
             gameService.board[i - 1].letters[j] &&
-            letter != gameService.board[i - 1].letters[j]
+            letter != gameService.board[i - 1].letters[j] &&
+            letter != null
         }">
         {{ letter }}
         <!-- Spinner while the letter is loading -->
@@ -36,13 +37,15 @@
 
       <!-- The rest of these are icons depending on the word -->
       <!-- Locked word, either invisible icon (at bottom) or reload icon (at top) -->
-      <div *ngIf="word.locked" class="letter-box icon" [style.font-size.px]="iconFontSize">
-        <fa-icon *ngIf="i === 0" [ngClass]="{
-            win: gameService.gameStatus === 'win',
-            broken: gameService.gameStatus === 'broken',
-            unverified: gameService.gameStatus === 'run',
-            'fa-spin': gameService.gameStatus === 'initialize'
-          }" (click)="newGame()" [icon]="faRepeat"></fa-icon>
+      <div *ngIf="word.locked" class="letter-box icon" 
+      [ngClass]="{
+        win: gameService.gameStatus === 'win',
+        broken: gameService.gameStatus === 'broken',
+        unverified: gameService.gameStatus === 'run',
+        'fa-spin': gameService.gameStatus === 'initialize'
+      }"
+      [style.font-size.px]="iconFontSize">
+        <fa-icon *ngIf="i === 0" (click)="newGame()" [icon]="faRepeat"></fa-icon>
       </div>
 
       <!-- Unverified word -->

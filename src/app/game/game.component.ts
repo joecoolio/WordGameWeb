@@ -115,7 +115,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.wordRowHeight = 100/numVCells;    
 
     // Calc the font size for letters and icons
-    this.letterFontSize = letterBoxSize * 0.6;
-    this.iconFontSize = letterBoxSize * 0.4;
+    this.letterFontSize = letterBoxSize * 0.7;
+    this.iconFontSize = letterBoxSize * 0.5;
   }
 }
