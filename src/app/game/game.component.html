@@ -8,7 +8,7 @@
       </div>
 
       <!-- The letters of the word -->
-      <div class="letter-box letter" [style.font-size.px]="letterFontSize"
+      <div class="letter-box letter" [style.font-size.px]="letterFontSize"`
         *ngFor="let letter of word.letters; let j = index" (click)="setSelectedCell(i, j)"
         [ngClass]="{ shake: word.wrong, bounceSize: word.solved,
           'locked-box': word.locked == true,
