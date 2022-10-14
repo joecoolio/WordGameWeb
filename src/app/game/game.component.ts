@@ -31,11 +31,12 @@ export class GameComponent implements OnInit, AfterViewInit {
   gameContainer: ElementRef;
 
   // Stored sizing information from last resize event
-  boardWidth: number = 100;
-  boardHeight: number = 500;
-  wordRowHeight: number = 20;
-  letterFontSize: number = 10;
-  iconFontSize: number = 10;
+  boardWidth: number = 100;    // Width of game board 
+  boardHeight: number = 500;   // Height of game board
+  wordRowHeight: number = 20;  // Height of a word row
+  letterBoxSize: number = 50;  // Size of a letter box
+  letterFontSize: number = 10; // Letter font size
+  iconFontSize: number = 10;   // Icon font size
 
   // Stuff for catching and dealing with window resizes (to adjust the board's size)
   resizeObservable$: Observable<Event>
@@ -104,18 +105,21 @@ export class GameComponent implements OnInit, AfterViewInit {
     
     // Figure out ideal width/height size of a single letter square cell
     var hSize = totWidth / numHCells;
-    var vSize = totHeight / numVCells;
-    var letterBoxSize = Math.min(hSize, vSize);
+    var vSize = (totHeight - 2 * (numVCells-1)) / numVCells; // The +2 is to account for padding 
+    this.letterBoxSize = Math.min(hSize, vSize);
     
     // Calc the size of the board based on cell size
-    this.boardWidth =  letterBoxSize * numHCells;
-    this.boardHeight = letterBoxSize * numVCells;
+    this.boardWidth =  this.letterBoxSize * numHCells;
+    this.boardHeight = this.letterBoxSize * numVCells + (2 * (numVCells-1));
   
-    // Calc the ideal height of each row (in %)
-    this.wordRowHeight = 100/numVCells;    
+    // Calc the ideal height of each row
+    // this.wordRowHeight = (totHeight - (2 * (numVCells-1))) /numVCells;    
+    this.wordRowHeight = this.letterBoxSize;
 
     // Calc the font size for letters and icons
-    this.letterFontSize = letterBoxSize * 0.7;
-    this.iconFontSize = letterBoxSize * 0.5;
+    this.letterFontSize = this.letterBoxSize * 0.7;
+    this.iconFontSize = this.letterBoxSize * 0.5;
+
+    // console.log("bh: " + this.boardHeight + " / " + (this.wordRowHeight * numVCells) + " / " + this.letterBoxSize);
   }
 }

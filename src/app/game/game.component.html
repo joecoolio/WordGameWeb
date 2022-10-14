@@ -1,6 +1,6 @@
 <div #gameContainer class="game-container">
   <div class="game-board" [style.width.px]="boardWidth" [style.height.px]="boardHeight">
-    <div class="word-row" *ngFor="let word of gameService.board; let i = index" [style.height.%]="wordRowHeight"
+    <div class="word-row" *ngFor="let word of gameService.board; let i = index" [style.height.px]="wordRowHeight"
       [ngClass]="{ 'highlighted': gameService.selectedWord === i }">
       <!-- Left side holds the hint button -->
       <div class="letter-box icon hint" [style.font-size.px]="iconFontSize">
@@ -9,6 +9,7 @@
 
       <!-- The letters of the word -->
       <div class="letter-box letter" [style.font-size.px]="letterFontSize"
+      [style.width.px]="letterBoxSize" [style.height.px]="letterBoxSize"
         *ngFor="let letter of word.letters; let j = index" (click)="setSelectedCell(i, j)"
         [ngClass]="{ shake: word.wrong, bounceSize: word.solved,
           'locked': word.locked == true,

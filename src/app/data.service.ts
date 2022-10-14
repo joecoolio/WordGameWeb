@@ -3,6 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
 
+export interface UserSettings {
+  userid: string, // User ID
+  letters: number, // Number of letters
+  hops: number, // Number of hops
+
+  
+}
+
 export interface WordPair {
   startWord: string;
   endWord: string;
