@@ -56,6 +56,11 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.handleScreenResize();
   }
 
+  ngAfterViewChecked() {
+    // This make chrome work at first draw
+    this.handleScreenResize();
+  }
+
   ngOnDestroy() {
     this.resizeSubscription$.unsubscribe()
   }
