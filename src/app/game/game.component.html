@@ -4,7 +4,7 @@
       [ngClass]="{ 'highlighted': gameService.selectedWord === i }">
       <!-- Left side holds the hint button -->
       <div class="letter-box icon hint" [style.font-size.px]="iconFontSize">
-        <fa-icon *ngIf="gameService.selectedWord === i" [icon]="faLightbulb" (click)="hint()"></fa-icon>
+        <fa-icon *ngIf="gameService.selectedWord === i && !word.solved" [icon]="faLightbulb" (click)="hint()"></fa-icon>
       </div>
 
       <!-- The letters of the word -->
