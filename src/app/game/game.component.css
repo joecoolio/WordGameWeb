@@ -38,13 +38,6 @@
   /* border: 2px solid red; */
 }
 
-.diagnostic-message {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  font: italic;
-}
-
 .letter-box {
   box-sizing: border-box;
   border: 2px solid gray;

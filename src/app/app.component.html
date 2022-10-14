@@ -1,10 +1,12 @@
 <div class="fullscreen_panel">
 
   <app-header (parentOpenSettings)="openSettings()"></app-header>
-
+  
   <div class="body">
 
     <game [gameService]="game"></game>
+
+    <div class="diagnostic-message">{{ game.lastExecutionTime }}</div>
 
   </div>
 

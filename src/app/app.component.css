@@ -38,6 +38,14 @@ header {
   min-height: 2em;
   background-color: silver;
   padding: 1em;
+  position: relative;
+}
+
+.diagnostic-message {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font: italic;
 }
 
 .bottom-of-screen {

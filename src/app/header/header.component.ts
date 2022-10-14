@@ -1,4 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-header',
@@ -10,7 +11,7 @@ export class HeaderComponent implements OnInit {
 
   public isCollapsed = true;
 
-  constructor() {}
+  constructor(private modalService: NgbModal) {}
 
   ngOnInit() {}
 
