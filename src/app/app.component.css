@@ -45,7 +45,9 @@ header {
   position: absolute;
   right: 0;
   bottom: 0;
-  font: italic;
+  font-style: italic;
+  font-size: 75%;
+  color: black;
 }
 
 .bottom-of-screen {
