@@ -6,7 +6,7 @@
 
     <game [gameService]="game"></game>
 
-    <div class="diagnostic-message">{{ game.lastExecutionTime }}</div>
+    <div class="diagnostic-message">Exec time (ms): {{ game.lastExecutionTime | number:'1.2-2' }} / {{ game.lastExecutionTimeAPI | number:'1.2-2' }}</div>
 
   </div>
 

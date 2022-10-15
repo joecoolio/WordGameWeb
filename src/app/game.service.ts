@@ -47,7 +47,8 @@ export class GameService {
   private _message: string = '';
 
   // Execution time of the last api call
-  private _lastExecutionTime: number;
+  private _lastExecutionTimeAPI: number; // Exec time on the server
+  private _lastExecutionTime: number; // Round trip execution
 
   constructor(private dataService: DataService) {
     this.newGame();
@@ -74,13 +75,16 @@ export class GameService {
     this._board = this.createEmptyBoard();
     this._message = 'Requesting a pair of words...';
 
+    var execStartTime = performance.now();
+
     this.dataService
       .getPair(this.numLetters, this._numHops)
       // resp is of type `HttpResponse<WordPair>`
       .subscribe({
         next: (wordpair) => {
           this.wordPair = { ...wordpair };
-          this._lastExecutionTime = this.wordPair.executionTime;
+          this._lastExecutionTime = performance.now() - execStartTime;
+          this._lastExecutionTimeAPI = this.wordPair.executionTime;
 
           console.log('Got wordpair: ' + JSON.stringify(this.wordPair));
           this.populateBoard();
@@ -279,6 +283,8 @@ export class GameService {
     this._board[this._selectedWord].solved = false;
     this._board[this._selectedWord].wrong = false;
 
+    var execStartTime = performance.now();
+
     // Make the remote call
     this.dataService.testWord(wordArray, testWord, testPosition).subscribe({
       next: (testedWord) => {
@@ -287,7 +293,8 @@ export class GameService {
         // The test word is not broken
         this._board[testedWord.testPosition].broken = false;
 
-        this._lastExecutionTime = testedWord.executionTime;
+        this._lastExecutionTime = performance.now() - execStartTime;
+        this._lastExecutionTimeAPI = testedWord.executionTime;
 
         if (testedWord.valid) {
           // Word is solved, not wrong
@@ -386,6 +393,8 @@ export class GameService {
     this._board[this._selectedWord].solved = false;
     this._board[this._selectedWord].wrong = false;
 
+    var execStartTime = performance.now();
+
     // Make the remote call
     this.dataService.getHint(wordArray, hintPosition).subscribe({
       next: (wordHint) => {
@@ -395,7 +404,9 @@ export class GameService {
         // The test word is not broken
         this._board[wordHint.hintWord].broken = false;
 
-        this._lastExecutionTime = wordHint.executionTime;
+        this._lastExecutionTime = performance.now() - execStartTime;
+        this._lastExecutionTimeAPI = wordHint.executionTime;
+
 
         if (wordHint.valid) {
           // Word is solved, not wrong
@@ -485,5 +496,9 @@ export class GameService {
 
   get lastExecutionTime() {
     return this._lastExecutionTime;
+  }
+
+  get lastExecutionTimeAPI() {
+    return this._lastExecutionTimeAPI;
   }
 }
