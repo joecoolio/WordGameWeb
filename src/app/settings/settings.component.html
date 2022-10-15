@@ -8,109 +8,20 @@
   ></button>
 </div>
 <div class="modal-body">
-  <form>
-    <!-- Number of letters -->
-    <fieldset class="form-group form-check-inline">
-      <div class="row">
-        <legend class="col-form-label col-sm-2 pt-0">Letters</legend>
-        <div class="col-sm-10">
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="letters"
-              id="letters1"
-              value="3"
-              [checked]="numLetters === 3"
-              (change)="numLetters = 3"
-            />
-            <label class="form-check-label" for="letters1">3</label>
-          </div>
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="letters"
-              id="letters2"
-              value="4"
-              [checked]="numLetters === 4"
-              (change)="numLetters = 4"
-            />
-            <label class="form-check-label" for="letters2">4</label>
-          </div>
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="letters"
-              id="letters3"
-              value="5"
-              [checked]="numLetters === 5"
-              (change)="numLetters = 5"
-            />
-            <label class="form-check-label" for="letters3">5</label>
-          </div>
-        </div>
-      </div>
-    </fieldset>
+  
+  <!-- Number of letters -->
+  <div class="value">{{ numLetters }}</div>
+  <input type="range" [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
+    [ngModel]="numLetters"
+    (ngModelChange)="numLetters = $event"
+  >
 
-    <!-- Number of hops -->
-    <fieldset class="form-group form-check-inline">
-      <div class="row">
-        <legend class="col-form-label col-sm-2 pt-0">Hops</legend>
-        <div class="col-sm-10">
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="hops"
-              id="hops2"
-              value="2"
-              [checked]="numHops === 2"
-              (change)="numHops = 2"
-            />
-            <label class="form-check-label" for="hops2">2</label>
-          </div>
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="hops"
-              id="hops3"
-              value="3"
-              [checked]="numHops === 3"
-              (change)="numHops = 3"
-            />
-            <label class="form-check-label" for="hops3">3</label>
-          </div>
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="hops"
-              id="hops4"
-              value="4"
-              [checked]="numHops === 4"
-              (change)="numHops = 4"
-            />
-            <label class="form-check-label" for="hops4">4</label>
-          </div>
-          <div class="form-check">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="hops"
-              id="hops5"
-              value="5"
-              [checked]="numHops === 5"
-              (change)="numHops = 5"
-            />
-            <label class="form-check-label" for="hops5">5</label>
-          </div>
-        </div>
-      </div>
-    </fieldset>
-  </form>
+  <!-- Number of hops -->
+  <div class="value">{{ numHops }}</div>
+  <input type="range" [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1" [value]="numHops"
+    [ngModel]="numHops"
+    (ngModelChange)="numHops = $event"
+  >
 </div>
 <div class="modal-footer">
   <button

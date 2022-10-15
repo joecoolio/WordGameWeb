@@ -53,15 +53,16 @@ header {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background-color: silver;
 }
 
 .simple-keyboard {
   max-width: 850px;
-  border: 2px solid blue;
+  /* border: 2px solid blue; */
 }
 
 .errormessage {
   height: 6vmin;
   font-size: 4vmin;
-  border: 1px solid orange;
+  /* border: 1px solid orange; */
 }

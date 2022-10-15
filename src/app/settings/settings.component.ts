@@ -18,6 +18,7 @@ export class SettingsComponent implements OnInit {
     return this.gameService.numLetters;
   }
   set numLetters(n: number) {
+console.log("Setting number of letters: " + n);
     this.gameService.numLetters = n;
   }
 

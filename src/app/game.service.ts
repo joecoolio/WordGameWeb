@@ -6,11 +6,17 @@ export interface GameSettings {
 }
 
 // If we have no idea what to set these to, use these defaults
-const DEFAULT_NUM_LETTERS: number = 3;
-const DEFAULT_NUM_HOPS: number = 3;
+const DEFAULT_NUM_LETTERS: number = 5;
+const DEFAULT_NUM_HOPS: number = 5;
 
 @Injectable()
 export class GameService {
+  // Min & max number of letters & hops
+  public MIN_LETTERS: number = 3;
+  public MAX_LETTERS: number = 5;
+  public MIN_HOPS: number = 2;
+  public MAX_HOPS: number = 5;
+
   // The game board - array of words each of which has:
   //   .letters = array of the letters of the word
   //   .locked = true if this word cannot be changed
