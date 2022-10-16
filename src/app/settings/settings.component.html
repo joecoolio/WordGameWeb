@@ -8,20 +8,24 @@
   ></button>
 </div>
 <div class="modal-body">
+  <div class="bodycontainer">
   
-  <!-- Number of letters -->
-  <div class="value">{{ numLetters }}</div>
-  <input type="range" [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
-    [ngModel]="numLetters"
-    (ngModelChange)="numLetters = $event"
-  >
-
-  <!-- Number of hops -->
-  <div class="value">{{ numHops }}</div>
-  <input type="range" [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1" [value]="numHops"
-    [ngModel]="numHops"
-    (ngModelChange)="numHops = $event"
-  >
+  
+    <!-- Number of letters -->
+    <div class="item">
+      <div class="rangeheader">Number Of Letters</div>
+      <div class="rangevalue">{{ gameService.numLettersForNextGame }}</div>
+      <input type="range" [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
+        [ngModel]="gameService.numLettersForNextGame" (ngModelChange)="gameService.numLettersForNextGame = $event">
+    </div>
+  
+    <!-- Number of hops -->
+    <div class="item">
+      <div class="rangeheader">Number Of Hops</div>
+      <div class="rangevalue">{{ gameService.numHopsForNextGame }}</div>
+      <input type="range" [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1"
+        [ngModel]="gameService.numHopsForNextGame" (ngModelChange)="gameService.numHopsForNextGame = $event">
+    </div>
 </div>
 <div class="modal-footer">
   <button

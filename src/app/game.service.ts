@@ -318,6 +318,9 @@ export class GameService {
             // You win!  Call this to report the completion.
             this.win();
           } else {
+            // Play a sound (yay!)
+            this.audioService.wordCorrect();
+
             // Move to the next word (unless the user has already moved)
             if (this._selectedWord == testedWord.testPosition) {
               if (this._selectedWord < this._numHops - 1) {
@@ -343,6 +346,9 @@ export class GameService {
           this._board[testedWord.testPosition].wrong = true;
 
           this._message = testedWord.error;
+
+          // Play a sound (boo!)
+          this.audioService.wordWrong();
         }
       },
       error: (err) => {
@@ -368,6 +374,7 @@ export class GameService {
   private win() {
     this._gameStatus = 'win';
     this._message = '!!! YOU WIN !!!';
+    this.audioService.puzzleSolved();
   }
 
   // Get a hint for the current word
@@ -415,7 +422,7 @@ export class GameService {
 
 
         if (wordHint.valid) {
-          // Word is solved, not wrong
+          // Word is not solved, not wrong
           this._board[wordHint.hintWord].solved = false;
           this._board[wordHint.hintWord].wrong = false;
 
@@ -423,10 +430,16 @@ export class GameService {
           this.setSelectedCell(wordHint.hintWord, wordHint.hintPosition);
           this.letterEntered(wordHint.hintLetter);
 
+          // Play a sound
+          this.audioService.hintGiven();
+
           return;
         } else {
           // Couldn't get a hint, tell the player
           this._message = wordHint.error;
+
+          // Play a sound
+          this.audioService.hintUnavailable();
         }
       },
       error: (err) => {
@@ -485,14 +498,22 @@ export class GameService {
   get numLetters() {
     return this._numLetters;
   }
-  set numLetters(n: number) {
+
+  get numLettersForNextGame() {
+    return this._numLettersForNextGame;
+  }
+  set numLettersForNextGame(n: number) {
     this._numLettersForNextGame = n;
   }
 
   get numHops() {
     return this._numHops;
   }
-  set numHops(n: number) {
+
+  get numHopsForNextGame() {
+    return this._numHopsForNextGame;
+  }
+  set numHopsForNextGame(n: number) {
     this._numHopsForNextGame = n;
   }
 

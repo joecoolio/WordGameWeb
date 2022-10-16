@@ -8,24 +8,8 @@ import { GameService } from '../game.service';
   styleUrls: ['./settings.component.css'],
 })
 export class SettingsComponent implements OnInit {
-  gameService: GameService;
-
-  constructor(public activeModal: NgbActiveModal) {}
+  constructor(public activeModal: NgbActiveModal, public gameService: GameService) {}
 
   ngOnInit() {}
 
-  get numLetters() {
-    return this.gameService.numLetters;
-  }
-  set numLetters(n: number) {
-console.log("Setting number of letters: " + n);
-    this.gameService.numLetters = n;
-  }
-
-  get numHops() {
-    return this.gameService.numHops;
-  }
-  set numHops(n: number) {
-    this.gameService.numHops = n;
-  }
 }
