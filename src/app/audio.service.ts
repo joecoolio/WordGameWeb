@@ -13,23 +13,23 @@ export class AudioService {
   }
 
   letterEntered(): void {
-    this.playSound('../assets/sounds/9744__horn__typewriter.wav');
+    this.playSound('../assets/sounds/9744__horn__typewriter.mp3');
   }
 
   wordWrong(): void {
-    this.playSound('../assets/sounds/650842__andreas__wrong-answer-buzzer.wav');
+    this.playSound('../assets/sounds/650842__andreas__wrong-answer-buzzer.mp3');
   }
 
   wordCorrect(): void {
-    this.playSound('../assets/sounds/345299__scrampunk__okay.wav');
+    this.playSound('../assets/sounds/345299__scrampunk__okay.mp3');
   }
 
   puzzleSolved(): void {
-    this.playSound('../assets/sounds/393402__stevedrums__group-yay-cheer.wav');
+    this.playSound('../assets/sounds/393402__stevedrums__group-yay-cheer.mp3');
   }
 
   hintGiven(): void {
-    this.playSound('../assets/sounds/243749__unfa__metronome-1khz-weak-pulse.flac');
+    this.playSound('../assets/sounds/243749__unfa__metronome-1khz-weak-pulse.mp3');
   }
 
   hintUnavailable(): void {
