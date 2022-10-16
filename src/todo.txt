@@ -1,0 +1,5 @@
+Big animated thumbs up when you win
+Instructions
+Settings
+Authentication
+Sounds - type, wrong, right, win 

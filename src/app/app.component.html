@@ -4,14 +4,14 @@
   
   <div class="body">
 
-    <game [gameService]="game"></game>
+    <game [gameService]="gameService"></game>
 
-    <div class="diagnostic-message">Exec time (ms): {{ game.lastExecutionTime | number:'1.2-2' }} / {{ game.lastExecutionTimeAPI | number:'1.2-2' }}</div>
+    <div class="diagnostic-message">Exec time (ms): {{ gameService.lastExecutionTime | number:'1.2-2' }} / {{ gameService.lastExecutionTimeAPI | number:'1.2-2' }}</div>
 
   </div>
 
   <div class="bottom-of-screen">
-    <label class="errormessage">{{ game.message}}</label>
+    <label class="errormessage">{{ gameService.message}}</label>
     <div class="simple-keyboard"></div>
   </div>
 

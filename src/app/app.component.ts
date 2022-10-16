@@ -1,7 +1,7 @@
 import { Component, HostListener, VERSION } from '@angular/core';
 import Keyboard from 'simple-keyboard';
-import { DataService } from './data.service';
 import { GameService } from './game.service';
+import { AudioService } from './audio.service';
 import { faDeleteLeft } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
@@ -16,19 +16,17 @@ export class AppComponent {
 
   value = '';
   keyboard: Keyboard;
-  game: GameService;
   faDeleteLeft = faDeleteLeft;
 
   constructor(
-    private dataService: DataService,
+    public gameService: GameService,
     private modalService: NgbModal
   ) {
-    this.game = new GameService(this.dataService);
   }
 
   openSettings() {
     const modalRef = this.modalService.open(SettingsComponent);
-    modalRef.componentInstance.gameService = this.game;
+    modalRef.componentInstance.gameService = this.gameService;
   }
 
   ngAfterViewInit() {
@@ -53,7 +51,7 @@ export class AppComponent {
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
     // Pass to game
-    this.game.letterEntered(event.key);
+    this.gameService.letterEntered(event.key);
   }
 
   // Onscreen keyboard events
@@ -68,7 +66,7 @@ export class AppComponent {
     if (button === '{shift}' || button === '{lock}') this.handleShift();
 
     // Pass to game
-    this.game.letterEntered(button);
+    this.gameService.letterEntered(button);
   };
 
   onInputChange = (event: any) => {

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DataService, WordPair, TestedWord, WordHint } from './data.service';
+import { AudioService } from './audio.service';
 
 export interface GameSettings {
   letters: number;
@@ -9,7 +10,9 @@ export interface GameSettings {
 const DEFAULT_NUM_LETTERS: number = 5;
 const DEFAULT_NUM_HOPS: number = 5;
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class GameService {
   // Min & max number of letters & hops
   public MIN_LETTERS: number = 3;
@@ -47,10 +50,10 @@ export class GameService {
   private _message: string = '';
 
   // Execution time of the last api call
-  private _lastExecutionTimeAPI: number; // Exec time on the server
-  private _lastExecutionTime: number; // Round trip execution
+  private _lastExecutionTimeAPI: number = 0; // Exec time on the server
+  private _lastExecutionTime: number = 0; // Round trip execution
 
-  constructor(private dataService: DataService) {
+  constructor(private dataService: DataService, private audioService: AudioService) {
     this.newGame();
   }
 
@@ -242,6 +245,9 @@ export class GameService {
           // Move 1 to the right
           this._selectedLetter++;
         }
+
+        // Play the sound
+        this.audioService.letterEntered();
       }
 
       // Arrow keys

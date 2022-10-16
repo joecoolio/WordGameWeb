@@ -36,7 +36,9 @@ export interface WordHint {
   executionTime: number;
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class DataService {
   constructor(private http: HttpClient) {}
 

@@ -11,6 +11,7 @@ import { SettingsComponent } from './settings/settings.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { GameService } from './game.service';
 import { DataService } from './data.service';
+import { AudioService } from './audio.service';
 
 import { MatDialogModule } from '@angular/material/dialog';
 
@@ -50,7 +51,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     SettingsComponent,
   ],
   bootstrap: [AppComponent],
-  providers: [GameService, DataService],
+  providers: [],
   entryComponents: [],
 })
 export class AppModule {}
