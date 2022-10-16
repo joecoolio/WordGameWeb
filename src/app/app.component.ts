@@ -1,7 +1,6 @@
 import { Component, HostListener, VERSION } from '@angular/core';
 import Keyboard from 'simple-keyboard';
 import { GameService } from './game.service';
-import { AudioService } from './audio.service';
 import { faDeleteLeft } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
