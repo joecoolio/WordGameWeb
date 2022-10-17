@@ -63,22 +63,33 @@ export class GameService {
   // Word pair retrieved from the server
   private _wordPair: WordPair | undefined;
 
-  newGame() {
-    this._gameStatus = GameStatus.Initialize;
+  loadPlayerSettings() : Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Load the user settings if needed
+      // This returns immediately if they're already loaded
+      this.playerService
+        .load()
+        .subscribe({
+          next: (result) => {
+            if (result) {
+              // User loaded, we're good to go
+              console.log("Loaded user: " + this.playerService.numLetters + " / " + this.playerService.numHops);
 
-    // Load the user settings if needed
-    // This returns immediately if they're already loaded
-    this.playerService
-      .load()
-      .subscribe({
-        next: (result) => {
-          if (result) {
-            // User loaded, we're good to go
-            console.log("Loaded user: " + this.playerService.numLetters + " / " + this.playerService.numHops);
+              resolve();
+            } else {
+              // User wasn't loaded correctly, kablooie
 
-            this.newGameInner();
-          } else {
-            // User wasn't loaded correctly, kablooie
+              // The game is broken
+              this._gameStatus = GameStatus.Broken;
+
+              // Show a message
+              this._message = 'Failed to load user settings, please try again later.';
+
+              reject();
+            }
+          },
+          error: (err) => {
+            // An error happened trying to load the user
 
             // The game is broken
             this._gameStatus = GameStatus.Broken;
@@ -86,84 +97,88 @@ export class GameService {
             // Show a message
             this._message =
               'Failed to load user settings, please try again later.';
-          }
-        },
-        error: (err) => {
-          // An error happened trying to load the user
 
-          // The game is broken
-          this._gameStatus = GameStatus.Broken;
+            console.log('Error getting user settings: ' + JSON.stringify(err));
+            
+            reject();
+          },
+        });
 
-          // Show a message
-          this._message =
-            'Failed to load user settings, please try again later.';
-
-          console.log('Error getting user settings: ' + JSON.stringify(err));
-        },
-      });
+    });
   }
 
-  // Run this only after loading the user information
-  private newGameInner() {
-    // Reset game parameters to the user's preferences
-    this._numLetters = this.playerService.numLetters;
-    this._numHops = this.playerService.numHops;
-    this._gameMode = this.playerService.gameMode;
-    this._difficultyLevel = this.playerService.difficultyLevel;
-    this._hintType = this.playerService.hintType;
+  newGame() : Promise<void> {
+    return new Promise((resolve, reject) => {
+      this._gameStatus = GameStatus.Initialize;
 
-    console.log(
-      'Initialize new game: letters = ' +
-        this._numLetters +
-        ' / hops = ' +
-        this._numHops
-    );
+      // Load the user settings if needed
+      // This returns immediately if they're already loaded
+      this.loadPlayerSettings().then(()=> {
+        // Reset game parameters to the user's preferences
+        this._numLetters = this.playerService.numLetters;
+        this._numHops = this.playerService.numHops;
+        this._gameMode = this.playerService.gameMode;
+        this._difficultyLevel = this.playerService.difficultyLevel;
+        this._hintType = this.playerService.hintType;
 
-    console.log('Requesting word pair...');
+        console.log(
+          'Initialize new game: letters = ' +
+            this._numLetters +
+            ' / hops = ' +
+            this._numHops
+        );
 
-    this._board = this.createEmptyBoard();
-    this._message = 'Requesting a pair of words...';
+        console.log('Requesting word pair...');
 
-    var execStartTime = performance.now();
+        this._board = this.createEmptyBoard();
+        this._message = 'Requesting a pair of words...';
 
-    this.dataService
-      .getPair(this.numLetters, this._numHops)
-      // resp is of type `HttpResponse<WordPair>`
-      .subscribe({
-        next: (wordpair) => {
-          this._wordPair = { ...wordpair };
-          this._lastExecutionTime = performance.now() - execStartTime;
-          this._lastExecutionTimeAPI = this._wordPair.executionTime;
+        var execStartTime = performance.now();
 
-          console.log('Got wordpair: ' + JSON.stringify(this._wordPair));
-          this.populateBoard();
-          this._message = '';
+        this.dataService
+          .getPair(this.numLetters, this._numHops)
+          // resp is of type `HttpResponse<WordPair>`
+          .subscribe({
+            next: (wordpair) => {
+              this._wordPair = { ...wordpair };
+              this._lastExecutionTime = performance.now() - execStartTime;
+              this._lastExecutionTimeAPI = this._wordPair.executionTime;
 
-          // Reset the current word/cell to the top
-          this._selectedWord = 1;
-          this._selectedLetter = 0;
+              console.log('Got wordpair: ' + JSON.stringify(this._wordPair));
+              this.populateBoard();
+              this._message = '';
 
-          // The game is now running
-          this._gameStatus = GameStatus.Run;
-        },
-        error: (err) => {
-          // An error happened trying to get words
+              // Reset the current word/cell to the top
+              this._selectedWord = 1;
+              this._selectedLetter = 0;
 
-          // The game is broken
-          this._gameStatus = GameStatus.Broken;
+              // The game is now running
+              this._gameStatus = GameStatus.Run;
 
-          // The words are no longer loading
-          for (const word of this._board) {
-            word.loading = false;
-          }
+              resolve();
+            },
+            error: (err) => {
+              // An error happened trying to get words
 
-          // Show a message
-          this._message =
-            'Failed to communicate with the server, please try again later.';
+              // The game is broken
+              this._gameStatus = GameStatus.Broken;
 
-          console.log('Error getting words: ' + JSON.stringify(err));
-        },
+              // The words are no longer loading
+              for (const word of this._board) {
+                word.loading = false;
+              }
+
+              // Show a message
+              this._message =
+                'Failed to communicate with the server, please try again later.';
+
+              console.log('Error getting words: ' + JSON.stringify(err));
+
+              reject();
+            },
+          });
       });
+    });
   }
 
   private createEmptyBoard() {

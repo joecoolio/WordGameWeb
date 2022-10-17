@@ -57,12 +57,17 @@ export class GameComponent implements OnInit, AfterViewInit {
       // Handle window resize events here
       this.handleScreenResize();
     })
-    this.handleScreenResize();
+
+    // The screen can't be properly sized until you load player settings
+    this.gameService.loadPlayerSettings().then(()=>{
+      this.gameService.newGame();
+      this.handleScreenResize();
+    });
   }
 
   ngAfterViewChecked() {
     // This make chrome work at first draw
-    this.handleScreenResize();
+    // this.handleScreenResize();
   }
 
   ngOnDestroy() {
@@ -85,8 +90,16 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   // Start over with new words
+  // Resize the screen if the number of letters or hops changed
   newGame() {
-    this.gameService.newGame();
+    let lastNumLetters = this.gameService.numLetters;
+    let lastNumHops = this.gameService.numHops;
+
+    this.gameService.newGame().then(()=>{
+      if (this.gameService.numLetters != lastNumLetters || this.gameService.numHops != lastNumHops) {
+        this.handleScreenResize();
+      }
+    });
   }
 
   // Get a hint for this word

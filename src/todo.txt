@@ -6,3 +6,4 @@ Authentication
 -- Settings - is the game service done right?
 Clean up imports in app.module.thumbs
 Check subscription unsubscribe
+Game service and game componenent have 2 promises that don't correctly handle rejects
