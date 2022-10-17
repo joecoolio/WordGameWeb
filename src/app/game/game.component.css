@@ -2,7 +2,7 @@
   width: 100%;
   height: 100%;
   box-sizing: border-box;
-  /* border: 5px solid green; */
+  border: 5px solid green;
 
   display: flex;
   align-items: top;
@@ -27,8 +27,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 20%;
   margin-top: 2px;
 
   box-sizing: border-box;
@@ -53,8 +51,6 @@
 
 .letter-box.letter {
   border: 1px solid black;
-  width: 20%;
-  height: 100%;
 }
 
 .letter-box.letter.locked {
@@ -80,30 +76,28 @@
 
 
 .letter-box.icon {
-  /* border: 2px solid yellow; */
-  width: 15%;
-  height: 85%;
+  border: 2px solid yellow;
 }
 
-.letter-box.icon.unverified {
+.letter-box.icon > .unverified {
   color: grey;
 }
-.letter-box.icon.solved {
+.letter-box.icon > .solved {
   color: green;
 }
-.letter-box.icon.wrong {
+.letter-box.icon > .wrong {
   color: red;
 }
-.letter-box.icon.testing {
+.letter-box.icon > .testing {
   color: purple;
 }
-.letter-box.icon.broken {
+.letter-box.icon > .broken {
   color: darkred;
 }
-.letter-box.icon.win {
+.letter-box.icon > .win {
   color: green;
 }
-.letter-box.icon.hint {
+.letter-box.icon > .hint {
   color: yellow;
 }
 

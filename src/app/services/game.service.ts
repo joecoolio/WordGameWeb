@@ -3,11 +3,11 @@ import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint } from './d
 import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel } from './player.service';
 
-enum GameStatus {
-  INITIALIZE,
-  RUN,
-  WIN,
-  BROKEN
+export enum GameStatus {
+  Initialize,
+  Run,
+  Win,
+  Broken
 }
 
 @Injectable({
@@ -32,7 +32,7 @@ export class GameService {
   private _board = [];
 
   // Status of the game:  run, win, broken, initialize
-  private _gameStatus: GameStatus = GameStatus.INITIALIZE;
+  private _gameStatus: GameStatus = GameStatus.Initialize;
 
   // Parameters of the current game
   private _numLetters: number;
@@ -64,7 +64,7 @@ export class GameService {
   private _wordPair: WordPair | undefined;
 
   newGame() {
-    this._gameStatus = GameStatus.INITIALIZE;
+    this._gameStatus = GameStatus.Initialize;
 
     // Load the user settings if needed
     // This returns immediately if they're already loaded
@@ -81,7 +81,7 @@ export class GameService {
             // User wasn't loaded correctly, kablooie
 
             // The game is broken
-            this._gameStatus = GameStatus.BROKEN;
+            this._gameStatus = GameStatus.Broken;
 
             // Show a message
             this._message =
@@ -92,7 +92,7 @@ export class GameService {
           // An error happened trying to load the user
 
           // The game is broken
-          this._gameStatus = GameStatus.BROKEN;
+          this._gameStatus = GameStatus.Broken;
 
           // Show a message
           this._message =
@@ -144,13 +144,13 @@ export class GameService {
           this._selectedLetter = 0;
 
           // The game is now running
-          this._gameStatus = GameStatus.RUN;
+          this._gameStatus = GameStatus.Run;
         },
         error: (err) => {
           // An error happened trying to get words
 
           // The game is broken
-          this._gameStatus = GameStatus.BROKEN;
+          this._gameStatus = GameStatus.Broken;
 
           // The words are no longer loading
           for (const word of this._board) {
@@ -418,7 +418,7 @@ export class GameService {
   // Async call to test the whole puzzle
   // I think I'm going to use this to report a completion
   private win() {
-    this._gameStatus = GameStatus.WIN;
+    this._gameStatus = GameStatus.Win;
     this._message = '!!! YOU WIN !!!';
     this.audioService.puzzleSolved();
   }
@@ -610,4 +610,9 @@ export class GameService {
   get lastExecutionTimeAPI() {
     return this._lastExecutionTimeAPI;
   }
+
+  public get difficultyLevel(): DifficultyLevel {
+    return this._difficultyLevel;
+  }
+
 }

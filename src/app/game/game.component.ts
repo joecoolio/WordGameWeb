@@ -30,7 +30,8 @@ export class GameComponent implements OnInit, AfterViewInit {
 
   public enumGameStatus = GameStatus;
 
-  @ViewChild('gameContainer') gameContainer: ElementRef;
+  @ViewChild('gameContainer')
+  gameContainer: ElementRef;
 
   // Stored sizing information from last resize event
   boardWidth: number = 100;    // Width of game board 
