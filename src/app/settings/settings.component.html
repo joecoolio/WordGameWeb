@@ -39,7 +39,7 @@
       <div class="rangevalue">{{ formatDifficulty(playerService.difficultyLevel) }}</div>
       <mat-slider
         thumbLabel tickInterval="1" aria-label="units"
-        min="1" max="4" step="1"
+        [min]="getMinDifficulty()" [max]="getMaxDifficulty()" step="1"
         [displayWith]="formatDifficulty"
         [ngModel]="playerService.difficultyLevel" (ngModelChange)="playerService.difficultyLevel = $event">
       </mat-slider>

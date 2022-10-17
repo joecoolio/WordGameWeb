@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { GameService } from '../services/game.service';
-import { PlayerService, HintType, GameMode } from '../services/player.service';
+import { PlayerService, DifficultyLevel, HintType, GameMode } from '../services/player.service';
 
 @Component({
   selector: 'app-settings',
@@ -17,15 +17,24 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit() { }
 
+  //////
+  // Difficulty is an enum
+  //////
+  getMinDifficulty() : number {
+    return DifficultyLevel.Normal;
+  }
+  getMaxDifficulty() : number {
+    return DifficultyLevel.Insane;
+  }
   formatDifficulty(value: number) : string {
     switch (value) {
-      case 1:
+      case DifficultyLevel.Normal:
         return "Normal";
-      case 2:
+      case DifficultyLevel.Advanced:
         return "Advanced";
-      case 3:
+      case DifficultyLevel.Expert:
         return "Expert";
-      case 4:
+      case DifficultyLevel.Insane:
         return "Insane";
     }
   }
