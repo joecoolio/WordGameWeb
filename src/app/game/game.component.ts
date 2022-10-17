@@ -1,7 +1,7 @@
 import { AfterViewInit, ApplicationRef, Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { fromEvent, Observable, Subscription } from "rxjs";
 import { MatDialog } from '@angular/material/dialog';
-import { GameService } from '../game.service';
+import { GameService } from '../services//game.service';
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
