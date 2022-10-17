@@ -1,7 +1,8 @@
 import { AfterViewInit, ApplicationRef, Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { fromEvent, Observable, Subscription } from "rxjs";
 import { MatDialog } from '@angular/material/dialog';
-import { GameService } from '../services//game.service';
+import { GameService, GameStatus } from '../services//game.service';
+
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
@@ -10,6 +11,7 @@ import { faFaceFrown } from '@fortawesome/free-solid-svg-icons';
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import { DifficultyLevel } from '../services/player.service';
 
 @Component({
   selector: 'game',
@@ -17,7 +19,6 @@ import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
   styleUrls: ['./game.component.css'],
 })
 export class GameComponent implements OnInit, AfterViewInit {
-  @Input() gameService: GameService;
   faCircleCheck = faCircleCheck;
   faCircleQuestion = faCircleQuestion;
   faCircleExclamation = faCircleExclamation;
@@ -27,8 +28,9 @@ export class GameComponent implements OnInit, AfterViewInit {
   faCircleXmark = faCircleXmark;
   faLightbulb = faLightbulb;
 
-  @ViewChild('gameContainer')
-  gameContainer: ElementRef;
+  public enumGameStatus = GameStatus;
+
+  @ViewChild('gameContainer') gameContainer: ElementRef;
 
   // Stored sizing information from last resize event
   boardWidth: number = 100;    // Width of game board 
@@ -43,7 +45,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   resizeSubscription$: Subscription
  
   // constructor(private dialog: MatDialog, private applicationRef: ApplicationRef, private el: ElementRef) {}
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog, public gameService: GameService) {}
 
   ngOnInit() {
   }
@@ -64,6 +66,10 @@ export class GameComponent implements OnInit, AfterViewInit {
 
   ngOnDestroy() {
     this.resizeSubscription$.unsubscribe()
+  }
+
+  hintsEnabled() : boolean {
+    return (this.gameService.difficultyLevel == DifficultyLevel.Normal);
   }
 
   // Test the word (click on the icons)
@@ -102,6 +108,11 @@ export class GameComponent implements OnInit, AfterViewInit {
     // Calculate number of cells to be drawn horizontal & vertical
     var numHCells = this.gameService.numLetters + 2; // To account for icons on either side
     var numVCells = this.gameService.numHops + 1; // There are 1 more rows than number of hops
+
+    // Adjust horizontal cells based on game settings
+    if (this.gameService.difficultyLevel >= DifficultyLevel.Advanced) {
+      numHCells--; // Hints are disabled so that column is gone
+    }
     
     // Figure out ideal width/height size of a single letter square cell
     var hSize = totWidth / numHCells;
@@ -120,6 +131,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.letterFontSize = this.letterBoxSize * 0.7;
     this.iconFontSize = this.letterBoxSize * 0.5;
 
+    console.log("tw: " + totWidth + " / " + totHeight);
     // console.log("bh: " + this.boardHeight + " / " + (this.wordRowHeight * numVCells) + " / " + this.letterBoxSize);
   }
 }
