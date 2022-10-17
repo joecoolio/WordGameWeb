@@ -14,34 +14,50 @@
     <!-- Number of letters -->
     <div class="item">
       <div class="rangeheader">Number Of Letters</div>
-      <div class="rangevalue">{{ gameService.numLettersForNextGame }}</div>
-      <!-- <input type="range" [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
-        [ngModel]="gameService.numLettersForNextGame" (ngModelChange)="gameService.numLettersForNextGame = $event"> -->
-        <mat-slider
-          thumbLabel tickInterval="1" aria-label="units"
-          [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
-          [ngModel]="gameService.numLettersForNextGame" (ngModelChange)="gameService.numLettersForNextGame = $event">
+      <div class="rangevalue">{{ playerService.numLetters }}</div>
+      <mat-slider
+        thumbLabel tickInterval="1" aria-label="units"
+        [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
+        [ngModel]="playerService.numLetters" (ngModelChange)="playerService.numLetters = $event">
       </mat-slider>
     </div>
   
     <!-- Number of hops -->
     <div class="item">
       <div class="rangeheader">Number Of Hops</div>
-      <div class="rangevalue">{{ gameService.numHopsForNextGame }}</div>
-      <!-- <input type="range" [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1"
-        [ngModel]="gameService.numHopsForNextGame" (ngModelChange)="gameService.numHopsForNextGame = $event"> -->
-        <mat-slider
-          thumbLabel tickInterval="1" aria-label="units"
-          [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1"
-          [ngModel]="gameService.numHopsForNextGame" (ngModelChange)="gameService.numHopsForNextGame = $event">
-        </mat-slider>
+      <div class="rangevalue">{{ playerService.numHops }}</div>
+      <mat-slider
+        thumbLabel tickInterval="1" aria-label="units"
+        [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1"
+        [ngModel]="playerService.numHops" (ngModelChange)="playerService.numHops = $event">
+      </mat-slider>
     </div>
 
+    <!-- Difficulty Level -->
+    <div class="item">
+      <div class="rangeheader">Difficulty</div>
+      <div class="rangevalue">{{ formatDifficulty(playerService.difficultyLevel) }}</div>
+      <mat-slider
+        thumbLabel tickInterval="1" aria-label="units"
+        min="1" max="4" step="1"
+        [displayWith]="formatDifficulty"
+        [ngModel]="playerService.difficultyLevel" (ngModelChange)="playerService.difficultyLevel = $event">
+      </mat-slider>
+    </div>
 
-    <mat-slide-toggle >
-      Toggle me!
+    <!-- Hint Type -->
+    <mat-slide-toggle
+      [ngModel]="formatHintType(playerService.hintType)" (ngModelChange)="setHintType($event)"
+    >
+      Whole Word Hints?
     </mat-slide-toggle>
 
+    <!-- Game Mode -->
+    <mat-slide-toggle
+      [ngModel]="formatGameMode(playerService.gameMode)" (ngModelChange)="setGameMode($event)"
+    >
+      Timed Game?
+    </mat-slide-toggle>
 
 </div>
 <div class="modal-footer">

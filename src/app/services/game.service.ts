@@ -1,24 +1,24 @@
 import { Injectable } from '@angular/core';
-import { DataService, WordPair, TestedWord, WordHint } from './data.service';
+import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint } from './data.service';
 import { AudioService } from './audio.service';
+import { PlayerService, GameMode, HintType, DifficultyLevel } from './player.service';
 
-export interface GameSettings {
-  letters: number;
+enum GameStatus {
+  INITIALIZE,
+  RUN,
+  WIN,
+  BROKEN
 }
-
-// If we have no idea what to set these to, use these defaults
-const DEFAULT_NUM_LETTERS: number = 5;
-const DEFAULT_NUM_HOPS: number = 5;
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameService {
   // Min & max number of letters & hops
-  public MIN_LETTERS: number = 3;
-  public MAX_LETTERS: number = 5;
-  public MIN_HOPS: number = 2;
-  public MAX_HOPS: number = 5;
+  readonly MIN_LETTERS: number = 3;
+  readonly MAX_LETTERS: number = 5;
+  readonly MIN_HOPS: number = 2;
+  readonly MAX_HOPS: number = 5;
 
   // The game board - array of words each of which has:
   //   .letters = array of the letters of the word
@@ -32,15 +32,14 @@ export class GameService {
   private _board = [];
 
   // Status of the game:  run, win, broken, initialize
-  private _gameStatus: string = 'initialize';
+  private _gameStatus: GameStatus = GameStatus.INITIALIZE;
 
-  // Parameters of the game
+  // Parameters of the current game
   private _numLetters: number;
   private _numHops: number;
-
-  // If something has requested a change to these values, store them until the next game starts
-  private _numLettersForNextGame: number = DEFAULT_NUM_LETTERS;
-  private _numHopsForNextGame: number = DEFAULT_NUM_HOPS;
+  private _gameMode: GameMode;
+  private _difficultyLevel: DifficultyLevel;
+  private _hintType: HintType;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -53,19 +52,66 @@ export class GameService {
   private _lastExecutionTimeAPI: number = 0; // Exec time on the server
   private _lastExecutionTime: number = 0; // Round trip execution
 
-  constructor(private dataService: DataService, private audioService: AudioService) {
+  constructor(
+    private dataService: DataService,
+    private audioService: AudioService,
+    private playerService: PlayerService)
+  {
     this.newGame();
   }
 
   // Word pair retrieved from the server
-  wordPair: WordPair | undefined;
+  private _wordPair: WordPair | undefined;
 
   newGame() {
-    this._gameStatus = 'initialize';
+    this._gameStatus = GameStatus.INITIALIZE;
 
-    // Reset the number of letters / hops to any stored value
-    this._numLetters = this._numLettersForNextGame;
-    this._numHops = this._numHopsForNextGame;
+    // Load the user settings if needed
+    // This returns immediately if they're already loaded
+    this.playerService
+      .load()
+      .subscribe({
+        next: (result) => {
+          if (result) {
+            // User loaded, we're good to go
+            console.log("Loaded user: " + this.playerService.numLetters + " / " + this.playerService.numHops);
+
+            this.newGameInner();
+          } else {
+            // User wasn't loaded correctly, kablooie
+
+            // The game is broken
+            this._gameStatus = GameStatus.BROKEN;
+
+            // Show a message
+            this._message =
+              'Failed to load user settings, please try again later.';
+          }
+        },
+        error: (err) => {
+          // An error happened trying to load the user
+
+          // The game is broken
+          this._gameStatus = GameStatus.BROKEN;
+
+          // Show a message
+          this._message =
+            'Failed to load user settings, please try again later.';
+
+          console.log('Error getting user settings: ' + JSON.stringify(err));
+        },
+      });
+  }
+
+  // Run this only after loading the user information
+  private newGameInner() {
+    // Reset game parameters to the user's preferences
+    this._numLetters = this.playerService.numLetters;
+    this._numHops = this.playerService.numHops;
+    this._gameMode = this.playerService.gameMode;
+    this._difficultyLevel = this.playerService.difficultyLevel;
+    this._hintType = this.playerService.hintType;
+
     console.log(
       'Initialize new game: letters = ' +
         this._numLetters +
@@ -85,23 +131,26 @@ export class GameService {
       // resp is of type `HttpResponse<WordPair>`
       .subscribe({
         next: (wordpair) => {
-          this.wordPair = { ...wordpair };
+          this._wordPair = { ...wordpair };
           this._lastExecutionTime = performance.now() - execStartTime;
-          this._lastExecutionTimeAPI = this.wordPair.executionTime;
+          this._lastExecutionTimeAPI = this._wordPair.executionTime;
 
-          console.log('Got wordpair: ' + JSON.stringify(this.wordPair));
+          console.log('Got wordpair: ' + JSON.stringify(this._wordPair));
           this.populateBoard();
           this._message = '';
 
           // Reset the current word/cell to the top
           this._selectedWord = 1;
           this._selectedLetter = 0;
+
+          // The game is now running
+          this._gameStatus = GameStatus.RUN;
         },
         error: (err) => {
           // An error happened trying to get words
 
           // The game is broken
-          this._gameStatus = 'broken';
+          this._gameStatus = GameStatus.BROKEN;
 
           // The words are no longer loading
           for (const word of this._board) {
@@ -149,8 +198,8 @@ export class GameService {
   private populateBoard() {
     // Fill in the first & last words on the board
     for (let j = 0; j < this._numLetters; j++) {
-      this.board[0].letters[j] = this.wordPair.startWord.charAt(j);
-      this.board[this._numHops].letters[j] = this.wordPair.endWord.charAt(j);
+      this.board[0].letters[j] = this._wordPair.startWord.charAt(j);
+      this.board[this._numHops].letters[j] = this._wordPair.endWord.charAt(j);
     }
 
     // First and last words are populated
@@ -160,9 +209,6 @@ export class GameService {
     // First and last words are not loading
     this.board[0].loading = false;
     this.board[this._numHops].loading = false;
-
-    // Game is ready to go
-    this._gameStatus = 'run';
   }
 
   // Keyboard entry occurred
@@ -372,7 +418,7 @@ export class GameService {
   // Async call to test the whole puzzle
   // I think I'm going to use this to report a completion
   private win() {
-    this._gameStatus = 'win';
+    this._gameStatus = GameStatus.WIN;
     this._message = '!!! YOU WIN !!!';
     this.audioService.puzzleSolved();
   }
@@ -381,9 +427,6 @@ export class GameService {
   // Send the request in without the current word.  When the reply comes back, clear
   // the word and put that letter in the right place.
   public getHint() {
-    // Output from remote call
-    let wordHint: WordHint;
-
     // Inputs to remote call
     let wordArray = [];
     for (let i = 0; i < this._board.length; i++) {
@@ -408,56 +451,109 @@ export class GameService {
 
     var execStartTime = performance.now();
 
-    // Make the remote call
-    this.dataService.getHint(wordArray, hintPosition).subscribe({
-      next: (wordHint) => {
-        console.log('Got hint: ' + JSON.stringify(wordHint));
-        // Test is done
-        this._board[wordHint.hintWord].testing = false;
-        // The test word is not broken
-        this._board[wordHint.hintWord].broken = false;
+    // Make the remote call -- Basic, 1-letter hint
+    if (this._hintType == HintType.Basic) {
+      this.dataService.getHint(wordArray, hintPosition).subscribe({
+        next: (basicHint : BasicHint) => {
+          console.log('Got basic hint: ' + JSON.stringify(basicHint));
+          // Test is done
+          this._board[basicHint.hintWord].testing = false;
+          // The test word is not broken
+          this._board[basicHint.hintWord].broken = false;
 
-        this._lastExecutionTime = performance.now() - execStartTime;
-        this._lastExecutionTimeAPI = wordHint.executionTime;
+          this._lastExecutionTime = performance.now() - execStartTime;
+          this._lastExecutionTimeAPI = basicHint.executionTime;
 
 
-        if (wordHint.valid) {
-          // Word is not solved, not wrong
-          this._board[wordHint.hintWord].solved = false;
-          this._board[wordHint.hintWord].wrong = false;
+          if (basicHint.valid) {
+            // Word is not solved, not wrong
+            this._board[basicHint.hintWord].solved = false;
+            this._board[basicHint.hintWord].wrong = false;
 
-          // Plug in the hint by moving to the cell and typing (to get other events)
-          this.setSelectedCell(wordHint.hintWord, wordHint.hintPosition);
-          this.letterEntered(wordHint.hintLetter);
+            // Plug in the hint by moving to the cell and typing (to get other events)
+            this.setSelectedCell(basicHint.hintWord, basicHint.hintPosition);
+            this.letterEntered(basicHint.hintLetter);
 
-          // Play a sound
-          this.audioService.hintGiven();
+            // Play a sound
+            this.audioService.hintGiven();
 
-          return;
-        } else {
-          // Couldn't get a hint, tell the player
-          this._message = wordHint.error;
+            return;
+          } else {
+            // Couldn't get a hint, tell the player
+            this._message = basicHint.error;
 
-          // Play a sound
-          this.audioService.hintUnavailable();
-        }
-      },
-      error: (err) => {
-        // An error happened trying to get words
+            // Play a sound
+            this.audioService.hintUnavailable();
+          }
+        },
+        error: (err) => {
+          // An error happened trying to get words
 
-        // Test is done
-        this._board[hintPosition].testing = false;
+          // Test is done
+          this._board[hintPosition].testing = false;
 
-        // The test word is broken
-        this._board[hintPosition].broken = true;
+          // The test word is broken
+          this._board[hintPosition].broken = true;
 
-        // Show a message
-        this._message =
-          'Failed to communicate with the server, please try again later.';
+          // Show a message
+          this._message =
+            'Failed to communicate with the server, please try again later.';
 
-        console.log('Error testing word: ' + JSON.stringify(err));
-      },
-    });
+          console.log('Error testing word: ' + JSON.stringify(err));
+        },
+      });
+    }
+    // Make the remote call -- Whole-word hint
+    if (this._hintType == HintType.WholeWord) {
+      this.dataService.getFullHint(wordArray, hintPosition).subscribe({
+        next: (wordHint : WholeWordHint) => {
+          console.log('Got whole-word hint: ' + JSON.stringify(wordHint));
+          // Test is done
+          this._board[wordHint.hintWord].testing = false;
+          // The test word is not broken
+          this._board[wordHint.hintWord].broken = false;
+
+          this._lastExecutionTime = performance.now() - execStartTime;
+          this._lastExecutionTimeAPI = wordHint.executionTime;
+
+
+          if (wordHint.valid) {
+            // Word is solved, not wrong
+            this._board[wordHint.hintWord].solved = true;
+            this._board[wordHint.hintWord].wrong = false;
+
+            // Plug in the hint by moving to the cell and typing (to get other events)
+            this._board[wordHint.hintWord].letters = wordHint.hintText.split('');
+
+            // Run the test routine (which should always work)
+            this.testSingleWord();
+
+            return;
+          } else {
+            // Couldn't get a hint, tell the player
+            this._message = wordHint.error;
+
+            // Play a sound
+            this.audioService.hintUnavailable();
+          }
+        },
+        error: (err) => {
+          // An error happened trying to get words
+
+          // Test is done
+          this._board[hintPosition].testing = false;
+
+          // The test word is broken
+          this._board[hintPosition].broken = true;
+
+          // Show a message
+          this._message =
+            'Failed to communicate with the server, please try again later.';
+
+          console.log('Error testing word: ' + JSON.stringify(err));
+        },
+      });
+    }
   }
 
   // Set the selected cell
@@ -499,22 +595,8 @@ export class GameService {
     return this._numLetters;
   }
 
-  get numLettersForNextGame() {
-    return this._numLettersForNextGame;
-  }
-  set numLettersForNextGame(n: number) {
-    this._numLettersForNextGame = n;
-  }
-
   get numHops() {
     return this._numHops;
-  }
-
-  get numHopsForNextGame() {
-    return this._numHopsForNextGame;
-  }
-  set numHopsForNextGame(n: number) {
-    this._numHopsForNextGame = n;
   }
 
   get message() {

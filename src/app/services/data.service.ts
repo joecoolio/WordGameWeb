@@ -18,10 +18,18 @@ export interface TestedWord {
   executionTime: number;
 }
 
-export interface WordHint {
+export interface BasicHint {
   hintWord: number;
   hintPosition: number;
   hintLetter: string;
+  valid: boolean;
+  error: string;
+  executionTime: number;
+}
+
+export interface WholeWordHint {
+  hintWord: number;
+  hintText: string;
   valid: boolean;
   error: string;
   executionTime: number;
@@ -63,14 +71,26 @@ export class DataService {
     );
   }
 
-  getHint(wordArray: string[], hintPosition: number): Observable<WordHint> {
+  getHint(wordArray: string[], hintPosition: number): Observable<BasicHint> {
     const body = {
       puzzle: wordArray,
       hintPosition: hintPosition,
     };
     console.log('Ask Hint: ' + JSON.stringify(body));
-    return this.http.post<WordHint>(
+    return this.http.post<BasicHint>(
       'https://wordgameapi.mikebillings.com/api/v1/getHint',
+      body
+    );
+  }
+
+  getFullHint(wordArray: string[], hintPosition: number): Observable<WholeWordHint> {
+    const body = {
+      puzzle: wordArray,
+      hintPosition: hintPosition,
+    };
+    console.log('Ask Hint: ' + JSON.stringify(body));
+    return this.http.post<WholeWordHint>(
+      'https://wordgameapi.mikebillings.com/api/v1/getFullHint',
       body
     );
   }
