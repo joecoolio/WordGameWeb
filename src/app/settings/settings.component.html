@@ -15,17 +15,34 @@
     <div class="item">
       <div class="rangeheader">Number Of Letters</div>
       <div class="rangevalue">{{ gameService.numLettersForNextGame }}</div>
-      <input type="range" [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
-        [ngModel]="gameService.numLettersForNextGame" (ngModelChange)="gameService.numLettersForNextGame = $event">
+      <!-- <input type="range" [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
+        [ngModel]="gameService.numLettersForNextGame" (ngModelChange)="gameService.numLettersForNextGame = $event"> -->
+        <mat-slider
+          thumbLabel tickInterval="1" aria-label="units"
+          [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
+          [ngModel]="gameService.numLettersForNextGame" (ngModelChange)="gameService.numLettersForNextGame = $event">
+      </mat-slider>
     </div>
   
     <!-- Number of hops -->
     <div class="item">
       <div class="rangeheader">Number Of Hops</div>
       <div class="rangevalue">{{ gameService.numHopsForNextGame }}</div>
-      <input type="range" [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1"
-        [ngModel]="gameService.numHopsForNextGame" (ngModelChange)="gameService.numHopsForNextGame = $event">
+      <!-- <input type="range" [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1"
+        [ngModel]="gameService.numHopsForNextGame" (ngModelChange)="gameService.numHopsForNextGame = $event"> -->
+        <mat-slider
+          thumbLabel tickInterval="1" aria-label="units"
+          [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1"
+          [ngModel]="gameService.numHopsForNextGame" (ngModelChange)="gameService.numHopsForNextGame = $event">
+        </mat-slider>
     </div>
+
+
+    <mat-slide-toggle >
+      Toggle me!
+    </mat-slide-toggle>
+
+
 </div>
 <div class="modal-footer">
   <button

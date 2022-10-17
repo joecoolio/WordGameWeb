@@ -35,7 +35,7 @@ body {
 /*   letter-spacing: -.07em; */
   /* border: 1px solid orange; */
 }
-input[type="range"] {
+/* input[type="range"] {
   display: block;
   -webkit-appearance: none;
   background-color: #bdc3c7;
@@ -61,4 +61,4 @@ input[type="range"]::-webkit-slider-thumb {
   }
   input[type="range"]::-webkit-slider-thumb:active {
     transform: scale(1.6);
-  }
+  } */
