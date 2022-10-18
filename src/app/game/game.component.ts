@@ -88,7 +88,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       // Display no fractions
       return Math.ceil(timeMs/1000).toString();
     } else {
-      return (Math.ceil(timeMs/100) / 10).toString();
+      return (Math.ceil(timeMs/100) / 10).toFixed(1);
     }
   }
 
