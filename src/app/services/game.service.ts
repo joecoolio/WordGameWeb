@@ -250,6 +250,9 @@ export class GameService {
         // When you delete or backspace, this word is no longer wrong
         this._board[this._selectedWord].wrong = false;
 
+        // When you delete or backspace, this word is no longer broken
+        this._board[this._selectedWord].broken = false;
+
         // Backspace moves the current cell where delete doesn't
         if (letter === 'Backspace' || letter === '{bksp}') {
           // Back up to the previous cell
@@ -345,10 +348,11 @@ export class GameService {
     let testWord = this._board[this._selectedWord].letters.join('');
     let testPosition = this._selectedWord;
 
-    // Mark the word as currently being tested, not solved, not wrong
+    // Mark the word as currently being tested, not solved, not wrong, not broken
     this._board[this._selectedWord].testing = true;
     this._board[this._selectedWord].solved = false;
     this._board[this._selectedWord].wrong = false;
+    this._board[this._selectedWord].broken = false;
 
     var execStartTime = performance.now();
 
@@ -364,9 +368,10 @@ export class GameService {
         this._lastExecutionTimeAPI = testedWord.executionTime;
 
         if (testedWord.valid) {
-          // Word is solved, not wrong
+          // Word is solved, not wrong, not broken
           this._board[testedWord.testPosition].solved = true;
           this._board[testedWord.testPosition].wrong = false;
+          this._board[testedWord.testPosition].broken = false;
 
           // If all words are solved, you win
           let puzzleFilledIn = true;
@@ -402,9 +407,10 @@ export class GameService {
           }
           return;
         } else {
-          // Word is wrong, not solved
+          // Word is wrong, not solved, not broken
           this._board[testedWord.testPosition].solved = false;
           this._board[testedWord.testPosition].wrong = true;
+          this._board[testedWord.testPosition].broken = true;
 
           this._message = testedWord.error;
 
@@ -481,9 +487,10 @@ export class GameService {
 
 
           if (basicHint.valid) {
-            // Word is not solved, not wrong
+            // Word is not solved, not wrong, not broken
             this._board[basicHint.hintWord].solved = false;
             this._board[basicHint.hintWord].wrong = false;
+            this._board[basicHint.hintWord].broken = false;
 
             // Plug in the hint by moving to the cell and typing (to get other events)
             this.setSelectedCell(basicHint.hintWord, basicHint.hintPosition);
@@ -533,9 +540,10 @@ export class GameService {
 
 
           if (wordHint.valid) {
-            // Word is solved, not wrong
+            // Word is solved, not wrong, not broken
             this._board[wordHint.hintWord].solved = true;
             this._board[wordHint.hintWord].wrong = false;
+            this._board[wordHint.hintWord].broken = false;
 
             // Plug in the hint by moving to the cell and typing (to get other events)
             this._board[wordHint.hintWord].letters = wordHint.hintText.split('');

@@ -94,12 +94,18 @@ export class GameComponent implements OnInit, AfterViewInit {
   newGame() {
     let lastNumLetters = this.gameService.numLetters;
     let lastNumHops = this.gameService.numHops;
+    let lastDifficultlyLevel = this.gameService.difficultyLevel;
 
     // Disable change detection while the game changes
     this.cdRef.detach();
 
     this.gameService.newGame().then(()=>{
-      if (this.gameService.numLetters != lastNumLetters || this.gameService.numHops != lastNumHops) {
+      // If something changed that would cause a screen resize, do it
+      if (
+        this.gameService.numLetters != lastNumLetters
+        || this.gameService.numHops != lastNumHops
+        || this.gameService.difficultyLevel != lastDifficultlyLevel
+      ) {
         this.handleScreenResize();
       }
 
