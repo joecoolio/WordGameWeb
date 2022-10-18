@@ -28,6 +28,9 @@ export class AudioService {
     this.playSound('../assets/sounds/393402_stevedrums_group-yay-cheer.mp3');
   }
 
+  puzzleLost(): void {
+    this.playSound('../assets/sounds/172950__notr__saddertrombones.mp3');
+  }
   hintGiven(): void {
     this.playSound('../assets/sounds/243749_unfa_metronome-1khz-weak-pulse.mp3');
   }

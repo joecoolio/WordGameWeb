@@ -239,6 +239,7 @@ export class GameService {
           // Move the game to timeout status if it's still running
           this._gameStatus = GameStatus.Timeout;
           this._message = "Time ran out, you lose!";
+          this._audioService.puzzleLost();
         }
       });
   
