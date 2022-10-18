@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, from, Observable, of, takeWhile } from 'rxjs';
 
 // Type of game the player wants to play
 export enum GameMode {
@@ -22,11 +22,11 @@ export enum HintType {
 }
 
 // Defaults:
-const DEFAULT_NUM_LETTERS: number = 5;
-const DEFAULT_NUM_HOPS: number = 5;
-const DEFAULT_GAMEMODE: GameMode = GameMode.Normal;
-const DEFAULT_DIFFICULTYLEVEL: DifficultyLevel = DifficultyLevel.Normal;
-const DEFAULT_HINTTYPE: HintType = HintType.Basic;
+export const DEFAULT_NUM_LETTERS: number = 5;
+export const DEFAULT_NUM_HOPS: number = 5;
+export const DEFAULT_GAMEMODE: GameMode = GameMode.Normal;
+export const DEFAULT_DIFFICULTYLEVEL: DifficultyLevel = DifficultyLevel.Normal;
+export const DEFAULT_HINTTYPE: HintType = HintType.Basic;
 
 // Status of the player settings
 export enum PlayerStatus {
@@ -35,87 +35,134 @@ export enum PlayerStatus {
     SAVING,           // Currently saving user settings
     OK                // Stable, use me now
 }
- 
+
+// Set of player settings
+export interface PlayerSettings {
+    status: PlayerStatus,
+    numLetters: number,
+    numHops: number,
+    gameMode: GameMode,
+    difficultyLevel: DifficultyLevel,
+    hintType: HintType
+}
 
 @Injectable({ providedIn: 'root' })
 export class PlayerService {
-    // Status of the service
-    private _status: PlayerStatus;
+    // Current player settings
+    private _playerSettings : PlayerSettings;
 
-    // User information
-    private _userId: string;
+    // Previous player settings (for change detection)
+    private _previousSettings : PlayerSettings;
 
-    // Parameters of the game
-    private _numLetters: number;
-    private _numHops: number;
-    private _gameMode: GameMode;
-    private _difficultyLevel: DifficultyLevel;
-
-    // Hint type
-    private _hintType: HintType;
+    // Subject for settings changed observer
+    private settingsChangesBehaviorSubject: BehaviorSubject<PlayerSettings>;
 
     constructor() {
-        this._status = PlayerStatus.NOT_INITIALIZED;
+        this._previousSettings = {
+            status: -1,
+            numLetters: -1,
+            numHops: -1,
+            gameMode: -1,
+            difficultyLevel: -1,
+            hintType: -1
+        }
+
+        this._playerSettings = {
+            status: PlayerStatus.NOT_INITIALIZED,
+            numLetters: DEFAULT_NUM_LETTERS,
+            numHops: DEFAULT_NUM_HOPS,
+            gameMode: DEFAULT_GAMEMODE,
+            difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
+            hintType: DEFAULT_HINTTYPE
+        }
+
+        this.settingsChangesBehaviorSubject = new BehaviorSubject(this._playerSettings);
     }
 
-    load(): Observable<boolean> {
+    // Subscribe to this to be notified of player settings being changed
+    settingsChanged(): Observable<PlayerSettings> {
+        return this.settingsChangesBehaviorSubject.pipe(takeWhile(val =>
+            val.status !== this._previousSettings.status
+            || val.numLetters !== this._previousSettings.numLetters
+            || val.numHops !== this._previousSettings.numHops
+            || val.gameMode !== this._previousSettings.gameMode
+            || val.difficultyLevel !== this._previousSettings.difficultyLevel
+            || val.hintType !== this._previousSettings.hintType
+        ));
+    }
+
+    // Request that the player is reloaded
+    load(): void {
         // If the user settings are already loaded, do nothing here
-        if (this._status == PlayerStatus.OK) {
-            return of(true);
-        } else {
-            // TODO: This is where user information will be loaded from the db
-            // For the time being, just return defaults
-            this._status = PlayerStatus.LOADING;
+        this._playerSettings.status = PlayerStatus.LOADING;
 
-            this._numLetters = DEFAULT_NUM_LETTERS;
-            this._numHops = DEFAULT_NUM_HOPS;
-            this._gameMode = DEFAULT_GAMEMODE;
-            this._difficultyLevel = DEFAULT_DIFFICULTYLEVEL;
-            this._hintType = DEFAULT_HINTTYPE
-
-            this._status = PlayerStatus.OK;
-            return of(true);
-        }
+        // TODO: This is where user information will be loaded from the db
+        // For the time being, just return defaults
+        this._playerSettings = {
+            status: PlayerStatus.OK,
+            numLetters: DEFAULT_NUM_LETTERS,
+            numHops: DEFAULT_NUM_HOPS,
+            gameMode: DEFAULT_GAMEMODE,
+            difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
+            hintType: DEFAULT_HINTTYPE
+        };
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 
     // Getters and Setters
+    // The settings fire the subject of the settings observer
     public get status(): PlayerStatus {
-        return this._status;
+        return this._playerSettings.status;
+    }
+    private set status(s: PlayerStatus) {
+        this._previousSettings.status = this._playerSettings.status;
+        this._playerSettings.status = s;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 
     get numLetters() : number {
-        return this._numLetters;
+        return this._playerSettings.numLetters;
     }
     set numLetters(n: number) {
-        this._numLetters = n;
+        this._previousSettings.numLetters = this._playerSettings.numLetters;
+        this._playerSettings.numLetters = n;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 
     public get numHops(): number {
-        return this._numHops;
+        return this._playerSettings.numHops;
     }
     public set numHops(value: number) {
-        this._numHops = value;
+        this._previousSettings.numHops = this._playerSettings.numHops;
+        this._playerSettings.numHops = value;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 
     public get gameMode(): GameMode {
-        return this._gameMode;
+        return this._playerSettings.gameMode;
     }
     public set gameMode(value: GameMode) {
-        this._gameMode = value;
+        this._previousSettings.gameMode = this._playerSettings.gameMode;
+        this._playerSettings.gameMode = value;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 
     public get difficultyLevel(): DifficultyLevel {
-        return this._difficultyLevel;
+        return this._playerSettings.difficultyLevel;
     }
     public set difficultyLevel(value: DifficultyLevel) {
-        this._difficultyLevel = value;
+        this._previousSettings.difficultyLevel = this._playerSettings.difficultyLevel;
+        this._playerSettings.difficultyLevel = value;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 
     public get hintType(): HintType {
-        return this._hintType;
+        return this._playerSettings.hintType;
     }
     public set hintType(value: HintType) {
-        this._hintType = value;
+        this._previousSettings.hintType = this._playerSettings.hintType;
+        this._playerSettings.hintType = value;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 
 }

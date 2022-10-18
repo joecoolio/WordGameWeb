@@ -1,7 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint } from './data.service';
 import { AudioService } from './audio.service';
-import { PlayerService, GameMode, HintType, DifficultyLevel } from './player.service';
+import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerSettings,
+  // DEFAULT_NUM_LETTERS, DEFAULT_NUM_HOPS, DEFAULT_GAMEMODE, DEFAULT_DIFFICULTYLEVEL, DEFAULT_HINTTYPE
+} from './player.service';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 
 export enum GameStatus {
   Initialize,
@@ -41,6 +44,10 @@ export class GameService {
   private _difficultyLevel: DifficultyLevel;
   private _hintType: HintType;
 
+  // Parameters (that can change at any time) of the player
+  private _playerSettingsSubscription: Subscription;
+  private _playerSettings: PlayerSettings;
+
   // Selected row/cell indexes
   private _selectedWord: number = 1;
   private _selectedLetter: number = 0;
@@ -57,127 +64,102 @@ export class GameService {
     private audioService: AudioService,
     private playerService: PlayerService)
   {
-    // this.newGame();
+    // Subscribe to get player settings when they change
+    this._playerSettingsSubscription = this.playerService.settingsChanged().subscribe({
+      next: (newPlayerSettings) => {
+          // User settings changed
+          console.log("Loaded user: " + newPlayerSettings.numLetters + " / " + newPlayerSettings.numHops);
+          this._playerSettings = newPlayerSettings;
+      },
+      error: (err) => {
+          // User load failed
+          console.log("Failed to load user: " + err);
+      }
+    });
+
+    // Ask the player service to load (will be notified via settingsChanged observer)
+    this.playerService.load();
   }
 
   // Word pair retrieved from the server
   private _wordPair: WordPair | undefined;
 
-  loadPlayerSettings() : Promise<void> {
+  // Create a new game
+  async newGame() : Promise<void> {
+    // Do not try to start a game until the player has been loaded
+    await firstValueFrom(this.playerService.settingsChanged());
+    console.log("Initial player load has occured");
+
+    // Once you have player settings, you can create a game
     return new Promise((resolve, reject) => {
-      // Load the user settings if needed
-      // This returns immediately if they're already loaded
-      this.playerService
-        .load()
-        .subscribe({
-          next: (result) => {
-            if (result) {
-              // User loaded, we're good to go
-              console.log("Loaded user: " + this.playerService.numLetters + " / " + this.playerService.numHops);
+      this._gameStatus = GameStatus.Initialize;
 
-              resolve();
-            } else {
-              // User wasn't loaded correctly, kablooie
+      // Reset game parameters to the user's preferences
+      this._numLetters = this._playerSettings.numLetters;
+      this._numHops = this._playerSettings.numHops;
+      this._gameMode = this._playerSettings.gameMode;
+      this._difficultyLevel = this._playerSettings.difficultyLevel;
+      this._hintType = this._playerSettings.hintType;
 
-              // The game is broken
-              this._gameStatus = GameStatus.Broken;
+      console.log(
+        'Initialize new game: letters = ' +
+          this._numLetters +
+          ' / hops = ' +
+          this._numHops
+      );
 
-              // Show a message
-              this._message = 'Failed to load user settings, please try again later.';
+      console.log('Requesting word pair...');
 
-              reject();
-            }
+      this._board = this.createEmptyBoard();
+
+      this._message = 'Requesting a pair of words...';
+
+      var execStartTime = performance.now();
+
+      this.dataService
+        .getPair(this.numLetters, this._numHops)
+        .then(
+          // Success
+          (wordpair: WordPair) => {
+            this._wordPair = { ...wordpair };
+            this._lastExecutionTime = performance.now() - execStartTime;
+            this._lastExecutionTimeAPI = this._wordPair.executionTime;
+
+            console.log('Got wordpair: ' + JSON.stringify(this._wordPair));
+            this.populateBoard();
+            this._message = '';
+
+            // Reset the current word/cell to the top
+            this._selectedWord = 1;
+            this._selectedLetter = 0;
+
+            // The game is now running
+            this._gameStatus = GameStatus.Run;
+
+            resolve();
           },
-          error: (err) => {
-            // An error happened trying to load the user
+          // Failure
+          (err) => {
+            // An error happened trying to get words
 
             // The game is broken
             this._gameStatus = GameStatus.Broken;
 
+            // The words are no longer loading
+            for (const word of this._board) {
+              word.loading = false;
+            }
+
             // Show a message
             this._message =
-              'Failed to load user settings, please try again later.';
+              'Failed to communicate with the server, please try again later.';
 
-            console.log('Error getting user settings: ' + JSON.stringify(err));
-            
+            console.log('Error getting words: ' + JSON.stringify(err));
+
             reject();
-          },
-        });
-
-    });
-  }
-
-  newGame() : Promise<void> {
-    return new Promise((resolve, reject) => {
-      this._gameStatus = GameStatus.Initialize;
-
-      // Load the user settings if needed
-      // This returns immediately if they're already loaded
-      this.loadPlayerSettings().then(()=> {
-        // Reset game parameters to the user's preferences
-        this._numLetters = this.playerService.numLetters;
-        this._numHops = this.playerService.numHops;
-        this._gameMode = this.playerService.gameMode;
-        this._difficultyLevel = this.playerService.difficultyLevel;
-        this._hintType = this.playerService.hintType;
-
-        console.log(
-          'Initialize new game: letters = ' +
-            this._numLetters +
-            ' / hops = ' +
-            this._numHops
+          }
         );
-
-        console.log('Requesting word pair...');
-
-        this._board = this.createEmptyBoard();
-        this._message = 'Requesting a pair of words...';
-
-        var execStartTime = performance.now();
-
-        this.dataService
-          .getPair(this.numLetters, this._numHops)
-          // resp is of type `HttpResponse<WordPair>`
-          .subscribe({
-            next: (wordpair) => {
-              this._wordPair = { ...wordpair };
-              this._lastExecutionTime = performance.now() - execStartTime;
-              this._lastExecutionTimeAPI = this._wordPair.executionTime;
-
-              console.log('Got wordpair: ' + JSON.stringify(this._wordPair));
-              this.populateBoard();
-              this._message = '';
-
-              // Reset the current word/cell to the top
-              this._selectedWord = 1;
-              this._selectedLetter = 0;
-
-              // The game is now running
-              this._gameStatus = GameStatus.Run;
-
-              resolve();
-            },
-            error: (err) => {
-              // An error happened trying to get words
-
-              // The game is broken
-              this._gameStatus = GameStatus.Broken;
-
-              // The words are no longer loading
-              for (const word of this._board) {
-                word.loading = false;
-              }
-
-              // Show a message
-              this._message =
-                'Failed to communicate with the server, please try again later.';
-
-              console.log('Error getting words: ' + JSON.stringify(err));
-
-              reject();
-            },
-          });
-      });
+      
     });
   }
 

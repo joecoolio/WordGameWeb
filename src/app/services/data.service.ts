@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 export interface WordPair {
   startWord: string;
@@ -42,12 +42,20 @@ export class DataService {
   constructor(private http: HttpClient) {}
 
   // Get a new pair of words to play
-  getPair(numLetters: number, numHops: number): Observable<WordPair> {
+  async getPair(numLetters: number, numHops: number): Promise<WordPair> {
     const body = { letters: numLetters, hops: numHops };
-    return this.http.post<WordPair>(
-      'https://wordgameapi.mikebillings.com/api/v1/getWordPair',
-      body
+    let retval = await firstValueFrom(
+        this.http.post<WordPair>(
+        'https://wordgameapi.mikebillings.com/api/v1/getWordPair',
+        body
+      // ).pipe(
+        // takeUntil(this.componentIsDestroyed$),
+        // takeUntil(this.cancelRestCall$),
+        // timeout(30000),
+        // retry(3)
+      )
     );
+    return retval;
   }
   // Test the whole puzzle
   testPuzzle(words: any[]): boolean {

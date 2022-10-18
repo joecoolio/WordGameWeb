@@ -99,19 +99,31 @@ export class GameComponent implements OnInit, AfterViewInit {
     // Disable change detection while the game changes
     this.cdRef.detach();
 
-    this.gameService.newGame().then(()=>{
-      // If something changed that would cause a screen resize, do it
-      if (
-        this.gameService.numLetters != lastNumLetters
-        || this.gameService.numHops != lastNumHops
-        || this.gameService.difficultyLevel != lastDifficultlyLevel
-      ) {
-        this.handleScreenResize();
+    this.gameService.newGame()
+    .then(
+      ()=>{
+        console.log("Game initialized correctly");
+      },
+      ()=>{
+        console.log("Game didn't initialize correctly");
       }
+    )
+    .finally(
+      // Draw the game regardless of the init status
+      ()=>{
+        // If something changed that would cause a screen resize, do it
+        if (
+          this.gameService.numLetters != lastNumLetters
+          || this.gameService.numHops != lastNumHops
+          || this.gameService.difficultyLevel != lastDifficultlyLevel
+        ) {
+          this.handleScreenResize();
+        }
 
-      // Re-enable change detection
-      this.cdRef.reattach();
-    });
+        // Re-enable change detection
+        this.cdRef.reattach();
+      }
+    );
 }
 
   // Get a hint for this word
@@ -157,7 +169,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.letterFontSize = this.letterBoxSize * 0.7;
     this.iconFontSize = this.letterBoxSize * 0.5;
 
-    console.log("tw: " + totWidth + " / " + totHeight);
+    // console.log("tw: " + totWidth + " / " + totHeight);
     // console.log("bh: " + this.boardHeight + " / " + (this.wordRowHeight * numVCells) + " / " + this.letterBoxSize);
   }
 }
