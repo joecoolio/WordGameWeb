@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 
 export interface WordPair {
   startWord: string;
@@ -35,6 +35,9 @@ export interface WholeWordHint {
   executionTime: number;
 }
 
+// Timeout for remote calls
+const HTTP_TIMEOUT: number = 5000;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -44,18 +47,17 @@ export class DataService {
   // Get a new pair of words to play
   async getPair(numLetters: number, numHops: number): Promise<WordPair> {
     const body = { letters: numLetters, hops: numHops };
-    let retval = await firstValueFrom(
-        this.http.post<WordPair>(
+    return await firstValueFrom(
+      this.http.post<WordPair>(
         'https://wordgameapi.mikebillings.com/api/v1/getWordPair',
         body
-      // ).pipe(
+      ).pipe(
         // takeUntil(this.componentIsDestroyed$),
         // takeUntil(this.cancelRestCall$),
-        // timeout(30000),
+        timeout(HTTP_TIMEOUT),
         // retry(3)
       )
     );
-    return retval;
   }
   // Test the whole puzzle
   testPuzzle(words: any[]): boolean {
@@ -63,43 +65,55 @@ export class DataService {
   }
 
   // Test a single word
-  testWord(
+  async testWord(
     wordArray: string[],
     testWord: string,
     testPosition: number
-  ): Observable<TestedWord> {
+  ): Promise<TestedWord> {
     const body = {
       puzzle: wordArray,
       testPosition: testPosition,
       testWord: testWord,
     };
-    return this.http.post<TestedWord>(
-      'https://wordgameapi.mikebillings.com/api/v1/testWord',
-      body
+    return await firstValueFrom(
+      this.http.post<TestedWord>(
+        'https://wordgameapi.mikebillings.com/api/v1/testWord',
+        body
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
     );
   }
 
-  getHint(wordArray: string[], hintPosition: number): Observable<BasicHint> {
+  async getHint(wordArray: string[], hintPosition: number): Promise<BasicHint> {
     const body = {
       puzzle: wordArray,
       hintPosition: hintPosition,
     };
     console.log('Ask Hint: ' + JSON.stringify(body));
-    return this.http.post<BasicHint>(
-      'https://wordgameapi.mikebillings.com/api/v1/getHint',
-      body
+    return await firstValueFrom(
+      this.http.post<BasicHint>(
+        'https://wordgameapi.mikebillings.com/api/v1/getHint',
+        body
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
     );
   }
 
-  getFullHint(wordArray: string[], hintPosition: number): Observable<WholeWordHint> {
+  async getFullHint(wordArray: string[], hintPosition: number): Promise<WholeWordHint> {
     const body = {
       puzzle: wordArray,
       hintPosition: hintPosition,
     };
     console.log('Ask Hint: ' + JSON.stringify(body));
-    return this.http.post<WholeWordHint>(
-      'https://wordgameapi.mikebillings.com/api/v1/getFullHint',
-      body
+    return await firstValueFrom(
+      this.http.post<WholeWordHint>(
+        'https://wordgameapi.mikebillings.com/api/v1/getFullHint',
+        body
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
     );
   }
 }

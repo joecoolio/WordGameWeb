@@ -1,10 +1,8 @@
-import { Injectable, OnDestroy, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint } from './data.service';
 import { AudioService } from './audio.service';
-import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerSettings,
-  // DEFAULT_NUM_LETTERS, DEFAULT_NUM_HOPS, DEFAULT_GAMEMODE, DEFAULT_DIFFICULTYLEVEL, DEFAULT_HINTTYPE
-} from './player.service';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerSettings} from './player.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 export enum GameStatus {
   Initialize,
@@ -339,8 +337,10 @@ export class GameService {
     var execStartTime = performance.now();
 
     // Make the remote call
-    this.dataService.testWord(wordArray, testWord, testPosition).subscribe({
-      next: (testedWord) => {
+    this.dataService.testWord(wordArray, testWord, testPosition)
+    .then(
+      // Success
+      (testedWord: TestedWord) => {
         // Test is done
         this._board[testedWord.testPosition].testing = false;
         // The test word is not broken
@@ -387,7 +387,6 @@ export class GameService {
               }
             }
           }
-          return;
         } else {
           // Word is wrong, not solved, not broken
           this._board[testedWord.testPosition].solved = false;
@@ -400,7 +399,8 @@ export class GameService {
           this.audioService.wordWrong();
         }
       },
-      error: (err) => {
+      // Failure
+      (err) => {
         // An error happened trying to get words
 
         // Test is done
@@ -414,8 +414,8 @@ export class GameService {
           'Failed to communicate with the server, please try again later.';
 
         console.log('Error testing word: ' + JSON.stringify(err));
-      },
-    });
+      }
+    );
   }
 
   // Async call to test the whole puzzle
@@ -456,8 +456,10 @@ export class GameService {
 
     // Make the remote call -- Basic, 1-letter hint
     if (this._hintType == HintType.Basic) {
-      this.dataService.getHint(wordArray, hintPosition).subscribe({
-        next: (basicHint : BasicHint) => {
+      this.dataService.getHint(wordArray, hintPosition)
+      .then(
+        // Success
+        (basicHint : BasicHint) => {
           console.log('Got basic hint: ' + JSON.stringify(basicHint));
           // Test is done
           this._board[basicHint.hintWord].testing = false;
@@ -490,8 +492,9 @@ export class GameService {
             this.audioService.hintUnavailable();
           }
         },
-        error: (err) => {
-          // An error happened trying to get words
+        // Failure
+        (err) => {
+          // An error happened trying to get hint
 
           // Test is done
           this._board[hintPosition].testing = false;
@@ -504,13 +507,15 @@ export class GameService {
             'Failed to communicate with the server, please try again later.';
 
           console.log('Error testing word: ' + JSON.stringify(err));
-        },
-      });
+        }
+      );
     }
     // Make the remote call -- Whole-word hint
     if (this._hintType == HintType.WholeWord) {
-      this.dataService.getFullHint(wordArray, hintPosition).subscribe({
-        next: (wordHint : WholeWordHint) => {
+      this.dataService.getFullHint(wordArray, hintPosition)
+      .then(
+        // Success
+        (wordHint : WholeWordHint) => {
           console.log('Got whole-word hint: ' + JSON.stringify(wordHint));
           // Test is done
           this._board[wordHint.hintWord].testing = false;
@@ -542,7 +547,8 @@ export class GameService {
             this.audioService.hintUnavailable();
           }
         },
-        error: (err) => {
+        // Failure
+        (err) => {
           // An error happened trying to get words
 
           // Test is done
@@ -557,7 +563,7 @@ export class GameService {
 
           console.log('Error testing word: ' + JSON.stringify(err));
         },
-      });
+      );
     }
   }
 
