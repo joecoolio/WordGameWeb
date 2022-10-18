@@ -23,6 +23,10 @@ export class TimerService {
     private _finishedBehaviorSubject: ReplaySubject<void>;
 
     constructor() {
+        this.reset();
+    }
+
+    reset() {
         this._remainingTime = -1;
         this._tickBehaviorSubject = new ReplaySubject(this._remainingTime);
         this._finishedBehaviorSubject = new ReplaySubject(null);

@@ -219,6 +219,7 @@ export class GameService {
   private startGame() {
     // If it's a timed game, start the counter
     if (this._playerSettings.gameMode == GameMode.Timed) {
+      this._timerService.reset();
       this._timeExpired = false;
       this._timerTickSub = this._timerService.tick().subscribe({
         next: (msRemaining) => {
@@ -237,6 +238,7 @@ export class GameService {
   
           // Move the game to timeout status if it's still running
           this._gameStatus = GameStatus.Timeout;
+          this._message = "Time ran out, you lose!";
         }
       });
   
@@ -250,7 +252,10 @@ export class GameService {
 
   // Keyboard entry occurred
   letterEntered(letter: string) {
-    if (!this._board[this._selectedWord].locked) {
+    // Only accept entry on unlocked cells and if the game is not timed oud
+    if (!this._board[this._selectedWord].locked &&
+      (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+    ) {
       // Backspace & Delete (mostly shared logic)
       if (
         letter === 'Backspace' ||
@@ -433,7 +438,7 @@ export class GameService {
           // Word is wrong, not solved, not broken
           this._board[testedWord.testPosition].solved = false;
           this._board[testedWord.testPosition].wrong = true;
-          this._board[testedWord.testPosition].broken = true;
+          this._board[testedWord.testPosition].broken = false;
 
           this._message = testedWord.error;
 
@@ -619,7 +624,10 @@ export class GameService {
   // Set the selected cell
   public setSelectedCell(word, letter) {
     // Only move the selection if the word isn't locked
-    if (!this._board[word].locked) {
+    // And the game is not timed out
+    if (!this._board[word].locked && 
+      (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+    ) {
       this._selectedWord = word;
       this._selectedLetter = letter;
     }

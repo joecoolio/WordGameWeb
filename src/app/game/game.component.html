@@ -4,9 +4,9 @@
       [ngClass]="{ 'highlighted': gameService.selectedWord === i }">
       
       <!-- Left side holds the hint button -->
-      <div class="letter-box icon" [style.width.px]="letterBoxSize * .85" [style.height.px]="letterBoxSize * .85" [style.font-size.px]="iconFontSize"
+      <div class="letter-box" [style.width.px]="letterBoxSize * .85" [style.height.px]="letterBoxSize * .85" [style.font-size.px]="iconFontSize"
       *ngIf="hintsEnabled()">
-        <fa-icon *ngIf="gameService.selectedWord === i && !word.solved" class="hint" [icon]="faLightbulb" (click)="hint()"></fa-icon>
+        <fa-icon *ngIf="gameService.selectedWord === i && !word.solved" class="icon hint" [icon]="faLightbulb" (click)="hint()"></fa-icon>
       </div>
 
       <!-- The letters of the word -->
@@ -68,19 +68,19 @@
           !word.wrong &&
           !word.testing &&
           !word.broken
-        " class="unverified" (click)="testWord(i)" [icon]="faCircleQuestion"></fa-icon>
+        " class="icon unverified" (click)="testWord(i)" [icon]="faCircleQuestion"></fa-icon>
 
         <!-- Solved word -->
-        <fa-icon *ngIf="!word.locked && word.solved" class="solved" (click)="testWord(i)" [icon]="faCircleCheck"></fa-icon>
+        <fa-icon *ngIf="!word.locked && word.solved" class="icon solved" (click)="testWord(i)" [icon]="faCircleCheck"></fa-icon>
 
         <!-- Wrong word -->
-        <fa-icon *ngIf="!word.locked && word.wrong" class="wrong" (click)="testWord(i)" [icon]="faCircleExclamation"></fa-icon>
+        <fa-icon *ngIf="!word.locked && word.wrong" class="icon wrong" (click)="testWord(i)" [icon]="faCircleExclamation"></fa-icon>
 
         <!-- Testing word -->
-        <fa-icon *ngIf="!word.locked && word.testing" class="testing fa-spin" (click)="testWord(i)" [icon]="faSpinner"></fa-icon>
+        <fa-icon *ngIf="!word.locked && word.testing" class="icon testing fa-spin" (click)="testWord(i)" [icon]="faSpinner"></fa-icon>
 
         <!-- Broken word -->
-        <fa-icon *ngIf="!word.locked && word.broken" class="broken" (click)="testWord(i)" [icon]="faCircleXmark"></fa-icon>
+        <fa-icon *ngIf="!word.locked && word.broken" class="icon broken" (click)="testWord(i)" [icon]="faCircleXmark"></fa-icon>
         
         <!-- No icon -->
         <div *ngIf="

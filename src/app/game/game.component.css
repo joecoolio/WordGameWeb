@@ -79,25 +79,25 @@
   /* border: 2px solid yellow; */
 }
 
-.letter-box.icon > .unverified {
+.letter-box > .icon.unverified {
   color: grey;
 }
-.letter-box.icon > .solved {
+.letter-box > .icon.solved {
   color: green;
 }
-.letter-box.icon > .wrong {
+.letter-box > .icon.wrong {
   color: red;
 }
-.letter-box.icon > .testing {
+.letter-box > .icon.testing {
   color: purple;
 }
-.letter-box.icon > .broken {
+.letter-box > .icon.broken {
   color: darkred;
 }
-.letter-box.icon > .win {
+.letter-box > .icon.win {
   color: green;
 }
-.letter-box.icon > .hint {
+.letter-box > .icon.hint {
   color: yellow;
 }
 
@@ -105,7 +105,7 @@
   color: green;
 }
 .letter-box > .timer.medium {
-  color: yellow;
+  color: yellowgreen;
 }
 .letter-box > .timer.low {
   color: red;
