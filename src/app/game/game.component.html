@@ -35,18 +35,29 @@
       </div>
 
       <!-- The rest of these are icons depending on the word -->
-      <div class="letter-box icon" [style.width.px]="letterBoxSize * .85" [style.height.px]="letterBoxSize * .85" [style.font-size.px]="iconFontSize">
+      <div class="letter-box" [style.width.px]="letterBoxSize * .85" [style.height.px]="letterBoxSize * .85" [style.font-size.px]="iconFontSize">
 
-        <!-- Locked word, either invisible icon (at bottom) or reload icon (at top) -->
-        <div *ngIf="word.locked">
-          <fa-icon 
-            [ngClass]="{
-              win: gameService.gameStatus == enumGameStatus.Initialize,
-              broken: gameService.gameStatus == enumGameStatus.Broken,
-              unverified: gameService.gameStatus == enumGameStatus.Run,
-              'fa-spin': gameService.gameStatus == enumGameStatus.Initialize
-            }"
-            *ngIf="i === 0" (click)="newGame()" [icon]="faRepeat"></fa-icon>
+        <!-- Locked word, either invisible/timer icon (at bottom) or reload icon (at top) -->
+        <!-- New game at top -->
+        <fa-icon class="icon"
+          [ngClass]="{
+            win: gameService.gameStatus == enumGameStatus.Initialize,
+            broken: gameService.gameStatus == enumGameStatus.Broken,
+            unverified: gameService.gameStatus == enumGameStatus.Run,
+            'fa-spin': gameService.gameStatus == enumGameStatus.Initialize
+          }"
+          *ngIf="word.locked && i === 0" (click)="newGame()" [icon]="faRepeat"></fa-icon>
+
+        <!-- Timer at bottom -->
+        <div class="timer"
+          [ngClass]="{
+            high: !gameService.timeExpired && gameService.timeRemaining >= 10000,
+            medium: !gameService.timeExpired && gameService.timeRemaining >= 5000 && gameService.timeRemaining < 10000,
+            low: !gameService.timeExpired && gameService.timeRemaining < 5000,
+            expired: gameService.timeExpired
+          }"
+          *ngIf="word.locked && i != 0 && gameService.gameMode == enumGameMode.Timed">
+          {{ formatTimer(gameService.timeRemaining) }}
         </div>
 
         <!-- Unverified word -->

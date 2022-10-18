@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, Observable, of, takeWhile } from 'rxjs';
+import { BehaviorSubject, from, Observable, of, takeWhile, tap } from 'rxjs';
 
 // Type of game the player wants to play
 export enum GameMode {
@@ -88,7 +88,9 @@ export class PlayerService {
             || val.gameMode !== this._previousSettings.gameMode
             || val.difficultyLevel !== this._previousSettings.difficultyLevel
             || val.hintType !== this._previousSettings.hintType
-        ));
+        ))
+        .pipe(tap(console.log))
+        ;
     }
 
     // Request that the player is reloaded

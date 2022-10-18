@@ -101,6 +101,20 @@
   color: yellow;
 }
 
+.letter-box > .timer.high {
+  color: green;
+}
+.letter-box > .timer.medium {
+  color: yellow;
+}
+.letter-box > .timer.low {
+  color: red;
+}
+.letter-box > .timer.expired {
+  color: red;
+}
+
+
 /* Animations */
 
 /* Shake sideways */

@@ -11,7 +11,7 @@ import { faFaceFrown } from '@fortawesome/free-solid-svg-icons';
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
-import { DifficultyLevel } from '../services/player.service';
+import { DifficultyLevel, GameMode } from '../services/player.service';
 
 @Component({
   selector: 'game',
@@ -29,6 +29,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   faLightbulb = faLightbulb;
 
   public enumGameStatus = GameStatus;
+  public enumGameMode = GameMode;
 
   @ViewChild('gameContainer')
   gameContainer: ElementRef;
@@ -76,6 +77,19 @@ export class GameComponent implements OnInit, AfterViewInit {
 
   hintsEnabled() : boolean {
     return (this.gameService.difficultyLevel == DifficultyLevel.Normal);
+  }
+
+  formatTimer(timeMs: number): string {
+    if (timeMs === undefined) {
+      return "";
+    }
+
+    if (timeMs > 10000) {
+      // Display no fractions
+      return Math.ceil(timeMs/1000).toString();
+    } else {
+      return (Math.ceil(timeMs/100) / 10).toString();
+    }
   }
 
   // Test the word (click on the icons)

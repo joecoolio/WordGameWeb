@@ -70,9 +70,9 @@ export class SettingsComponent implements OnInit {
   }
   setGameMode(value: boolean) {
     if (value) {
-      this.playerService.gameMode = GameMode.Normal;
-    } else {
       this.playerService.gameMode = GameMode.Timed;
+    } else {
+      this.playerService.gameMode = GameMode.Normal;
     }
 
     // console.log("Setting player game mode to: " + this.playerService.hintType);

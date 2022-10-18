@@ -3,12 +3,14 @@ import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint } from './d
 import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerSettings} from './player.service';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { TimerService } from './timer.service';
 
 export enum GameStatus {
-  Initialize,
-  Run,
-  Win,
-  Broken
+  Initialize,  // The game isn't setup yet
+  Run,         // The game is running
+  Win,         // You win!
+  Broken,      // Something is borked
+  Timeout      // Timed mode & time is up, you lose sucka
 }
 
 @Injectable({
@@ -57,13 +59,20 @@ export class GameService {
   private _lastExecutionTimeAPI: number = 0; // Exec time on the server
   private _lastExecutionTime: number = 0; // Round trip execution
 
+  // Timer subscriptions
+  private _timerTickSub: Subscription;
+  private _timerFinishedSub: Subscription;
+  private _timeRemaining: number;
+  private _timeExpired: boolean = false;
+
   constructor(
-    private dataService: DataService,
-    private audioService: AudioService,
-    private playerService: PlayerService)
+    private _dataService: DataService,
+    private _audioService: AudioService,
+    private _playerService: PlayerService,
+    private _timerService: TimerService)
   {
     // Subscribe to get player settings when they change
-    this._playerSettingsSubscription = this.playerService.settingsChanged().subscribe({
+    this._playerSettingsSubscription = this._playerService.settingsChanged().subscribe({
       next: (newPlayerSettings) => {
           // User settings changed
           console.log("Loaded user: " + newPlayerSettings.numLetters + " / " + newPlayerSettings.numHops);
@@ -76,7 +85,7 @@ export class GameService {
     });
 
     // Ask the player service to load (will be notified via settingsChanged observer)
-    this.playerService.load();
+    this._playerService.load();
   }
 
   // Word pair retrieved from the server
@@ -85,7 +94,7 @@ export class GameService {
   // Create a new game
   async newGame() : Promise<void> {
     // Do not try to start a game until the player has been loaded
-    await firstValueFrom(this.playerService.settingsChanged());
+    await firstValueFrom(this._playerService.settingsChanged());
     console.log("Initial player load has occured");
 
     // Once you have player settings, you can create a game
@@ -100,10 +109,8 @@ export class GameService {
       this._hintType = this._playerSettings.hintType;
 
       console.log(
-        'Initialize new game: letters = ' +
-          this._numLetters +
-          ' / hops = ' +
-          this._numHops
+        'Initialize new game: letters = ' + this._numLetters + ' / hops = ' + this._numHops +
+          " mode = " + this._gameMode
       );
 
       console.log('Requesting word pair...');
@@ -114,7 +121,7 @@ export class GameService {
 
       var execStartTime = performance.now();
 
-      this.dataService
+      this._dataService
         .getPair(this.numLetters, this._numHops)
         .then(
           // Success
@@ -133,6 +140,9 @@ export class GameService {
 
             // The game is now running
             this._gameStatus = GameStatus.Run;
+
+            // The game is ready, do any other stuff necessary
+            this.startGame();
 
             resolve();
           },
@@ -204,6 +214,38 @@ export class GameService {
     // First and last words are not loading
     this.board[0].loading = false;
     this.board[this._numHops].loading = false;
+  }
+
+  private startGame() {
+    // If it's a timed game, start the counter
+    if (this._playerSettings.gameMode == GameMode.Timed) {
+      this._timeExpired = false;
+      this._timerTickSub = this._timerService.tick().subscribe({
+        next: (msRemaining) => {
+          // console.log("Tick: " + sRemaining);
+          this._timeRemaining = msRemaining;
+        }
+      });
+  
+      this._timerFinishedSub = this._timerService.finished().subscribe({
+        next: () => {
+          // console.log("Finished!");
+          this._timeRemaining = 0;
+          this._timeExpired = true;
+          this._timerTickSub.unsubscribe();
+          this._timerFinishedSub.unsubscribe();
+  
+          // Move the game to timeout status if it's still running
+          this._gameStatus = GameStatus.Timeout;
+        }
+      });
+  
+      // Allocate 10 seconds per word to fill in
+      let timeS = 10 * (this._numHops - 1);
+  
+      console.log("Starting timer @ " + timeS + " / " + this._numHops);
+      this._timerService.startTimer(timeS * 1000);
+    }
   }
 
   // Keyboard entry occurred
@@ -291,7 +333,7 @@ export class GameService {
         }
 
         // Play the sound
-        this.audioService.letterEntered();
+        this._audioService.letterEntered();
       }
 
       // Arrow keys
@@ -337,7 +379,7 @@ export class GameService {
     var execStartTime = performance.now();
 
     // Make the remote call
-    this.dataService.testWord(wordArray, testWord, testPosition)
+    this._dataService.testWord(wordArray, testWord, testPosition)
     .then(
       // Success
       (testedWord: TestedWord) => {
@@ -367,7 +409,7 @@ export class GameService {
             this.win();
           } else {
             // Play a sound (yay!)
-            this.audioService.wordCorrect();
+            this._audioService.wordCorrect();
 
             // Move to the next word (unless the user has already moved)
             if (this._selectedWord == testedWord.testPosition) {
@@ -396,7 +438,7 @@ export class GameService {
           this._message = testedWord.error;
 
           // Play a sound (boo!)
-          this.audioService.wordWrong();
+          this._audioService.wordWrong();
         }
       },
       // Failure
@@ -423,7 +465,14 @@ export class GameService {
   private win() {
     this._gameStatus = GameStatus.Win;
     this._message = '!!! YOU WIN !!!';
-    this.audioService.puzzleSolved();
+    this._audioService.puzzleSolved();
+
+    // Clean up timing stuff
+    if (this._playerSettings.gameMode == GameMode.Timed) {
+      this._timerTickSub.unsubscribe();
+      this._timerFinishedSub.unsubscribe();
+      this._timerService.stopTimer();
+    }
   }
 
   // Get a hint for the current word
@@ -456,7 +505,7 @@ export class GameService {
 
     // Make the remote call -- Basic, 1-letter hint
     if (this._hintType == HintType.Basic) {
-      this.dataService.getHint(wordArray, hintPosition)
+      this._dataService.getHint(wordArray, hintPosition)
       .then(
         // Success
         (basicHint : BasicHint) => {
@@ -481,7 +530,7 @@ export class GameService {
             this.letterEntered(basicHint.hintLetter);
 
             // Play a sound
-            this.audioService.hintGiven();
+            this._audioService.hintGiven();
 
             return;
           } else {
@@ -489,7 +538,7 @@ export class GameService {
             this._message = basicHint.error;
 
             // Play a sound
-            this.audioService.hintUnavailable();
+            this._audioService.hintUnavailable();
           }
         },
         // Failure
@@ -512,7 +561,7 @@ export class GameService {
     }
     // Make the remote call -- Whole-word hint
     if (this._hintType == HintType.WholeWord) {
-      this.dataService.getFullHint(wordArray, hintPosition)
+      this._dataService.getFullHint(wordArray, hintPosition)
       .then(
         // Success
         (wordHint : WholeWordHint) => {
@@ -544,7 +593,7 @@ export class GameService {
             this._message = wordHint.error;
 
             // Play a sound
-            this.audioService.hintUnavailable();
+            this._audioService.hintUnavailable();
           }
         },
         // Failure
@@ -625,5 +674,18 @@ export class GameService {
   public get difficultyLevel(): DifficultyLevel {
     return this._difficultyLevel;
   }
+
+  public get gameMode(): GameMode {
+    return this._gameMode;
+  }
+
+  // Stuff for a timed game
+  public get timeRemaining(): number {
+    return this._timeRemaining;
+  }
+  public get timeExpired(): boolean {
+    return this._timeExpired;
+  }
+
 
 }
