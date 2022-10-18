@@ -1,4 +1,4 @@
-import { AfterViewInit, ApplicationRef, Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { fromEvent, Observable, Subscription } from "rxjs";
 import { MatDialog } from '@angular/material/dialog';
 import { GameService, GameStatus } from '../services//game.service';
@@ -46,7 +46,11 @@ export class GameComponent implements OnInit, AfterViewInit {
   resizeSubscription$: Subscription
  
   // constructor(private dialog: MatDialog, private applicationRef: ApplicationRef, private el: ElementRef) {}
-  constructor(private dialog: MatDialog, public gameService: GameService) {}
+  constructor(
+    private dialog: MatDialog,
+    public gameService: GameService,
+    private cdRef: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
   }
@@ -56,13 +60,9 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.resizeSubscription$ = this.resizeObservable$.subscribe( evt => {
       // Handle window resize events here
       this.handleScreenResize();
-    })
-
-    // The screen can't be properly sized until you load player settings
-    this.gameService.loadPlayerSettings().then(()=>{
-      this.gameService.newGame();
-      this.handleScreenResize();
     });
+
+    this.newGame();
   }
 
   ngAfterViewChecked() {
@@ -95,12 +95,18 @@ export class GameComponent implements OnInit, AfterViewInit {
     let lastNumLetters = this.gameService.numLetters;
     let lastNumHops = this.gameService.numHops;
 
+    // Disable change detection while the game changes
+    this.cdRef.detach();
+
     this.gameService.newGame().then(()=>{
       if (this.gameService.numLetters != lastNumLetters || this.gameService.numHops != lastNumHops) {
         this.handleScreenResize();
       }
+
+      // Re-enable change detection
+      this.cdRef.reattach();
     });
-  }
+}
 
   // Get a hint for this word
   hint() {

@@ -57,7 +57,7 @@ export class GameService {
     private audioService: AudioService,
     private playerService: PlayerService)
   {
-    this.newGame();
+    // this.newGame();
   }
 
   // Word pair retrieved from the server
