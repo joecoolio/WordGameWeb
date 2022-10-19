@@ -23,11 +23,6 @@ export class TimerService {
     private _finishedBehaviorSubject: ReplaySubject<void>;
 
     constructor() {
-        this.reset();
-    }
-
-    reset() {
-        this._remainingTime = -1;
         this._tickBehaviorSubject = new ReplaySubject(this._remainingTime);
         this._finishedBehaviorSubject = new ReplaySubject(null);
     }
@@ -53,6 +48,9 @@ export class TimerService {
         this._endTime = performance.now() + timeInMs;
         this._remainingTime = -1;
 
+        if (this._timerSubscription != undefined) {
+            this.stopTimer();
+        }
         this._timerSubscription = timer(TICK_TIME, TICK_TIME).subscribe(
             event => {
                 this._remainingTime = Math.max(this._endTime - performance.now(), 0);
@@ -60,7 +58,7 @@ export class TimerService {
                     this._tickBehaviorSubject.next(this._remainingTime);
                 } else {
                     this._finishedBehaviorSubject.next();
-                    this._timerSubscription.unsubscribe();
+                    this.stopTimer();
                 }
             }
         );
@@ -68,7 +66,10 @@ export class TimerService {
 
     // Turn off the timer
     stopTimer() {
-        this._timerSubscription.unsubscribe();
+        if (this._timerSubscription != undefined) {
+            this._timerSubscription.unsubscribe();
+            this._timerSubscription = undefined;
+        }
     }
 
 }

@@ -219,34 +219,57 @@ export class GameService {
   private startGame() {
     // If it's a timed game, start the counter
     if (this._playerSettings.gameMode == GameMode.Timed) {
-      this._timerService.reset();
       this._timeExpired = false;
-      this._timerTickSub = this._timerService.tick().subscribe({
-        next: (msRemaining) => {
-          // console.log("Tick: " + sRemaining);
-          this._timeRemaining = msRemaining;
-        }
-      });
-  
-      this._timerFinishedSub = this._timerService.finished().subscribe({
-        next: () => {
-          // console.log("Finished!");
-          this._timeRemaining = 0;
-          this._timeExpired = true;
-          this._timerTickSub.unsubscribe();
-          this._timerFinishedSub.unsubscribe();
-  
-          // Move the game to timeout status if it's still running
-          this._gameStatus = GameStatus.Timeout;
-          this._message = "Time ran out, you lose!";
-          this._audioService.puzzleLost();
-        }
-      });
-  
+
+      // Stop the timer if it's already running
+      this._timerService.stopTimer();
+
+      // Register subscriptions if needed
+      if (this._timerTickSub === undefined) {
+        this._timerTickSub = this._timerService.tick().subscribe({
+          next: (msRemaining) => {
+            // console.log("Tick: " + sRemaining);
+            this._timeRemaining = msRemaining;
+            
+            // Play sounds every second until 8.0.
+            if (msRemaining > 8000) {
+              if (Math.ceil(msRemaining/100) % 10 == 0) {
+                this._audioService.clockTick();
+              }
+            // From 8 to 3 seconds, every other tick
+            } else {
+              if (msRemaining > 3000) {
+                if (Math.ceil(msRemaining/100) % 2 == 0) {
+                  this._audioService.clockTick();
+                }
+              } else {
+                // From 3 to 0 seconds, every tick
+                this._audioService.clockTick();
+              }
+            }
+          }
+        });
+      }
+
+      if (this._timerFinishedSub === undefined) {
+        this._timerFinishedSub = this._timerService.finished().subscribe({
+          next: () => {
+            // console.log("Finished!");
+            this._timeRemaining = 0;
+            this._timeExpired = true;
+    
+            // Move the game to timeout status if it's still running
+            this._gameStatus = GameStatus.Timeout;
+            this._message = "Time ran out, you lose!";
+            this._audioService.puzzleLost();
+          }
+        });
+      }
+
       // Allocate 10 seconds per word to fill in
       let timeS = 10 * (this._numHops - 1);
-  
-      console.log("Starting timer @ " + timeS + " / " + this._numHops);
+
+      // Start the timer
       this._timerService.startTimer(timeS * 1000);
     }
   }
@@ -485,140 +508,145 @@ export class GameService {
   // Send the request in without the current word.  When the reply comes back, clear
   // the word and put that letter in the right place.
   public getHint() {
-    // Inputs to remote call
-    let wordArray = [];
-    for (let i = 0; i < this._board.length; i++) {
-      // WordArray includes everything including the partial word (spaces filled in)
-      // Handle an incomplete word
-      let incWord = '';
-      for (const letter of this._board[i].letters) {
-        if (letter != null) {
-          incWord += letter;
-        } else {
-          incWord += ' ';
+    // Only allowed if the difficulty is Normal and not timed out
+    if (this._difficultyLevel < DifficultyLevel.Advanced && 
+      (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+    ) {
+      // Inputs to remote call
+      let wordArray = [];
+      for (let i = 0; i < this._board.length; i++) {
+        // WordArray includes everything including the partial word (spaces filled in)
+        // Handle an incomplete word
+        let incWord = '';
+        for (const letter of this._board[i].letters) {
+          if (letter != null) {
+            incWord += letter;
+          } else {
+            incWord += ' ';
+          }
         }
+        wordArray.push(incWord);
       }
-      wordArray.push(incWord);
-    }
-    let hintPosition = this._selectedWord;
+      let hintPosition = this._selectedWord;
 
-    // Mark the word as currently being tested, not solved, not wrong
-    this._board[this._selectedWord].testing = true;
-    this._board[this._selectedWord].solved = false;
-    this._board[this._selectedWord].wrong = false;
+      // Mark the word as currently being tested, not solved, not wrong
+      this._board[this._selectedWord].testing = true;
+      this._board[this._selectedWord].solved = false;
+      this._board[this._selectedWord].wrong = false;
 
-    var execStartTime = performance.now();
+      var execStartTime = performance.now();
 
-    // Make the remote call -- Basic, 1-letter hint
-    if (this._hintType == HintType.Basic) {
-      this._dataService.getHint(wordArray, hintPosition)
-      .then(
-        // Success
-        (basicHint : BasicHint) => {
-          console.log('Got basic hint: ' + JSON.stringify(basicHint));
-          // Test is done
-          this._board[basicHint.hintWord].testing = false;
-          // The test word is not broken
-          this._board[basicHint.hintWord].broken = false;
-
-          this._lastExecutionTime = performance.now() - execStartTime;
-          this._lastExecutionTimeAPI = basicHint.executionTime;
-
-
-          if (basicHint.valid) {
-            // Word is not solved, not wrong, not broken
-            this._board[basicHint.hintWord].solved = false;
-            this._board[basicHint.hintWord].wrong = false;
+      // Make the remote call -- Basic, 1-letter hint
+      if (this._hintType == HintType.Basic) {
+        this._dataService.getHint(wordArray, hintPosition)
+        .then(
+          // Success
+          (basicHint : BasicHint) => {
+            console.log('Got basic hint: ' + JSON.stringify(basicHint));
+            // Test is done
+            this._board[basicHint.hintWord].testing = false;
+            // The test word is not broken
             this._board[basicHint.hintWord].broken = false;
 
-            // Plug in the hint by moving to the cell and typing (to get other events)
-            this.setSelectedCell(basicHint.hintWord, basicHint.hintPosition);
-            this.letterEntered(basicHint.hintLetter);
+            this._lastExecutionTime = performance.now() - execStartTime;
+            this._lastExecutionTimeAPI = basicHint.executionTime;
 
-            // Play a sound
-            this._audioService.hintGiven();
 
-            return;
-          } else {
-            // Couldn't get a hint, tell the player
-            this._message = basicHint.error;
+            if (basicHint.valid) {
+              // Word is not solved, not wrong, not broken
+              this._board[basicHint.hintWord].solved = false;
+              this._board[basicHint.hintWord].wrong = false;
+              this._board[basicHint.hintWord].broken = false;
 
-            // Play a sound
-            this._audioService.hintUnavailable();
+              // Plug in the hint by moving to the cell and typing (to get other events)
+              this.setSelectedCell(basicHint.hintWord, basicHint.hintPosition);
+              this.letterEntered(basicHint.hintLetter);
+
+              // Play a sound
+              this._audioService.hintGiven();
+
+              return;
+            } else {
+              // Couldn't get a hint, tell the player
+              this._message = basicHint.error;
+
+              // Play a sound
+              this._audioService.hintUnavailable();
+            }
+          },
+          // Failure
+          (err) => {
+            // An error happened trying to get hint
+
+            // Test is done
+            this._board[hintPosition].testing = false;
+
+            // The test word is broken
+            this._board[hintPosition].broken = true;
+
+            // Show a message
+            this._message =
+              'Failed to communicate with the server, please try again later.';
+
+            console.log('Error testing word: ' + JSON.stringify(err));
           }
-        },
-        // Failure
-        (err) => {
-          // An error happened trying to get hint
-
-          // Test is done
-          this._board[hintPosition].testing = false;
-
-          // The test word is broken
-          this._board[hintPosition].broken = true;
-
-          // Show a message
-          this._message =
-            'Failed to communicate with the server, please try again later.';
-
-          console.log('Error testing word: ' + JSON.stringify(err));
-        }
-      );
-    }
-    // Make the remote call -- Whole-word hint
-    if (this._hintType == HintType.WholeWord) {
-      this._dataService.getFullHint(wordArray, hintPosition)
-      .then(
-        // Success
-        (wordHint : WholeWordHint) => {
-          console.log('Got whole-word hint: ' + JSON.stringify(wordHint));
-          // Test is done
-          this._board[wordHint.hintWord].testing = false;
-          // The test word is not broken
-          this._board[wordHint.hintWord].broken = false;
-
-          this._lastExecutionTime = performance.now() - execStartTime;
-          this._lastExecutionTimeAPI = wordHint.executionTime;
-
-
-          if (wordHint.valid) {
-            // Word is solved, not wrong, not broken
-            this._board[wordHint.hintWord].solved = true;
-            this._board[wordHint.hintWord].wrong = false;
+        );
+      }
+      // Make the remote call -- Whole-word hint
+      if (this._hintType == HintType.WholeWord) {
+        this._dataService.getFullHint(wordArray, hintPosition)
+        .then(
+          // Success
+          (wordHint : WholeWordHint) => {
+            console.log('Got whole-word hint: ' + JSON.stringify(wordHint));
+            // Test is done
+            this._board[wordHint.hintWord].testing = false;
+            // The test word is not broken
             this._board[wordHint.hintWord].broken = false;
 
-            // Plug in the hint by moving to the cell and typing (to get other events)
-            this._board[wordHint.hintWord].letters = wordHint.hintText.split('');
+            this._lastExecutionTime = performance.now() - execStartTime;
+            this._lastExecutionTimeAPI = wordHint.executionTime;
 
-            // Run the test routine (which should always work)
-            this.testSingleWord();
 
-            return;
-          } else {
-            // Couldn't get a hint, tell the player
-            this._message = wordHint.error;
+            if (wordHint.valid) {
+              // Word is solved, not wrong, not broken
+              this._board[wordHint.hintWord].solved = true;
+              this._board[wordHint.hintWord].wrong = false;
+              this._board[wordHint.hintWord].broken = false;
 
-            // Play a sound
-            this._audioService.hintUnavailable();
-          }
-        },
-        // Failure
-        (err) => {
-          // An error happened trying to get words
+              // Plug in the hint by moving to the cell and typing (to get other events)
+              this._board[wordHint.hintWord].letters = wordHint.hintText.split('');
 
-          // Test is done
-          this._board[hintPosition].testing = false;
+              // Run the test routine (which should always work)
+              this.testSingleWord();
 
-          // The test word is broken
-          this._board[hintPosition].broken = true;
+              return;
+            } else {
+              // Couldn't get a hint, tell the player
+              this._message = wordHint.error;
 
-          // Show a message
-          this._message =
-            'Failed to communicate with the server, please try again later.';
+              // Play a sound
+              this._audioService.hintUnavailable();
+            }
+          },
+          // Failure
+          (err) => {
+            // An error happened trying to get words
 
-          console.log('Error testing word: ' + JSON.stringify(err));
-        },
-      );
+            // Test is done
+            this._board[hintPosition].testing = false;
+
+            // The test word is broken
+            this._board[hintPosition].broken = true;
+
+            // Show a message
+            this._message =
+              'Failed to communicate with the server, please try again later.';
+
+            console.log('Error testing word: ' + JSON.stringify(err));
+          },
+        );
+      }
     }
   }
 

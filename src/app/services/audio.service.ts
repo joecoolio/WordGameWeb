@@ -38,4 +38,8 @@ export class AudioService {
   hintUnavailable(): void {
     this.playSound('../assets/sounds/554053_gronkjaer_wronganswer.mp3');
   }
+
+  clockTick(): void {
+    this.playSound('../assets/sounds/429720__fellur__tic.mp3')
+  }
 }
