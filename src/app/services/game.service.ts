@@ -243,19 +243,21 @@ export class GameService {
             this._timeRemaining = msRemaining;
             
             // Play sounds every second until 8.0.
-            if (msRemaining > 8000) {
+            if (msRemaining > 10000) {
               if (Math.ceil(msRemaining/100) % 10 == 0) {
                 this._audioService.clockTick();
               }
-            // From 8 to 3 seconds, every other tick
+            // From 10 to 5 seconds, every 1/2 second
             } else {
-              if (msRemaining > 3000) {
-                if (Math.ceil(msRemaining/100) % 2 == 0) {
+              if (msRemaining > 5000) {
+                if (Math.ceil(msRemaining/100) % 5 == 0) {
                   this._audioService.clockTick();
                 }
               } else {
-                // From 3 to 0 seconds, every tick
-                this._audioService.clockTick();
+                // From 5 to 0 seconds, every other tick
+                if (Math.ceil(msRemaining/100) % 2 == 0) {
+                  this._audioService.clockTick();
+                }
               }
             }
           }

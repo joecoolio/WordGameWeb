@@ -51,10 +51,11 @@
         <!-- Timer at bottom -->
         <div class="timer"
           [ngClass]="{
-            high: !gameService.timeExpired && gameService.timeRemaining >= 10000,
-            medium: !gameService.timeExpired && gameService.timeRemaining >= 5000 && gameService.timeRemaining < 10000,
-            low: !gameService.timeExpired && gameService.timeRemaining < 5000,
-            expired: gameService.timeExpired
+            high: gameService.gameStatus == enumGameStatus.Run && gameService.timeRemaining >= 10000,
+            medium: gameService.gameStatus == enumGameStatus.Run && gameService.timeRemaining >= 5000 && gameService.timeRemaining < 10000,
+            low: gameService.gameStatus == enumGameStatus.Run && gameService.timeRemaining < 5000,
+            solved: gameService.gameStatus == enumGameStatus.Win,
+            expired: gameService.gameStatus == enumGameStatus.Timeout
           }"
           *ngIf="word.locked && i != 0 && gameService.gameMode == enumGameMode.Timed">
           {{ formatTimer(gameService.timeRemaining) }}

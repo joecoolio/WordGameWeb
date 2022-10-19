@@ -111,6 +111,9 @@
   color: red;
   animation: blinker 1s linear infinite;
 }
+.letter-box > .timer.solved {
+  color: green;
+}
 .letter-box > .timer.expired {
   color: red;
 }

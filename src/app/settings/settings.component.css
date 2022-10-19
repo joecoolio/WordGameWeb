@@ -1,6 +1,6 @@
-@import url(https://fonts.googleapis.com/css?family=Dosis:700);
+/* @import url(https://fonts.googleapis.com/css?family=Dosis:700); */
 body {
-  font-family: "Dosis", Helvetica, Arial, sans-serif; 
+  /* font-family: "Dosis", Helvetica, Arial, sans-serif;  */
   background: #ecf0f1;
   color: #34495e;
   padding-top: 40px;
@@ -20,45 +20,18 @@ body {
   /* border: 1px solid purple; */
 /*   margin-bottom: 30px; */
   gap: 5px;
-  padding-bottom: 30px;
+  padding-bottom: 20px;
 }
-.rangeheader {
-  text-align: center;
+.headertext {
+  display: flex;
+  align-self: center;
+  align-items: center;
   font-size: 1em;
-  /* border: 1px solid orange; */
+  gap: 5px;
 }
-.rangevalue {
-  text-align: center;
+.headertext > .headervalue {
   font-weight: bold;
+  font-style: italic;
   font-size: 2em;
-  padding-bottom: 5px;
-/*   letter-spacing: -.07em; */
-  /* border: 1px solid orange; */
 }
-/* input[type="range"] {
-  display: block;
-  -webkit-appearance: none;
-  background-color: #bdc3c7;
-  width: 90%;
-  height: 5px;
-  border-radius: 5px;
-  margin: 0 auto;
-  outline: 0;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  background-color: #e74c3c;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid white;
-  cursor: pointer;
-  transition: .3s ease-in-out;
-}​
-  input[type="range"]::-webkit-slider-thumb:hover {
-    background-color: white;
-    border: 2px solid #e74c3c;
-  }
-  input[type="range"]::-webkit-slider-thumb:active {
-    transform: scale(1.6);
-  } */
+

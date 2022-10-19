@@ -1,15 +1,18 @@
 import { Injectable } from '@angular/core';
+import { PlayerService } from './player.service';
 
 @Injectable({ providedIn: 'root' })
 export class AudioService {
 
-  constructor() { }
+  constructor(private playerService: PlayerService) { }
 
   private playSound(filename: string) {
-    const audio = new Audio();
-    audio.src = filename;
-    audio.load();
-    audio.play();
+    if (this.playerService.enableSounds) {
+      const audio = new Audio();
+      audio.src = filename;
+      audio.load();
+      audio.play();
+    }
   }
 
   letterEntered(): void {

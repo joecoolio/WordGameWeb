@@ -43,7 +43,8 @@ export interface PlayerSettings {
     numHops: number,
     gameMode: GameMode,
     difficultyLevel: DifficultyLevel,
-    hintType: HintType
+    hintType: HintType,
+    enableSounds: boolean
 }
 
 @Injectable({ providedIn: 'root' })
@@ -64,7 +65,8 @@ export class PlayerService {
             numHops: -1,
             gameMode: -1,
             difficultyLevel: -1,
-            hintType: -1
+            hintType: -1,
+            enableSounds: false
         }
 
         this._playerSettings = {
@@ -73,7 +75,8 @@ export class PlayerService {
             numHops: DEFAULT_NUM_HOPS,
             gameMode: DEFAULT_GAMEMODE,
             difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
-            hintType: DEFAULT_HINTTYPE
+            hintType: DEFAULT_HINTTYPE,
+            enableSounds: true
         }
 
         this.settingsChangesBehaviorSubject = new BehaviorSubject(this._playerSettings);
@@ -88,6 +91,7 @@ export class PlayerService {
             || val.gameMode !== this._previousSettings.gameMode
             || val.difficultyLevel !== this._previousSettings.difficultyLevel
             || val.hintType !== this._previousSettings.hintType
+            || val.enableSounds !== this._previousSettings.enableSounds
         ))
         .pipe(tap(console.log))
         ;
@@ -106,7 +110,8 @@ export class PlayerService {
             numHops: DEFAULT_NUM_HOPS,
             gameMode: DEFAULT_GAMEMODE,
             difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
-            hintType: DEFAULT_HINTTYPE
+            hintType: DEFAULT_HINTTYPE,
+            enableSounds: true
         };
         this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
@@ -164,6 +169,15 @@ export class PlayerService {
     public set hintType(value: HintType) {
         this._previousSettings.hintType = this._playerSettings.hintType;
         this._playerSettings.hintType = value;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+    }
+
+    public get enableSounds(): boolean {
+        return this._playerSettings.enableSounds;
+    }
+    public set enableSounds(value: boolean) {
+        this._previousSettings.enableSounds = this._playerSettings.enableSounds;
+        this._playerSettings.enableSounds = value;
         this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 

@@ -13,8 +13,7 @@
   
     <!-- Number of letters -->
     <div class="item">
-      <div class="rangeheader">Number Of Letters</div>
-      <div class="rangevalue">{{ playerService.numLetters }}</div>
+      <div class="headertext">Number Of Letters: <span class="headervalue">{{ playerService.numLetters }}</span></div>
       <mat-slider
         thumbLabel tickInterval="1" aria-label="units"
         [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
@@ -24,8 +23,7 @@
   
     <!-- Number of hops -->
     <div class="item">
-      <div class="rangeheader">Number Of Hops</div>
-      <div class="rangevalue">{{ playerService.numHops }}</div>
+      <div class="headertext">Number Of Hops: <span class="headervalue">{{ playerService.numHops }}</span></div>
       <mat-slider
         thumbLabel tickInterval="1" aria-label="units"
         [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1"
@@ -35,8 +33,7 @@
 
     <!-- Difficulty Level -->
     <div class="item">
-      <div class="rangeheader">Difficulty</div>
-      <div class="rangevalue">{{ formatDifficulty(playerService.difficultyLevel) }}</div>
+      <div class="headertext">Difficulty: <span class="headervalue">{{ formatDifficulty(playerService.difficultyLevel) }}</span></div>
       <mat-slider
         thumbLabel tickInterval="1" aria-label="units"
         [min]="getMinDifficulty()" [max]="getMaxDifficulty()" step="1"
@@ -59,6 +56,13 @@
       Timed Game?
     </mat-slide-toggle>
 
+      <!-- Enable Sounds -->
+      <mat-slide-toggle
+      [ngModel]="playerService.enableSounds" (ngModelChange)="playerService.enableSounds = $event"
+    >
+      Enable Sounds?
+    </mat-slide-toggle>
+  
 </div>
 <div class="modal-footer">
   <button
