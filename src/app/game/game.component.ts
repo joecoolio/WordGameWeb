@@ -30,6 +30,7 @@ export class GameComponent implements OnInit, AfterViewInit {
 
   public enumGameStatus = GameStatus;
   public enumGameMode = GameMode;
+  public enumDifficultyLevel = DifficultyLevel;
 
   @ViewChild('gameContainer')
   gameContainer: ElementRef;
@@ -75,6 +76,15 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.resizeSubscription$.unsubscribe()
   }
 
+  gameFullyPopulated(): boolean {
+    for (const word of this.gameService.board) {
+      if (!word.populated) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   hintsEnabled() : boolean {
     return (this.gameService.difficultyLevel == DifficultyLevel.Normal);
   }
@@ -96,11 +106,19 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Just send an enter key press
   testWord(index: number) {
     // If the word clicked isn't the selected word, change to it
-    if (this.gameService.selectedWord != index) {
-      this.gameService.selectedWord = index;
-      this.gameService.selectedLetter = 0;
+    // Not after the game is won or timed out
+    if (this.gameService.gameStatus != GameStatus.Timeout && this.gameService.gameStatus != GameStatus.Win) {
+      if (this.gameService.selectedWord != index) {
+        this.gameService.selectedWord = index;
+        this.gameService.selectedLetter = 0;
+      }
+      this.gameService.letterEntered('Enter');
     }
-    this.gameService.letterEntered('Enter');
+  }
+
+  // Test the entire puzzle
+  validatePuzzle() {
+    this.gameService.testEntirePuzzle();
   }
 
   // Start over with new words

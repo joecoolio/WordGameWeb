@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSet } from './data.service';
+import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSet, ValidatedPuzzle } from './data.service';
 import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerSettings} from './player.service';
 import { firstValueFrom, Subscription, timer } from 'rxjs';
 import { TimerService } from './timer.service';
+import { createMayBeForwardRefExpression } from '@angular/compiler';
 
 export enum GameStatus {
   Initialize,  // The game isn't setup yet
@@ -290,9 +291,10 @@ export class GameService {
 
   // Keyboard entry occurred
   letterEntered(letter: string) {
-    // Only accept entry on unlocked cells and if the game is not timed oud
-    if (!this._board[this._selectedWord].locked &&
-      (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+    // Only accept entry on unlocked cells and if the game is not timed out and not won
+    if (!this._board[this._selectedWord].locked
+      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      && (this._gameStatus != GameStatus.Win)
     ) {
       // Backspace & Delete (mostly shared logic)
       if (
@@ -332,15 +334,34 @@ export class GameService {
 
       // Enter key
       if (letter === 'Enter' || letter === '{enter}') {
-        // If all letters of this word are filled in, test the word
-        if (this._board[this._selectedWord].populated) {
-          // When you hit enter, the previous message goes away
-          this._message = '';
+        // In lower difficulty, check one word at a time
+        if (this._difficultyLevel < DifficultyLevel.Expert) {
+          // If all letters of this word are filled in, test the word
+          if (this._board[this._selectedWord].populated) {
+            // When you hit enter, the previous message goes away
+            this._message = '';
 
-          // We know the current word is filled in
-          // Need to determine if you test 1 word or all of them
-          // Validate a single word
-          this.testSingleWord();
+            // We know the current word is filled in
+            // Need to determine if you test 1 word or all of them
+            // Validate a single word
+            this.testSingleWord();
+          }
+        } else {
+          // In higher difficulty, check the whole puzzle at once
+          let boardFullyPopulated: boolean = true;
+          for (const word of this._board) {
+            if (!word.populated) {
+              boardFullyPopulated = false;
+              break;
+            }
+          }
+          if (boardFullyPopulated) {
+            // When you hit enter, the previous message goes away
+            this._message = '';
+
+            // Validate the whole puzzle
+            this.testEntirePuzzle();
+          }
         }
       }
 
@@ -369,7 +390,14 @@ export class GameService {
 
         // Move the input to the next appropriate cell
         if (this._selectedLetter === this._numLetters - 1) {
-          // Move to check button
+          // In lower difficulties, stay here so you can test the word
+          // In higher levels, just move to the next word
+          if (this._difficultyLevel >= DifficultyLevel.Expert) {
+            if (this.selectedWord < this.numHops - 1) {
+              this._selectedLetter = 0;
+              this._selectedWord++;
+            }
+          }
         } else {
           // Move 1 to the right
           this._selectedLetter++;
@@ -396,115 +424,209 @@ export class GameService {
   }
 
   // Async call to test a single word
-  private testSingleWord() {
-    // Output from remote call
-    let testedWord: TestedWord;
+  public testSingleWord() {
+    // Only allowed if the difficulty is Advanced or lower and not timed out and not won
+    if (this._difficultyLevel < DifficultyLevel.Expert
+      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      && (this._gameStatus != GameStatus.Win)
+    ) {
 
-    // Inputs to remote call
-    let wordArray = [];
-    for (let i = 0; i < this._board.length; i++) {
-      // WordArray includes everything except the testing word
-      if (i != this._selectedWord) {
-        wordArray.push(this._board[i].letters.join(''));
-      } else {
-        wordArray.push('');
+      // Inputs to remote call
+      let wordArray = [];
+      for (let i = 0; i < this._board.length; i++) {
+        // WordArray includes everything except the testing word
+        if (i != this._selectedWord) {
+          wordArray.push(this._board[i].letters.join(''));
+        } else {
+          wordArray.push('');
+        }
       }
-    }
-    let testWord = this._board[this._selectedWord].letters.join('');
-    let testPosition = this._selectedWord;
+      let testWord = this._board[this._selectedWord].letters.join('');
+      let testPosition = this._selectedWord;
 
-    // Mark the word as currently being tested, not solved, not wrong, not broken
-    this._board[this._selectedWord].testing = true;
-    this._board[this._selectedWord].solved = false;
-    this._board[this._selectedWord].wrong = false;
-    this._board[this._selectedWord].broken = false;
+      // Mark the word as currently being tested, not solved, not wrong, not broken
+      this._board[this._selectedWord].testing = true;
+      this._board[this._selectedWord].solved = false;
+      this._board[this._selectedWord].wrong = false;
+      this._board[this._selectedWord].broken = false;
 
-    var execStartTime = performance.now();
+      var execStartTime = performance.now();
 
-    // Make the remote call
-    this._dataService.testWord(wordArray, testWord, testPosition)
-    .then(
-      // Success
-      (testedWord: TestedWord) => {
-        // Test is done
-        this._board[testedWord.testPosition].testing = false;
-        // The test word is not broken
-        this._board[testedWord.testPosition].broken = false;
-
-        this._lastExecutionTime = performance.now() - execStartTime;
-        this._lastExecutionTimeAPI = testedWord.executionTime;
-
-        if (testedWord.valid) {
-          // Word is solved, not wrong, not broken
-          this._board[testedWord.testPosition].solved = true;
-          this._board[testedWord.testPosition].wrong = false;
+      // Make the remote call
+      this._dataService.testWord(wordArray, testWord, testPosition)
+      .then(
+        // Success
+        (testedWord: TestedWord) => {
+          // Test is done
+          this._board[testedWord.testPosition].testing = false;
+          // The test word is not broken
           this._board[testedWord.testPosition].broken = false;
 
-          // If all words are solved, you win
-          let puzzleFilledIn = true;
-          for (const word of this._board) {
-            if (!word.locked && !word.solved) {
-              puzzleFilledIn = false;
-            }
-          }
-          if (puzzleFilledIn) {
-            // You win!  Call this to report the completion.
-            this.win();
-          } else {
-            // Play a sound (yay!)
-            this._audioService.wordCorrect();
+          this._lastExecutionTime = performance.now() - execStartTime;
+          this._lastExecutionTimeAPI = testedWord.executionTime;
 
-            // Move to the next word (unless the user has already moved)
-            if (this._selectedWord == testedWord.testPosition) {
-              if (this._selectedWord < this._numHops - 1) {
-                // Need to avoid moving to a solved word.
-                // Start at the next word and move forwards.
-                for (
-                  let i = testedWord.testPosition + 1;
-                  i < this._numHops;
-                  i++
-                ) {
-                  this._board[i].solved == false;
-                  this._selectedWord = i;
-                  this._selectedLetter = 0;
-                  break;
+          if (testedWord.valid) {
+            // Word is solved, not wrong, not broken
+            this._board[testedWord.testPosition].solved = true;
+            this._board[testedWord.testPosition].wrong = false;
+            this._board[testedWord.testPosition].broken = false;
+
+            // If all words are solved, you win
+            let puzzleFilledIn = true;
+            for (const word of this._board) {
+              if (!word.locked && !word.solved) {
+                puzzleFilledIn = false;
+              }
+            }
+            if (puzzleFilledIn) {
+              // You win!  Call this to report the completion.
+              this.win();
+            } else {
+              // Play a sound (yay!)
+              this._audioService.wordCorrect();
+
+              // Move to the next word (unless the user has already moved)
+              if (this._selectedWord == testedWord.testPosition) {
+                if (this._selectedWord < this._numHops - 1) {
+                  // Need to avoid moving to a solved word.
+                  // Start at the next word and move forwards.
+                  for (
+                    let i = testedWord.testPosition + 1;
+                    i < this._numHops;
+                    i++
+                  ) {
+                    this._board[i].solved == false;
+                    this._selectedWord = i;
+                    this._selectedLetter = 0;
+                    break;
+                  }
                 }
               }
             }
+          } else {
+            // Word is wrong, not solved, not broken
+            this._board[testedWord.testPosition].solved = false;
+            this._board[testedWord.testPosition].wrong = true;
+            this._board[testedWord.testPosition].broken = false;
+
+            this._message = testedWord.error;
+
+            // Play a sound (boo!)
+            this._audioService.wordWrong();
           }
-        } else {
-          // Word is wrong, not solved, not broken
-          this._board[testedWord.testPosition].solved = false;
-          this._board[testedWord.testPosition].wrong = true;
-          this._board[testedWord.testPosition].broken = false;
+        },
+        // Failure
+        (err) => {
+          // An error happened trying to get words
 
-          this._message = testedWord.error;
+          // Test is done
+          this._board[testPosition].testing = false;
 
-          // Play a sound (boo!)
-          this._audioService.wordWrong();
+          // The test word is broken
+          this._board[testPosition].broken = true;
+
+          // Show a message
+          this._message =
+            'Failed to communicate with the server, please try again later.';
+
+          console.log('Error testing word: ' + JSON.stringify(err));
         }
-      },
-      // Failure
-      (err) => {
-        // An error happened trying to get words
-
-        // Test is done
-        this._board[testPosition].testing = false;
-
-        // The test word is broken
-        this._board[testPosition].broken = true;
-
-        // Show a message
-        this._message =
-          'Failed to communicate with the server, please try again later.';
-
-        console.log('Error testing word: ' + JSON.stringify(err));
-      }
-    );
+      );
+    }
   }
 
+  // Async call to test a the whole puzzle
+  public testEntirePuzzle() {
+    // Only allowed if not timed out and not won
+    if (
+      (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      && (this._gameStatus != GameStatus.Win)
+    ) {
+
+      // Inputs to remote call
+      let wordArray = [];
+      for (let i = 0; i < this._board.length; i++) {
+        wordArray.push(this._board[i].letters.join(''));
+      }
+
+      // The test is done against the last word entered by the user (index = numHops - 1)
+      // Word is currently being tested, not solved, not wrong, not broken
+      this._board[this._numHops - 1].testing = true;
+      this._board[this._numHops - 1].solved = false;
+      this._board[this._numHops - 1].wrong = false;
+      this._board[this._numHops - 1].broken = false;
+
+      var execStartTime = performance.now();
+
+      // Make the remote call
+      // console.log("Validate Puzzle request: " + JSON.stringify(wordArray));
+      this._dataService.validatePuzzle(wordArray)
+      .then(
+        // Success
+        (validatedPuzzle: ValidatedPuzzle) => {
+          // console.log("Validate puzzle response: " + JSON.stringify(validatedPuzzle));
+          // Test is done
+          if (validatedPuzzle.valid) {
+            // Puzzle is valid
+            this._lastExecutionTime = performance.now() - execStartTime;
+            this._lastExecutionTimeAPI = validatedPuzzle.executionTime;
+  
+            // Word is not being tested, is solved, not wrong, not broken
+            this._board[this._numHops - 1].testing = false;
+            this._board[this._numHops - 1].solved = true;
+            this._board[this._numHops - 1].wrong = false;
+            this._board[this._numHops - 1].broken = false;
+      
+            // You win!  Call this to report the completion.
+            this.win();
+          } else {
+            // Puzzle is invalid
+
+            // Word is not being tested, not solved, is wrong, not broken
+            this._board[this._numHops - 1].testing = false;
+            this._board[this._numHops - 1].solved = false;
+            this._board[this._numHops - 1].wrong = true;
+            this._board[this._numHops - 1].broken = false;
+
+            this._message = validatedPuzzle.error;
+
+            // Play a sound (boo!)
+            this._audioService.wordWrong();
+          }
+        },
+        // Failure
+        (err) => {
+          console.log("Validate puzzle response: " + err);
+          // An error happened trying to get words
+
+          // Word is not being tested, not solved, is wrong, not broken
+          this._board[this._numHops - 1].testing = false;
+          this._board[this._numHops - 1].solved = false;
+          this._board[this._numHops - 1].wrong = false;
+          this._board[this._numHops - 1].broken = true;
+
+          // Show a message
+          this._message =
+            'Failed to communicate with the server, please try again later.';
+
+          console.log('Error testing word: ' + JSON.stringify(err));
+        }
+      );
+    }
+  }
+  
   // TODO: use this to report a completion
   private win() {
+    // Make all words solved
+    for (const word of this._board) {
+      if (!word.locked) {
+        word.testing = false;
+        word.solved = true;
+        word.wrong = false;
+        word.broken = false;
+      }
+    }
+
     this._gameStatus = GameStatus.Win;
     this._message = '!!! YOU WIN !!!';
     this._audioService.puzzleSolved();
@@ -611,9 +733,10 @@ export class GameService {
   // Send the request in without the current word.  When the reply comes back, clear
   // the word and put that letter in the right place.
   public getHint() {
-    // Only allowed if the difficulty is Normal and not timed out
-    if (this._difficultyLevel < DifficultyLevel.Advanced && 
-      (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+    // Only allowed if the difficulty is Normal and not timed out and not won
+    if (this._difficultyLevel < DifficultyLevel.Advanced
+      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      && (this._gameStatus != GameStatus.Win)
     ) {
       // Inputs to remote call
       let wordArray = [];
@@ -756,9 +879,11 @@ export class GameService {
   // Set the selected cell
   public setSelectedCell(word, letter) {
     // Only move the selection if the word isn't locked
-    // And the game is not timed out
-    if (!this._board[word].locked && 
-      (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+    // And the game is not timed out and not won
+    if (
+      !this._board[word].locked
+      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      && (this._gameStatus != GameStatus.Win)
     ) {
       this._selectedWord = word;
       this._selectedLetter = letter;

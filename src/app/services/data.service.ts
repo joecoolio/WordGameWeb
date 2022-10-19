@@ -18,6 +18,12 @@ export interface TestedWord {
   executionTime: number;
 }
 
+export interface ValidatedPuzzle {
+  valid: boolean;
+  error: string;
+  executionTime: number;
+}
+
 export interface BasicHint {
   hintWord: number;
   hintPosition: number;
@@ -93,6 +99,23 @@ export class DataService {
     );
   }
 
+  // Test full puzzle
+  async validatePuzzle(
+    wordArray: string[]
+  ): Promise<ValidatedPuzzle> {
+    const body = {
+      puzzle: wordArray
+    };
+    return await firstValueFrom(
+      this.http.post<ValidatedPuzzle>(
+        'https://wordgameapi.mikebillings.com/api/v1/validatePuzzle',
+        body
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
+    );
+  }
+  
   async getHint(wordArray: string[], hintPosition: number): Promise<BasicHint> {
     const body = {
       puzzle: wordArray,

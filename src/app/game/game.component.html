@@ -61,38 +61,81 @@
           {{ formatTimer(gameService.timeRemaining) }}
         </div>
 
-        <!-- Unverified word -->
-        <fa-icon *ngIf="
-          !word.locked &&
-          word.populated &&
-          !word.solved &&
-          !word.wrong &&
-          !word.testing &&
-          !word.broken
-        " class="icon unverified" (click)="testWord(i)" [icon]="faCircleQuestion"></fa-icon>
+        <!-- In levels lower than expert mode, you can test individual words.  These are their icons -->
+        <ng-container *ngIf="gameService.difficultyLevel < enumDifficultyLevel.Expert">
 
-        <!-- Solved word -->
-        <fa-icon *ngIf="!word.locked && word.solved" class="icon solved" (click)="testWord(i)" [icon]="faCircleCheck"></fa-icon>
-
-        <!-- Wrong word -->
-        <fa-icon *ngIf="!word.locked && word.wrong" class="icon wrong" (click)="testWord(i)" [icon]="faCircleExclamation"></fa-icon>
-
-        <!-- Testing word -->
-        <fa-icon *ngIf="!word.locked && word.testing" class="icon testing fa-spin" (click)="testWord(i)" [icon]="faSpinner"></fa-icon>
-
-        <!-- Broken word -->
-        <fa-icon *ngIf="!word.locked && word.broken" class="icon broken" (click)="testWord(i)" [icon]="faCircleXmark"></fa-icon>
-        
-        <!-- No icon -->
-        <div *ngIf="
+          <!-- Unverified word -->
+          <fa-icon *ngIf="
             !word.locked &&
-            !word.populated &&
+            word.populated &&
             !word.solved &&
             !word.wrong &&
             !word.testing &&
             !word.broken
+          " class="icon unverified" (click)="testWord(i)" [icon]="faCircleQuestion"></fa-icon>
+
+          <!-- Solved word -->
+          <fa-icon *ngIf="!word.locked && word.solved" class="icon solved" (click)="testWord(i)" [icon]="faCircleCheck"></fa-icon>
+
+          <!-- Wrong word -->
+          <fa-icon *ngIf="!word.locked && word.wrong" class="icon wrong" (click)="testWord(i)" [icon]="faCircleExclamation"></fa-icon>
+
+          <!-- Testing word -->
+          <fa-icon *ngIf="!word.locked && word.testing" class="icon testing fa-spin" (click)="testWord(i)" [icon]="faSpinner"></fa-icon>
+
+          <!-- Broken word -->
+          <fa-icon *ngIf="!word.locked && word.broken" class="icon broken" (click)="testWord(i)" [icon]="faCircleXmark"></fa-icon>
+          
+          <!-- No icon -->
+          <div *ngIf="
+              !word.locked &&
+              !word.populated &&
+              !word.solved &&
+              !word.wrong &&
+              !word.testing &&
+              !word.broken
+          ">
+          </div>
+
+        </ng-container>
+
+        <!-- In levels >= expert mode, you can only test the whole puzzle and don't get feedback
+          on individual words. Icons for this go on the last entered word (next to last row). -->
+        <ng-container *ngIf="
+          gameService.difficultyLevel >= enumDifficultyLevel.Expert
+          && i === gameService.numHops - 1
+          && gameFullyPopulated()
         ">
-        </div>
+          <!-- Unverified word -->
+          <fa-icon *ngIf="
+            !word.solved &&
+            !word.wrong &&
+            !word.testing &&
+            !word.broken
+          " class="icon unverified" (click)="validatePuzzle()" [icon]="faCircleQuestion"></fa-icon>
+
+          <!-- Solved word -->
+          <fa-icon *ngIf="word.solved" class="icon solved" (click)="validatePuzzle()" [icon]="faCircleCheck"></fa-icon>
+
+          <!-- Wrong word -->
+          <fa-icon *ngIf="word.wrong" class="icon wrong" (click)="validatePuzzle()" [icon]="faCircleExclamation"></fa-icon>
+
+          <!-- Testing word -->
+          <fa-icon *ngIf="word.testing" class="icon testing fa-spin" (click)="validatePuzzle()" [icon]="faSpinner"></fa-icon>
+
+          <!-- Broken word -->
+          <fa-icon *ngIf="word.broken" class="icon broken" (click)="validatePuzzle()" [icon]="faCircleXmark"></fa-icon>
+          
+          <!-- No icon -->
+          <div *ngIf="
+              !word.solved &&
+              !word.wrong &&
+              !word.testing &&
+              !word.broken
+          "></div>
+
+        </ng-container>
+
       </div>
     </div>
   </div>
