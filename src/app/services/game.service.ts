@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint } from './data.service';
+import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSet } from './data.service';
 import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerSettings} from './player.service';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom, Subscription, timer } from 'rxjs';
 import { TimerService } from './timer.service';
 
 export enum GameStatus {
@@ -59,11 +59,14 @@ export class GameService {
   private _lastExecutionTimeAPI: number = 0; // Exec time on the server
   private _lastExecutionTime: number = 0; // Round trip execution
 
-  // Timer subscriptions
+  // Timer subscriptions for timed game
   private _timerTickSub: Subscription;
   private _timerFinishedSub: Subscription;
   private _timeRemaining: number;
   private _timeExpired: boolean = false;
+
+  // Everything in here should be unsubscribed at the start of every game
+  private _perGameSubscriptions: Subscription;
 
   constructor(
     private _dataService: DataService,
@@ -86,6 +89,9 @@ export class GameService {
 
     // Ask the player service to load (will be notified via settingsChanged observer)
     this._playerService.load();
+
+    // Setup the per game subscriptions
+    this._perGameSubscriptions = new Subscription();
   }
 
   // Word pair retrieved from the server
@@ -96,6 +102,11 @@ export class GameService {
     // Do not try to start a game until the player has been loaded
     await firstValueFrom(this._playerService.settingsChanged());
     console.log("Initial player load has occured");
+
+    // Reset anything required from the previous game
+    console.log("Unsubscribing from per-game subscriptions");
+    this._perGameSubscriptions.unsubscribe();
+    this._perGameSubscriptions = new Subscription();    
 
     // Once you have player settings, you can create a game
     return new Promise((resolve, reject) => {
@@ -260,8 +271,9 @@ export class GameService {
     
             // Move the game to timeout status if it's still running
             this._gameStatus = GameStatus.Timeout;
-            this._message = "Time ran out, you lose!";
-            this._audioService.puzzleLost();
+
+            // You lose
+            this.lose();
           }
         });
       }
@@ -489,8 +501,7 @@ export class GameService {
     );
   }
 
-  // Async call to test the whole puzzle
-  // I think I'm going to use this to report a completion
+  // TODO: use this to report a completion
   private win() {
     this._gameStatus = GameStatus.Win;
     this._message = '!!! YOU WIN !!!';
@@ -500,6 +511,98 @@ export class GameService {
     if (this._playerSettings.gameMode == GameMode.Timed) {
       this._timerService.stopTimer();
     }
+  }
+
+  // TODO: use this to report a loss
+  private lose() {
+    this._message = "Time ran out, you lose!";
+    this._audioService.puzzleLost();
+
+    // Get all the solutions
+
+    // Inputs to remote call
+    let wordArray = [];
+    for (let i = 0; i < this._board.length; i++) {
+      // WordArray includes everything including the partial word (spaces filled in)
+      // Handle an incomplete word
+      let incWord = '';
+      for (const letter of this._board[i].letters) {
+        if (letter != null) {
+          incWord += letter;
+        } else {
+          incWord += ' ';
+        }
+      }
+      wordArray.push(incWord);
+    }
+    
+    // Get all the possible solutions so we can show the user why they lose
+    this._dataService.getAllSolutions(wordArray)
+    .then(
+      // Success
+      (solutionSet : SolutionSet) => {
+
+
+        if (solutionSet.valid && solutionSet.solutions.length > 0) {
+          // Got some solutions, store them
+          // They each look like [abc, def, xyx]
+          
+          for (const wordArray of solutionSet.solutions) {
+            console.log("Solution: " + wordArray.toString());
+          }
+
+          // Store the original words so we can get back to them
+          let puzzleWords: string[] = [];
+          for (const word of this._board) {
+            puzzleWords.push(word.letters);
+          }
+          console.log("Puzzle: " + puzzleWords.toString());
+
+          // Which solution to show (this increments and cyles)
+          let solutionToShow: number = 0;
+
+          // Setup a timer so we can blink the solutions up for the user every 5 seconds
+          let showSolutionSubscription: Subscription = timer(3000, 5000).subscribe(
+            event => {
+              // console.log("Flipping to: " + solutionToShow + ": " + solutionSet.solutions[solutionToShow].toString());
+              // Show one of the solutions instead of the puzzle
+              for (let wordIndex = 0; wordIndex < this._board.length; wordIndex++) {
+                this._board[wordIndex].letters = solutionSet.solutions[solutionToShow][wordIndex].split('');
+              }
+              solutionToShow = (solutionToShow < solutionSet.solutions.length - 1) ? solutionToShow+1 : 0;
+
+              // Setup a one-time timer to flip back to the puzzle after 2 seconds
+              let showOriginalSubscription: Subscription = timer(2000).subscribe(
+                event => {
+                  // console.log("Flipping back: " + puzzleWords.toString());
+                  for (let wordIndex = 0; wordIndex < this._board.length; wordIndex++) {
+                    this._board[wordIndex].letters = puzzleWords[wordIndex];
+                  }
+
+                  showOriginalSubscription.unsubscribe;
+                }
+              );
+              // Add original subscription to solution subscription
+              // This way, if you start a new game everything gets unsubscribed
+              showSolutionSubscription.add(showOriginalSubscription);
+            }
+          );
+          // Set the flip subscription to be unsubscribed when the next game starts
+          this._perGameSubscriptions.add(showSolutionSubscription);
+
+
+
+        } else {
+          console.log("No solutions available");
+        }
+
+
+      },
+      // Failure
+      (err) => {
+        // API call for solutions failed, nothing to be done here
+      }
+    );
   }
 
   // Get a hint for the current word

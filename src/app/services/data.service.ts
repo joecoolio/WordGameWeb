@@ -35,6 +35,14 @@ export interface WholeWordHint {
   executionTime: number;
 }
 
+export interface SolutionSet {
+  solutions: string[][],
+  valid: boolean;
+  error: string;
+  executionTime: number;
+}
+
+
 // Timeout for remote calls
 const HTTP_TIMEOUT: number = 5000;
 
@@ -116,4 +124,20 @@ export class DataService {
       )
     );
   }
+
+  async getAllSolutions(wordArray: string[]): Promise<SolutionSet> {
+    const body = {
+      puzzle: wordArray,
+    };
+    console.log('Ask For Solutions: ' + JSON.stringify(body));
+    return await firstValueFrom(
+      this.http.post<SolutionSet>(
+        'https://wordgameapi.mikebillings.com/api/v1/getAllSolutions',
+        body
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
+    );
+  }
+
 }

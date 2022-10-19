@@ -105,10 +105,11 @@
   color: green;
 }
 .letter-box > .timer.medium {
-  color: yellowgreen;
+  color: red;
 }
 .letter-box > .timer.low {
   color: red;
+  animation: blinker 1s linear infinite;
 }
 .letter-box > .timer.expired {
   color: red;
@@ -116,6 +117,13 @@
 
 
 /* Animations */
+
+/* Blink, call with: animation: blinker 1s linear infinite; */
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
 
 /* Shake sideways */
 .shake {
