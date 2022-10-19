@@ -498,8 +498,6 @@ export class GameService {
 
     // Clean up timing stuff
     if (this._playerSettings.gameMode == GameMode.Timed) {
-      this._timerTickSub.unsubscribe();
-      this._timerFinishedSub.unsubscribe();
       this._timerService.stopTimer();
     }
   }
