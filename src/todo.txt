@@ -9,3 +9,4 @@ Check subscription unsubscribe
 Game service and game componenent have 2 promises that don't correctly handle rejects
 Somehow flag letters in the solution in timed mode that the user didn't enter.  Show them with some different format?
 Figure out insane mode hiding letters
+In API, auto-uppercase everything via the test framework

@@ -11,6 +11,8 @@ import { faFaceFrown } from '@fortawesome/free-solid-svg-icons';
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+
 import { DifficultyLevel, GameMode } from '../services/player.service';
 
 @Component({
@@ -27,6 +29,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   faRepeat = faRepeat;
   faCircleXmark = faCircleXmark;
   faLightbulb = faLightbulb;
+  faEyeSlash = faEyeSlash;
 
   public enumGameStatus = GameStatus;
   public enumGameMode = GameMode;
@@ -67,13 +70,21 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.newGame();
   }
 
-  ngAfterViewChecked() {
-    // This make chrome work at first draw
-    // this.handleScreenResize();
-  }
-
   ngOnDestroy() {
     this.resizeSubscription$.unsubscribe()
+  }
+
+  isLetterOnPath(letter: string, wordIndex: number, letterIndex: number): boolean {
+    const priorLetter: string = (wordIndex > 0) ? this.gameService.board[wordIndex - 1].letters[letterIndex] : letter;
+    // const nextLetter: string = (wordIndex < this.gameService.board.length) ? this.gameService.board[wordIndex + 1].letters[letterIndex] : letterToTest;
+
+    let retval: boolean =
+      (letter != null && priorLetter != null && letter != priorLetter)
+      // || 
+      // (nextLetter != null && letterToTest != nextLetter)
+    ;
+
+    return retval;
   }
 
   gameFullyPopulated(): boolean {

@@ -20,13 +20,28 @@
           'highlighted':
             gameService.selectedWord === i &&
             gameService.selectedLetter === j,
-          'on-path':
-            i > 0 &&
-            gameService.board[i - 1].letters[j] &&
-            letter != gameService.board[i - 1].letters[j] &&
-            letter != null
+          'on-path': isLetterOnPath(letter, i, j)
         }">
-        {{ letter }}
+        <!-- i > 0 &&
+        gameService.board[i - 1].letters[j] &&
+        letter != gameService.board[i - 1].letters[j] &&
+        letter != null -->
+
+        <!-- Show the letter unless it's the first/last row insane mode and the letter doesn't match -->
+        <ng-container *ngIf=
+          "i == 0 || i == gameService.numHops
+          || gameService.difficultyLevel != enumDifficultyLevel.Insane || isLetterOnPath(letter, i, j)"
+        >{{ letter }}</ng-container>
+
+        <!-- In insane mode on middle rows with a non-matching letter, show an icon -->
+        <ng-container *ngIf=
+          "i != 0 && i != gameService.numHops
+          && letter != null
+          && gameService.difficultyLevel == enumDifficultyLevel.Insane && !isLetterOnPath(letter, i, j)"
+        >
+          <fa-icon class="icon" [icon]="faEyeSlash"></fa-icon>
+        </ng-container>
+        
         <!-- Spinner while the letter is loading -->
         <fa-icon *ngIf="word.loading == true" class="icon testing fa-spin" [style.font-size.px]="iconFontSize" [icon]="faSpinner"></fa-icon>
 
