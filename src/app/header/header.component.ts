@@ -7,6 +7,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnInit {
+  @Output() parentOpenProfile = new EventEmitter();
   @Output() parentOpenSettings = new EventEmitter();
 
   public isCollapsed = true;
@@ -18,4 +19,9 @@ export class HeaderComponent implements OnInit {
   openSettings() {
     this.parentOpenSettings.emit();
   }
+
+  openProfile() {
+    this.parentOpenProfile.emit();
+  }
+
 }

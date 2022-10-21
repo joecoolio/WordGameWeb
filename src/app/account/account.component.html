@@ -1,0 +1,54 @@
+<div class="modal-header">
+    <h4 class="modal-title">Profile</h4>
+    <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="activeModal.dismiss('Cross click')"
+    ></button>
+</div>
+<div class="modal-body">
+    <div class="bodycontainer">
+    
+        <form [formGroup]="signin" (ngSubmit)="onSubmit()">
+
+            <!-- Email Address -->
+            <div>
+                <mat-form-field>
+                    <input matInput placeholder="Email Address" type="email" formControlName="email" ngModel required>
+                    <ng-container *ngIf="email.invalid && (email.dirty || email.touched)">
+                        <mat-hint *ngIf="!email.value">Enter your email address</mat-hint>
+                        <mat-error *ngIf="email.errors.email">Please enter a valid email address.</mat-error>
+                    </ng-container>
+                </mat-form-field>
+            </div>
+
+            <!-- Password -->
+            <div>
+                <mat-form-field>
+                    <input matInput placeholder="Password" [type]="hidePassword ? 'password' : 'text'" formControlName="password" required>
+                    <mat-icon matSuffix (click)="hidePassword = !hidePassword"></mat-icon>
+                    <mat-hint *ngIf="!password.value">Enter your password</mat-hint>
+                </mat-form-field>
+            </div>
+
+            <!-- Submit button -->
+            <button class="hidden" id="submit-form" type="submit">Save</button>
+          
+        </form>
+
+    
+    </div>
+</div>
+<div class="modal-footer">
+    <label class="btn btn-outline-dark" for="submit-form">Save</label>
+
+    <button
+        type="button"
+        class="btn btn-outline-dark"
+        (click)="activeModal.close('Close click')"
+    >
+      Cancel
+    </button>  
+</div>
+  

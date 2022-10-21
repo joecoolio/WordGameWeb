@@ -16,9 +16,9 @@ import { SettingsComponent } from './settings/settings.component';
 
 // Material
 import { MatDialogModule } from '@angular/material/dialog';
-// import { MatFormFieldModule } from '@angular/material/form-field';
-// import { MatInputModule } from '@angular/material/input';
-// import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 import { MatSliderModule } from '@angular/material/slider';
 // import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -26,6 +26,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 // import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { AccountComponent } from './account/account.component';
 
 
 // Bootstrap stuff
@@ -40,9 +41,9 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     ReactiveFormsModule,
     FontAwesomeModule,
     MatDialogModule,
-    // MatFormFieldModule,
-    // MatInputModule,
-    // MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
     MatSliderModule,
     MatSlideToggleModule,
     // NgbModule,
@@ -54,6 +55,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     HeaderComponent,
     FooterComponent,
     SettingsComponent,
+    AccountComponent,
   ],
   bootstrap: [AppComponent],
   providers: [],

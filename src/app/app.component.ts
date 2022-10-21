@@ -4,6 +4,7 @@ import { GameService } from './services/game.service';
 import { faDeleteLeft } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
+import { AccountComponent } from './account/account.component';
 
 @Component({
   selector: 'wordgame-app',
@@ -21,6 +22,10 @@ export class AppComponent {
     public gameService: GameService,
     private modalService: NgbModal
   ) {
+  }
+
+  openProfile() {
+    const modalRef = this.modalService.open(AccountComponent);
   }
 
   openSettings() {
