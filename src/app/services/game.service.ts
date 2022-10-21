@@ -14,9 +14,7 @@ export enum GameStatus {
   Timeout      // Timed mode & time is up, you lose sucka
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class GameService {
   // Min & max number of letters & hops
   readonly MIN_LETTERS: number = 3;
@@ -71,7 +69,7 @@ export class GameService {
     this._playerSettingsSubscription = this._playerService.settingsChanged().subscribe({
       next: (newPlayerSettings) => {
           // User settings changed
-          console.log("Loaded user: " + newPlayerSettings.numLetters + " / " + newPlayerSettings.numHops);
+          console.log("Loaded user: " + JSON.stringify(newPlayerSettings));
           this._playerSettings = newPlayerSettings;
       },
       error: (err) => {
