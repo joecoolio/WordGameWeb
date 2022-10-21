@@ -1,10 +1,10 @@
 import { Component, HostListener, VERSION } from '@angular/core';
 import Keyboard from 'simple-keyboard';
 import { GameService } from './services/game.service';
-import { faDeleteLeft } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
 import { AccountComponent } from './account/account.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'wordgame-app',
@@ -14,14 +14,17 @@ import { AccountComponent } from './account/account.component';
 export class AppComponent {
   name = 'Angular ' + VERSION.major;
 
-  value = '';
-  keyboard: Keyboard;
-  faDeleteLeft = faDeleteLeft;
+  private _subscriptions: Subscription;
+
+  private _value: string = '';
+  private _keyboard: Keyboard;
+  private _dialogOpen: boolean;
 
   constructor(
     public gameService: GameService,
     private modalService: NgbModal
   ) {
+    this._subscriptions = new Subscription();
   }
 
   openProfile() {
@@ -34,7 +37,17 @@ export class AppComponent {
   }
 
   ngAfterViewInit() {
-    this.keyboard = new Keyboard({
+    // Register subscription to the modal service to keep an eye on it
+    // When a dialog is open, keystrokes won't be sent to the game
+    this._dialogOpen = false;
+    let sub: Subscription = this.modalService.activeInstances.subscribe(
+      (value) => {
+        this._dialogOpen = (value.length > 0);
+      }
+    );
+
+    // Setup the onscreen keyboard
+    this._keyboard = new Keyboard({
       onChange: (input) => this.onChange(input),
       onKeyPress: (button) => this.onKeyPress(button),
       layout: {
@@ -49,18 +62,29 @@ export class AppComponent {
         '{enter}': 'enter',
       },
     });
+
+    // Force destroy to run
+    // Might record abandoned games here?
+    window.onbeforeunload = () => this.ngOnDestroy();
+  }
+
+  ngOnDestroy() {
+    console.log("Destroy called");
+    this._subscriptions.unsubscribe();
   }
 
   // Computer keyboard events
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
     // Pass to game
-    this.gameService.letterEntered(event.key);
+    if (!this._dialogOpen) {
+      this.gameService.letterEntered(event.key);
+    }
   }
 
   // Onscreen keyboard events
   onChange = (input: string) => {
-    this.value = input;
+    this._value = input;
   };
 
   onKeyPress = (button: string) => {
@@ -70,18 +94,20 @@ export class AppComponent {
     if (button === '{shift}' || button === '{lock}') this.handleShift();
 
     // Pass to game
-    this.gameService.letterEntered(button);
+    if (!this._dialogOpen) {
+      this.gameService.letterEntered(button);
+    }
   };
 
   onInputChange = (event: any) => {
-    this.keyboard.setInput(event.target.value);
+    this._keyboard.setInput(event.target.value);
   };
 
   handleShift = () => {
-    let currentLayout = this.keyboard.options.layoutName;
+    let currentLayout = this._keyboard.options.layoutName;
     let shiftToggle = currentLayout === 'default' ? 'shift' : 'default';
 
-    this.keyboard.setOptions({
+    this._keyboard.setOptions({
       layoutName: shiftToggle,
     });
   };
