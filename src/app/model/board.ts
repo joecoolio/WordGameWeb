@@ -38,6 +38,9 @@ export class Board {
         for(let i = 0; i < numHops + 1; i++) {
             this._words.push(new Word(numLetters));
         }
+
+        // Setup pair word status
+        this.setPairWordStatus(WordStatus.PairWord);
     };
 
     // Initialize the game with a pair of words
