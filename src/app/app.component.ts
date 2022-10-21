@@ -3,8 +3,9 @@ import Keyboard from 'simple-keyboard';
 import { GameService } from './services/game.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
-import { AccountComponent } from './account/account.component';
+import { RegisterComponent } from './account/login/login.component';
 import { Subscription } from 'rxjs';
+import { PlayerService } from './services/player.service';
 
 @Component({
   selector: 'wordgame-app',
@@ -22,13 +23,19 @@ export class AppComponent {
 
   constructor(
     public gameService: GameService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private playerService: PlayerService
   ) {
-    this._subscriptions = new Subscription();
   }
 
   openProfile() {
-    const modalRef = this.modalService.open(AccountComponent);
+    if (this.playerService.email != null) {
+      // Not logged in, show the login/register screen
+      const modalRef = this.modalService.open(RegisterComponent);
+    } else {
+      // Already logged in, show the profile/stats screen
+      const modalRef = this.modalService.open(RegisterComponent);
+    }
   }
 
   openSettings() {
@@ -39,12 +46,14 @@ export class AppComponent {
   ngAfterViewInit() {
     // Register subscription to the modal service to keep an eye on it
     // When a dialog is open, keystrokes won't be sent to the game
+    this._subscriptions = new Subscription();
     this._dialogOpen = false;
     let sub: Subscription = this.modalService.activeInstances.subscribe(
       (value) => {
         this._dialogOpen = (value.length > 0);
       }
     );
+    this._subscriptions.add(sub);
 
     // Setup the onscreen keyboard
     this._keyboard = new Keyboard({

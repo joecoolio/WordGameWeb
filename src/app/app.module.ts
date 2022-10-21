@@ -22,11 +22,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSliderModule } from '@angular/material/slider';
 // import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-
+import { MatCardModule } from '@angular/material/card';
 
 // import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { AccountComponent } from './account/account.component';
+import { RegisterComponent as LoginComponent } from './account/login/login.component';
 
 
 // Bootstrap stuff
@@ -46,6 +46,7 @@ import { AccountComponent } from './account/account.component';
     MatButtonModule,
     MatSliderModule,
     MatSlideToggleModule,
+    MatCardModule,
     // NgbModule,
   ],
 
@@ -55,7 +56,7 @@ import { AccountComponent } from './account/account.component';
     HeaderComponent,
     FooterComponent,
     SettingsComponent,
-    AccountComponent,
+    LoginComponent,
   ],
   bootstrap: [AppComponent],
   providers: [],

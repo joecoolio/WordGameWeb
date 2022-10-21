@@ -38,6 +38,7 @@ export enum PlayerStatus {
 
 // Set of player settings
 export interface PlayerSettings {
+    email: string,
     status: PlayerStatus,
     numLetters: number,
     numHops: number,
@@ -60,6 +61,7 @@ export class PlayerService {
 
     constructor() {
         this._previousSettings = {
+            email: null,
             status: -1,
             numLetters: -1,
             numHops: -1,
@@ -70,6 +72,7 @@ export class PlayerService {
         }
 
         this._playerSettings = {
+            email: null,
             status: PlayerStatus.NOT_INITIALIZED,
             numLetters: DEFAULT_NUM_LETTERS,
             numHops: DEFAULT_NUM_HOPS,
@@ -85,7 +88,8 @@ export class PlayerService {
     // Subscribe to this to be notified of player settings being changed
     settingsChanged(): Observable<PlayerSettings> {
         return this.settingsChangesBehaviorSubject.pipe(takeWhile(val =>
-            val.status !== this._previousSettings.status
+            val.email !== this._previousSettings.email
+            || val.status !== this._previousSettings.status
             || val.numLetters !== this._previousSettings.numLetters
             || val.numHops !== this._previousSettings.numHops
             || val.gameMode !== this._previousSettings.gameMode
@@ -105,6 +109,7 @@ export class PlayerService {
         // TODO: This is where user information will be loaded from the db
         // For the time being, just return defaults
         this._playerSettings = {
+            email: null,
             status: PlayerStatus.OK,
             numLetters: DEFAULT_NUM_LETTERS,
             numHops: DEFAULT_NUM_HOPS,
@@ -118,6 +123,15 @@ export class PlayerService {
 
     // Getters and Setters
     // The settings fire the subject of the settings observer
+    public get email(): string {
+        return this._playerSettings.email;
+    }
+    private set email(s: string) {
+        this._previousSettings.email = this._playerSettings.email;
+        this._playerSettings.email = s;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+    }
+
     public get status(): PlayerStatus {
         return this._playerSettings.status;
     }

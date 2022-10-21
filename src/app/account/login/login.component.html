@@ -1,0 +1,115 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{ showLoginForm ? "User Login" : "New User Registration" }}</h4>
+    <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="activeModal.dismiss('Cross click')"
+    ></button>
+</div>
+<div class="modal-body">
+    <div class="bodycontainer">
+    
+        <!-- Login Form -->
+        <mat-card *ngIf="showLoginForm">
+            <mat-card-title>Login</mat-card-title>
+            <mat-card-content>
+                <form [formGroup]="loginFormGroup" (ngSubmit)="onSubmitLogin()">
+
+                    <!-- Email Address -->
+                    <div>
+                        <mat-form-field >
+                            <input matInput placeholder="Email Address" type="email" formControlName="email" ngModel required>
+                            <ng-container *ngIf="email.invalid && (email.dirty || email.touched)">
+                                <mat-hint *ngIf="!email.value">Enter your email address</mat-hint>
+                                <mat-error *ngIf="email.errors.email">Please enter a valid email address.</mat-error>
+                            </ng-container>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <mat-form-field>
+                            <input matInput placeholder="Password" [type]="hidePassword ? 'password' : 'text'" formControlName="password" required>
+                            <mat-icon matSuffix (click)="hidePassword = !hidePassword"></mat-icon>
+                            <mat-hint *ngIf="!password.value">Enter your password</mat-hint>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="donthavea">
+                        <span (click)="showLoginForm = !showLoginForm">
+                            Don't have an account?
+                        </span>
+                    </div>
+
+                    <!-- Hidden Submit button -->
+                    <button class="hidden" id="submit-form" type="submit">Register</button>
+                
+                </form>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- Registration Form -->
+        <mat-card *ngIf="!showLoginForm">
+            <mat-card-title>Registration</mat-card-title>
+            <mat-card-content>
+                <form [formGroup]="registerFormGroup" (ngSubmit)="onSubmitRegister()">
+
+                    <!-- Name -->
+                    <div>
+                        <mat-form-field>
+                            <input matInput placeholder="Name" type="text" formControlName="name" ngModel required>
+                            <ng-container *ngIf="name.invalid && (name.dirty || name.touched)">
+                                <mat-hint *ngIf="!name.value">Enter your name</mat-hint>
+                            </ng-container>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Email Address -->
+                    <div>
+                        <mat-form-field>
+                            <input matInput placeholder="Email Address" type="email" formControlName="email" ngModel required>
+                            <ng-container *ngIf="email.invalid && (email.dirty || email.touched)">
+                                <mat-hint *ngIf="!email.value">Enter your email address</mat-hint>
+                                <mat-error *ngIf="email.errors.email">Please enter a valid email address.</mat-error>
+                            </ng-container>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <mat-form-field>
+                            <input matInput placeholder="Password" [type]="hidePassword ? 'password' : 'text'" formControlName="password" required>
+                            <mat-icon matSuffix (click)="hidePassword = !hidePassword"></mat-icon>
+                            <mat-hint *ngIf="!password.value">Enter your password</mat-hint>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="donthavea">
+                        <span (click)="showLoginForm = !showLoginForm">
+                            Already have an account?
+                        </span>
+                    </div>
+
+                    <!-- Hidden Submit button -->
+                    <button class="hidden" id="submit-form" type="submit">Register</button>
+                
+                </form>
+            </mat-card-content>
+        </mat-card>
+    
+    </div>
+</div>
+<div class="modal-footer">
+    <label *ngIf="showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form">Login</label>
+    <label *ngIf="!showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form">Register</label>
+
+    <button
+        type="button"
+        class="btn btn-outline-dark btn-secondary"
+        (click)="activeModal.close('Close click')"
+    >
+      Cancel
+    </button>  
+</div>
+  
