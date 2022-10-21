@@ -14,6 +14,7 @@ import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 import { DifficultyLevel, GameMode } from '../services/player.service';
+import { Letter, WordStatus } from '../model/board';
 
 @Component({
   selector: 'game',
@@ -34,6 +35,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   public enumGameStatus = GameStatus;
   public enumGameMode = GameMode;
   public enumDifficultyLevel = DifficultyLevel;
+  public enumWordStatus = WordStatus;
 
   @ViewChild('gameContainer')
   gameContainer: ElementRef;
@@ -52,7 +54,7 @@ export class GameComponent implements OnInit, AfterViewInit {
  
   // constructor(private dialog: MatDialog, private applicationRef: ApplicationRef, private el: ElementRef) {}
   constructor(
-    private dialog: MatDialog,
+    // private dialog: MatDialog,
     public gameService: GameService,
     private cdRef: ChangeDetectorRef
   ) {}
@@ -74,26 +76,17 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.resizeSubscription$.unsubscribe()
   }
 
-  isLetterOnPath(letter: string, wordIndex: number, letterIndex: number): boolean {
-    const priorLetter: string = (wordIndex > 0) ? this.gameService.board[wordIndex - 1].letters[letterIndex] : letter;
+  isLetterOnPath(letter: Letter, wordIndex: number, letterIndex: number): boolean {
+    const priorLetter: Letter = (wordIndex > 0) ? this.gameService.board.words[wordIndex - 1].letters[letterIndex] : letter;
     // const nextLetter: string = (wordIndex < this.gameService.board.length) ? this.gameService.board[wordIndex + 1].letters[letterIndex] : letterToTest;
 
     let retval: boolean =
-      (letter != null && priorLetter != null && letter != priorLetter)
+      (letter.character != null && priorLetter.character != null && letter.character != priorLetter.character)
       // || 
       // (nextLetter != null && letterToTest != nextLetter)
     ;
 
     return retval;
-  }
-
-  gameFullyPopulated(): boolean {
-    for (const word of this.gameService.board) {
-      if (!word.populated) {
-        return false;
-      }
-    }
-    return true;
   }
 
   hintsEnabled() : boolean {

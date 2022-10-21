@@ -4,7 +4,7 @@ import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerSettings} from './player.service';
 import { firstValueFrom, Subscription, timer } from 'rxjs';
 import { TimerService } from './timer.service';
-import { createMayBeForwardRefExpression } from '@angular/compiler';
+import { Board, Solution, WordStatus } from '../model/board';
 
 export enum GameStatus {
   Initialize,  // The game isn't setup yet
@@ -24,16 +24,8 @@ export class GameService {
   readonly MIN_HOPS: number = 2;
   readonly MAX_HOPS: number = 5;
 
-  // The game board - array of words each of which has:
-  //   .letters = array of the letters of the word
-  //   .locked = true if this word cannot be changed
-  //   .solved = true if this word is verified
-  //   .wrong = word was tested and is wrong
-  //   .testing = word is currently being tested
-  //   .loading = word is being loaded
-  //   .populated = word is fully populated (all letters)
-  //   .broken = server problem, try again
-  private _board = [];
+  // The game board
+  private _board: Board;
 
   // Status of the game:  run, win, broken, initialize
   private _gameStatus: GameStatus = GameStatus.Initialize;
@@ -127,11 +119,14 @@ export class GameService {
 
       console.log('Requesting word pair...');
 
-      this._board = this.createEmptyBoard();
-
+      // Setup a new board
+      this._board = new Board(this._numLetters, this._numHops);
       this._message = 'Requesting a pair of words...';
 
       var execStartTime = performance.now();
+
+      // Flag puzzle as loading
+      this._board.setPairWordStatus(WordStatus.Loading);
 
       this._dataService
         .getPair(this.numLetters, this._numHops)
@@ -143,7 +138,7 @@ export class GameService {
             this._lastExecutionTimeAPI = this._wordPair.executionTime;
 
             console.log('Got wordpair: ' + JSON.stringify(this._wordPair));
-            this.populateBoard();
+            this._board.initialize(this._wordPair.startWord, this._wordPair.endWord);
             this._message = '';
 
             // Reset the current word/cell to the top
@@ -166,9 +161,7 @@ export class GameService {
             this._gameStatus = GameStatus.Broken;
 
             // The words are no longer loading
-            for (const word of this._board) {
-              word.loading = false;
-            }
+            this._board.setPairWordStatus(WordStatus.Broken);
 
             // Show a message
             this._message =
@@ -181,51 +174,6 @@ export class GameService {
         );
       
     });
-  }
-
-  private createEmptyBoard() {
-    // Create a 2d board holding correct number words and letters each / all nulls
-    let board = [];
-    for (let i = 0; i < this._numHops + 1; i++) {
-      board[i] = {
-        letters: [],
-        locked: false,
-        solved: false,
-        wrong: false,
-        testing: false,
-        loading: false,
-        populated: false,
-        broken: false,
-      };
-      for (let j = 0; j < this._numLetters; j++) {
-        board[i].letters.push(null);
-      }
-    }
-    // First and last words are locked
-    board[0].locked = true;
-    board[this._numHops].locked = true;
-
-    // First and last words are loading
-    board[0].loading = true;
-    board[this._numHops].loading = true;
-
-    return board;
-  }
-
-  private populateBoard() {
-    // Fill in the first & last words on the board
-    for (let j = 0; j < this._numLetters; j++) {
-      this.board[0].letters[j] = this._wordPair.startWord.charAt(j);
-      this.board[this._numHops].letters[j] = this._wordPair.endWord.charAt(j);
-    }
-
-    // First and last words are populated
-    this.board[0].populated = true;
-    this.board[this._numHops].populated = true;
-
-    // First and last words are not loading
-    this.board[0].loading = false;
-    this.board[this._numHops].loading = false;
   }
 
   private startGame() {
@@ -292,7 +240,7 @@ export class GameService {
   // Keyboard entry occurred
   letterEntered(letter: string) {
     // Only accept entry on unlocked cells and if the game is not timed out and not won
-    if (!this._board[this._selectedWord].locked
+    if (!this._board.words[this._selectedWord].letters[this._selectedLetter].locked
       && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
       && (this._gameStatus != GameStatus.Win)
     ) {
@@ -306,19 +254,7 @@ export class GameService {
         this._message = '';
 
         // Remove the letter from the current cell
-        this._board[this._selectedWord].letters[this._selectedLetter] = null;
-
-        // The word is no longer fully populated
-        this._board[this._selectedWord].populated = false;
-
-        // When you delete or backspace, this word is no longer solved
-        this._board[this._selectedWord].solved = false;
-
-        // When you delete or backspace, this word is no longer wrong
-        this._board[this._selectedWord].wrong = false;
-
-        // When you delete or backspace, this word is no longer broken
-        this._board[this._selectedWord].broken = false;
+        this._board.words[this._selectedWord].letters[this._selectedLetter].character = null;
 
         // Backspace moves the current cell where delete doesn't
         if (letter === 'Backspace' || letter === '{bksp}') {
@@ -337,7 +273,7 @@ export class GameService {
         // In lower difficulty, check one word at a time
         if (this._difficultyLevel < DifficultyLevel.Expert) {
           // If all letters of this word are filled in, test the word
-          if (this._board[this._selectedWord].populated) {
+          if (this._board.words[this._selectedWord].populated) {
             // When you hit enter, the previous message goes away
             this._message = '';
 
@@ -349,7 +285,7 @@ export class GameService {
         } else {
           // In higher difficulty, check the whole puzzle at once
           let boardFullyPopulated: boolean = true;
-          for (const word of this._board) {
+          for (const word of this._board.words) {
             if (!word.populated) {
               boardFullyPopulated = false;
               break;
@@ -369,21 +305,7 @@ export class GameService {
       let found = letter.match(/^[a-z]$/gi);
       if (found) {
         // Valid letter, put it in the appropriate cell
-        this._board[this._selectedWord].letters[this._selectedLetter] =
-          letter.toUpperCase();
-
-        // When you change a letter, this word is no longer wrong or solved
-        this._board[this._selectedWord].wrong = false;
-        this._board[this._selectedWord].solved = false;
-
-        // Check to see if the word is fully populated
-        let populated = true;
-        for (const letter of this._board[this._selectedWord].letters) {
-          if (letter == null) {
-            populated = false;
-          }
-        }
-        if (populated) this._board[this._selectedWord].populated = true;
+        this._board.words[this._selectedWord].letters[this._selectedLetter].character = letter.toUpperCase();
 
         // When you change a letter, the previous message goes away
         this._message = '';
@@ -433,22 +355,19 @@ export class GameService {
 
       // Inputs to remote call
       let wordArray = [];
-      for (let i = 0; i < this._board.length; i++) {
+      for (let i = 0; i < this._board.words.length; i++) {
         // WordArray includes everything except the testing word
         if (i != this._selectedWord) {
-          wordArray.push(this._board[i].letters.join(''));
+          wordArray.push(this._board.words[i].stringify());
         } else {
-          wordArray.push('');
+          wordArray.push(null);
         }
       }
-      let testWord = this._board[this._selectedWord].letters.join('');
+      let testWord = this._board.words[this._selectedWord].stringify();
       let testPosition = this._selectedWord;
 
       // Mark the word as currently being tested, not solved, not wrong, not broken
-      this._board[this._selectedWord].testing = true;
-      this._board[this._selectedWord].solved = false;
-      this._board[this._selectedWord].wrong = false;
-      this._board[this._selectedWord].broken = false;
+      this._board.words[this._selectedWord].status = WordStatus.Testing;
 
       var execStartTime = performance.now();
 
@@ -458,23 +377,17 @@ export class GameService {
         // Success
         (testedWord: TestedWord) => {
           // Test is done
-          this._board[testedWord.testPosition].testing = false;
-          // The test word is not broken
-          this._board[testedWord.testPosition].broken = false;
-
           this._lastExecutionTime = performance.now() - execStartTime;
           this._lastExecutionTimeAPI = testedWord.executionTime;
 
           if (testedWord.valid) {
-            // Word is solved, not wrong, not broken
-            this._board[testedWord.testPosition].solved = true;
-            this._board[testedWord.testPosition].wrong = false;
-            this._board[testedWord.testPosition].broken = false;
+            // Word is solved
+            this._board.words[testedWord.testPosition].status = WordStatus.Solved;
 
             // If all words are solved, you win
             let puzzleFilledIn = true;
-            for (const word of this._board) {
-              if (!word.locked && !word.solved) {
+            for (const word of this._board.words) {
+              if (!word.locked && word.status != WordStatus.Solved) {
                 puzzleFilledIn = false;
               }
             }
@@ -495,7 +408,7 @@ export class GameService {
                     i < this._numHops;
                     i++
                   ) {
-                    this._board[i].solved == false;
+                    this._board.words[i].status != WordStatus.Solved;
                     this._selectedWord = i;
                     this._selectedLetter = 0;
                     break;
@@ -505,9 +418,7 @@ export class GameService {
             }
           } else {
             // Word is wrong, not solved, not broken
-            this._board[testedWord.testPosition].solved = false;
-            this._board[testedWord.testPosition].wrong = true;
-            this._board[testedWord.testPosition].broken = false;
+            this._board.words[testedWord.testPosition].status = WordStatus.Wrong;
 
             this._message = testedWord.error;
 
@@ -519,11 +430,8 @@ export class GameService {
         (err) => {
           // An error happened trying to get words
 
-          // Test is done
-          this._board[testPosition].testing = false;
-
           // The test word is broken
-          this._board[testPosition].broken = true;
+          this._board.words[testPosition].status = WordStatus.Broken;
 
           // Show a message
           this._message =
@@ -545,16 +453,13 @@ export class GameService {
 
       // Inputs to remote call
       let wordArray = [];
-      for (let i = 0; i < this._board.length; i++) {
-        wordArray.push(this._board[i].letters.join(''));
+      for (let i = 0; i < this._board.words.length; i++) {
+        wordArray.push(this._board.words[i].stringify());
       }
 
       // The test is done against the last word entered by the user (index = numHops - 1)
       // Word is currently being tested, not solved, not wrong, not broken
-      this._board[this._numHops - 1].testing = true;
-      this._board[this._numHops - 1].solved = false;
-      this._board[this._numHops - 1].wrong = false;
-      this._board[this._numHops - 1].broken = false;
+      this._board.words[this._numHops - 1].status = WordStatus.Testing;
 
       var execStartTime = performance.now();
 
@@ -571,22 +476,13 @@ export class GameService {
             this._lastExecutionTime = performance.now() - execStartTime;
             this._lastExecutionTimeAPI = validatedPuzzle.executionTime;
   
-            // Word is not being tested, is solved, not wrong, not broken
-            this._board[this._numHops - 1].testing = false;
-            this._board[this._numHops - 1].solved = true;
-            this._board[this._numHops - 1].wrong = false;
-            this._board[this._numHops - 1].broken = false;
-      
             // You win!  Call this to report the completion.
             this.win();
           } else {
             // Puzzle is invalid
 
-            // Word is not being tested, not solved, is wrong, not broken
-            this._board[this._numHops - 1].testing = false;
-            this._board[this._numHops - 1].solved = false;
-            this._board[this._numHops - 1].wrong = true;
-            this._board[this._numHops - 1].broken = false;
+            // Word is wrong
+            this._board.words[this._numHops - 1].status = WordStatus.Wrong;
 
             this._message = validatedPuzzle.error;
 
@@ -599,11 +495,8 @@ export class GameService {
           console.log("Validate puzzle response: " + err);
           // An error happened trying to get words
 
-          // Word is not being tested, not solved, is wrong, not broken
-          this._board[this._numHops - 1].testing = false;
-          this._board[this._numHops - 1].solved = false;
-          this._board[this._numHops - 1].wrong = false;
-          this._board[this._numHops - 1].broken = true;
+          // Word is broken
+          this._board.words[this._numHops - 1].status = WordStatus.Broken;
 
           // Show a message
           this._message =
@@ -618,14 +511,8 @@ export class GameService {
   // TODO: use this to report a completion
   private win() {
     // Make all words solved
-    for (const word of this._board) {
-      if (!word.locked) {
-        word.testing = false;
-        word.solved = true;
-        word.wrong = false;
-        word.broken = false;
-      }
-    }
+    // All words are solved
+    this._board.setUserWordStatus(WordStatus.Solved);
 
     this._gameStatus = GameStatus.Win;
     this._message = '!!! YOU WIN !!!';
@@ -646,18 +533,9 @@ export class GameService {
 
     // Inputs to remote call
     let wordArray = [];
-    for (let i = 0; i < this._board.length; i++) {
+    for (let i = 0; i < this._board.words.length; i++) {
       // WordArray includes everything including the partial word (spaces filled in)
-      // Handle an incomplete word
-      let incWord = '';
-      for (const letter of this._board[i].letters) {
-        if (letter != null) {
-          incWord += letter;
-        } else {
-          incWord += ' ';
-        }
-      }
-      wordArray.push(incWord);
+      wordArray.push(this._board.words[i].stringify());
     }
     
     // Get all the possible solutions so we can show the user why they lose
@@ -671,49 +549,15 @@ export class GameService {
           // Got some solutions, store them
           // They each look like [abc, def, xyx]
           
-          for (const wordArray of solutionSet.solutions) {
-            console.log("Solution: " + wordArray.toString());
+          for (const solution of solutionSet.solutions) {
+            this._board.addSolution(solution);
           }
 
-          // Store the original words so we can get back to them
-          let puzzleWords: string[] = [];
-          for (const word of this._board) {
-            puzzleWords.push(word.letters);
-          }
-          console.log("Puzzle: " + puzzleWords.toString());
+          // Tell the board to cycle through solutions
+          let cycleSubscription: Subscription = this._board.cycleThroughSolutions();
 
-          // Which solution to show (this increments and cyles)
-          let solutionToShow: number = 0;
-
-          // Setup a timer so we can blink the solutions up for the user every 5 seconds
-          let showSolutionSubscription: Subscription = timer(3000, 5000).subscribe(
-            event => {
-              // console.log("Flipping to: " + solutionToShow + ": " + solutionSet.solutions[solutionToShow].toString());
-              // Show one of the solutions instead of the puzzle
-              for (let wordIndex = 0; wordIndex < this._board.length; wordIndex++) {
-                this._board[wordIndex].letters = solutionSet.solutions[solutionToShow][wordIndex].split('');
-              }
-              solutionToShow = (solutionToShow < solutionSet.solutions.length - 1) ? solutionToShow+1 : 0;
-
-              // Setup a one-time timer to flip back to the puzzle after 2 seconds
-              let showOriginalSubscription: Subscription = timer(2000).subscribe(
-                event => {
-                  // console.log("Flipping back: " + puzzleWords.toString());
-                  for (let wordIndex = 0; wordIndex < this._board.length; wordIndex++) {
-                    this._board[wordIndex].letters = puzzleWords[wordIndex];
-                  }
-
-                  showOriginalSubscription.unsubscribe;
-                }
-              );
-              // Add original subscription to solution subscription
-              // This way, if you start a new game everything gets unsubscribed
-              showSolutionSubscription.add(showOriginalSubscription);
-            }
-          );
           // Set the flip subscription to be unsubscribed when the next game starts
-          this._perGameSubscriptions.add(showSolutionSubscription);
-
+          this._perGameSubscriptions.add(cycleSubscription);
 
 
         } else {
@@ -740,13 +584,13 @@ export class GameService {
     ) {
       // Inputs to remote call
       let wordArray = [];
-      for (let i = 0; i < this._board.length; i++) {
+      for (let i = 0; i < this._board.words.length; i++) {
         // WordArray includes everything including the partial word (spaces filled in)
         // Handle an incomplete word
         let incWord = '';
-        for (const letter of this._board[i].letters) {
-          if (letter != null) {
-            incWord += letter;
+        for (const letter of this._board.words[i].letters) {
+          if (letter.character != null) {
+            incWord += letter.character;
           } else {
             incWord += ' ';
           }
@@ -756,9 +600,7 @@ export class GameService {
       let hintPosition = this._selectedWord;
 
       // Mark the word as currently being tested, not solved, not wrong
-      this._board[this._selectedWord].testing = true;
-      this._board[this._selectedWord].solved = false;
-      this._board[this._selectedWord].wrong = false;
+      this._board.words[this._selectedWord].status = WordStatus.Testing;
 
       var execStartTime = performance.now();
 
@@ -770,19 +612,12 @@ export class GameService {
           (basicHint : BasicHint) => {
             console.log('Got basic hint: ' + JSON.stringify(basicHint));
             // Test is done
-            this._board[basicHint.hintWord].testing = false;
-            // The test word is not broken
-            this._board[basicHint.hintWord].broken = false;
-
             this._lastExecutionTime = performance.now() - execStartTime;
             this._lastExecutionTimeAPI = basicHint.executionTime;
 
-
             if (basicHint.valid) {
               // Word is not solved, not wrong, not broken
-              this._board[basicHint.hintWord].solved = false;
-              this._board[basicHint.hintWord].wrong = false;
-              this._board[basicHint.hintWord].broken = false;
+              this._board.words[basicHint.hintWord].status = WordStatus.Initialized;
 
               // Plug in the hint by moving to the cell and typing (to get other events)
               this.setSelectedCell(basicHint.hintWord, basicHint.hintPosition);
@@ -796,6 +631,9 @@ export class GameService {
               // Couldn't get a hint, tell the player
               this._message = basicHint.error;
 
+              // Word is reset
+              this._board.words[basicHint.hintWord].status = WordStatus.Initialized;
+
               // Play a sound
               this._audioService.hintUnavailable();
             }
@@ -804,11 +642,8 @@ export class GameService {
           (err) => {
             // An error happened trying to get hint
 
-            // Test is done
-            this._board[hintPosition].testing = false;
-
             // The test word is broken
-            this._board[hintPosition].broken = true;
+            this._board.words[hintPosition].status = WordStatus.Broken;
 
             // Show a message
             this._message =
@@ -825,23 +660,16 @@ export class GameService {
           // Success
           (wordHint : WholeWordHint) => {
             console.log('Got whole-word hint: ' + JSON.stringify(wordHint));
-            // Test is done
-            this._board[wordHint.hintWord].testing = false;
-            // The test word is not broken
-            this._board[wordHint.hintWord].broken = false;
-
             this._lastExecutionTime = performance.now() - execStartTime;
             this._lastExecutionTimeAPI = wordHint.executionTime;
 
 
             if (wordHint.valid) {
-              // Word is solved, not wrong, not broken
-              this._board[wordHint.hintWord].solved = true;
-              this._board[wordHint.hintWord].wrong = false;
-              this._board[wordHint.hintWord].broken = false;
+              // Word is solved
+              this._board.words[wordHint.hintWord].status = WordStatus.Solved;
 
               // Plug in the hint by moving to the cell and typing (to get other events)
-              this._board[wordHint.hintWord].letters = wordHint.hintText.split('');
+              this._board.words[wordHint.hintWord].setText(wordHint.hintText);
 
               // Run the test routine (which should always work)
               this.testSingleWord();
@@ -859,11 +687,8 @@ export class GameService {
           (err) => {
             // An error happened trying to get words
 
-            // Test is done
-            this._board[hintPosition].testing = false;
-
             // The test word is broken
-            this._board[hintPosition].broken = true;
+            this._board.words[hintPosition].status = WordStatus.Broken;
 
             // Show a message
             this._message =
@@ -881,7 +706,7 @@ export class GameService {
     // Only move the selection if the word isn't locked
     // And the game is not timed out and not won
     if (
-      !this._board[word].locked
+      !this._board.words[word].locked
       && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
       && (this._gameStatus != GameStatus.Win)
     ) {

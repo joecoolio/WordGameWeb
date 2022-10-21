@@ -52,24 +52,24 @@
 .letter-box.letter {
   border: 1px solid black;
 }
-
 .letter-box.letter.locked {
   background-color: grey;
   color: white;
 }
-
 .letter-box.letter.solved {
   background-color: lightgreen;
 }
-
 .letter-box.letter.wrong {
   background-color: red;
 }
-
 .letter-box.letter.highlighted {
   border: 5px solid purple;
 }
-
+.letter-box.letter.solution {
+  /* text-transform: lowercase; */
+  color: gray;
+  /* font-style: italic; */
+}
 .letter-box.letter.on-path {
   color: yellow;
 }
