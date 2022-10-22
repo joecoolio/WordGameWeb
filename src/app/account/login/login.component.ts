@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { PlayerService } from 'src/app/services/player.service';
 
 @Component({
   selector: 'app-login',
@@ -10,7 +11,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 export class RegisterComponent implements OnInit {
   constructor(
     public activeModal: NgbActiveModal,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private playerService: PlayerService
   ) { }
 
   ngOnInit() {
@@ -45,9 +47,18 @@ export class RegisterComponent implements OnInit {
   onSubmitLogin(): void {
     // Process login
     console.log('Login: ', this.loginFormGroup.value);
+    this.playerService.email = this.email.value;
+    this.playerService.password = this.password.value;
+  
+    this.playerService.login();
   }
 
   onSubmitRegister(): void {
+    this.playerService.email = this.email.value;
+    this.playerService.password = this.password.value;
+    this.playerService.name = this.name.value;
+  
     console.log('Register: ', this.registerFormGroup.value);
+    this.playerService.register();
   }
 }

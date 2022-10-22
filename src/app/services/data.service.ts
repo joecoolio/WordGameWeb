@@ -48,6 +48,17 @@ export interface SolutionSet {
   executionTime: number;
 }
 
+export interface LoginResult {
+  success: boolean,
+  email: string,
+  name: string,
+  numLetters: number,
+  numHops: number,
+  gameMode: number,
+  difficultyLevel: number,
+  hintType: number,
+  enableSounds: true
+}
 
 // Timeout for remote calls
 const HTTP_TIMEOUT: number = 5000;
@@ -156,6 +167,55 @@ export class DataService {
     return await firstValueFrom(
       this.http.post<SolutionSet>(
         'https://wordgameapi.mikebillings.com/api/v1/getAllSolutions',
+        body
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
+    );
+  }
+
+  async login(email: string, password: string): Promise<LoginResult> {
+    const body = {
+      email: email,
+      password: password
+    };
+    console.log('Login: ' + JSON.stringify(body));
+    return await firstValueFrom(
+      this.http.post<LoginResult>(
+        'https://wordgameapi.mikebillings.com/api/v1/login',
+        body
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
+    );
+  }
+
+  async register(
+    email: string,
+    password: string,
+    name: string,
+    numLetters: number,
+    numHops: number,
+    gameMode: number,
+    difficultyLevel: number,
+    hintType: number,
+    enableSounds: boolean
+  ): Promise<LoginResult> {
+    const body = {
+      email: email,
+      password: password,
+      name: name,
+      numLetters: numLetters,
+      numHops: numHops,
+      gameMode: gameMode,
+      difficultyLevel: difficultyLevel,
+      hintType: hintType,
+      enableSounds: enableSounds
+    };
+    console.log('Login: ' + JSON.stringify(body));
+    return await firstValueFrom(
+      this.http.post<LoginResult>(
+        'https://wordgameapi.mikebillings.com/api/v1/register',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)

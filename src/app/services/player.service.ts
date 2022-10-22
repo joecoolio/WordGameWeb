@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, from, Observable, of, takeWhile, tap } from 'rxjs';
+import { DataService, LoginResult } from './data.service';
 
 // Type of game the player wants to play
 export enum GameMode {
@@ -39,6 +40,8 @@ export enum PlayerStatus {
 // Set of player settings
 export interface PlayerSettings {
     email: string,
+    password: string,
+    name: string,
     status: PlayerStatus,
     numLetters: number,
     numHops: number,
@@ -59,9 +62,11 @@ export class PlayerService {
     // Subject for settings changed observer
     private settingsChangesBehaviorSubject: BehaviorSubject<PlayerSettings>;
 
-    constructor() {
+    constructor(private dataService: DataService) {
         this._previousSettings = {
             email: null,
+            password: null,
+            name: "",
             status: -1,
             numLetters: -1,
             numHops: -1,
@@ -73,6 +78,8 @@ export class PlayerService {
 
         this._playerSettings = {
             email: null,
+            password: null,
+            name: "",
             status: PlayerStatus.NOT_INITIALIZED,
             numLetters: DEFAULT_NUM_LETTERS,
             numHops: DEFAULT_NUM_HOPS,
@@ -89,6 +96,8 @@ export class PlayerService {
     settingsChanged(): Observable<PlayerSettings> {
         return this.settingsChangesBehaviorSubject.pipe(takeWhile(val =>
             val.email !== this._previousSettings.email
+            || val.password !== this._previousSettings.password
+            || val.name !== this._previousSettings.name
             || val.status !== this._previousSettings.status
             || val.numLetters !== this._previousSettings.numLetters
             || val.numHops !== this._previousSettings.numHops
@@ -110,6 +119,8 @@ export class PlayerService {
         // For the time being, just return defaults
         this._playerSettings = {
             email: null,
+            password: null,
+            name: "",
             status: PlayerStatus.OK,
             numLetters: DEFAULT_NUM_LETTERS,
             numHops: DEFAULT_NUM_HOPS,
@@ -121,14 +132,76 @@ export class PlayerService {
         this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 
+    register(): void {
+        // If the user settings are already loaded, do nothing here
+        this._playerSettings.status = PlayerStatus.SAVING;
+
+console.log("Player settings", this._playerSettings);
+
+        // Get all the possible solutions so we can show the user why they lose
+        this.dataService.register(
+            this._playerSettings.email,
+            this._playerSettings.password,
+            this._playerSettings.name,
+            this._playerSettings.numLetters,
+            this._playerSettings.numHops,
+            this._playerSettings.gameMode,
+            this._playerSettings.difficultyLevel,
+            this._playerSettings.hintType,
+            this._playerSettings.enableSounds
+        )
+        .then(
+            // Success
+            (LoginResult : LoginResult) => {
+                console.log("Register result", LoginResult);
+            },
+            // Failure
+            (err) => {
+            // API call for solutions failed, nothing to be done here
+                console.log("Register failed", err);
+            }
+        );
+    }
+
+    login(): void {
+        // If the user settings are already loaded, do nothing here
+        this._playerSettings.status = PlayerStatus.SAVING;
+
+        // Get all the possible solutions so we can show the user why they lose
+        this.dataService.login(
+            this._playerSettings.email,
+            this._playerSettings.password
+        )
+        .then(
+            // Success
+            (LoginResult : LoginResult) => {
+                console.log("Login result", LoginResult);
+            },
+            // Failure
+            (err) => {
+            // API call for solutions failed, nothing to be done here
+                console.log("Login failed", err);
+            }
+        );
+    }
+
     // Getters and Setters
     // The settings fire the subject of the settings observer
     public get email(): string {
         return this._playerSettings.email;
     }
-    private set email(s: string) {
+    public set email(s: string) {
         this._previousSettings.email = this._playerSettings.email;
         this._playerSettings.email = s;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+    }
+
+    public get password(): string {
+        return this._playerSettings.password;
+    }
+    public set password(s: string) {
+        this._previousSettings.password = this._playerSettings.password;
+        this._playerSettings.password = s;
         this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
 
@@ -140,6 +213,17 @@ export class PlayerService {
         this._playerSettings.status = s;
         this.settingsChangesBehaviorSubject.next(this._playerSettings);
     }
+
+    public get name(): string {
+        return this._playerSettings.name;
+    }
+    public set name(s: string) {
+        this._previousSettings.name = this._playerSettings.name;
+        this._playerSettings.name = s;
+        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+    }
+
+
 
     get numLetters() : number {
         return this._playerSettings.numLetters;
