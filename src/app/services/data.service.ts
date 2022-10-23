@@ -49,15 +49,19 @@ export interface SolutionSet {
 }
 
 export interface LoginResult {
-  success: boolean,
+  result: boolean,
+  error: string,
   email: string,
-  name: string,
-  numLetters: number,
-  numHops: number,
-  gameMode: number,
-  difficultyLevel: number,
-  hintType: number,
-  enableSounds: true
+  password: string,
+  settings: {
+    name: string,
+    numLetters: number,
+    numHops: number,
+    gameMode: number,
+    difficultyLevel: number,
+    hintType: number,
+    enableSounds: true
+  }
 }
 
 // Timeout for remote calls
@@ -174,12 +178,13 @@ export class DataService {
     );
   }
 
-  async login(email: string, password: string): Promise<LoginResult> {
+  async login(email: string, password: string, passwordIsHashed: boolean): Promise<LoginResult> {
     const body = {
       email: email,
-      password: password
+      password: password,
+      passwordIsHashed: passwordIsHashed
     };
-    console.log('Login: ' + JSON.stringify(body));
+    console.log('Dataservice Login: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<LoginResult>(
         'https://wordgameapi.mikebillings.com/api/v1/login',
@@ -193,26 +198,14 @@ export class DataService {
   async register(
     email: string,
     password: string,
-    name: string,
-    numLetters: number,
-    numHops: number,
-    gameMode: number,
-    difficultyLevel: number,
-    hintType: number,
-    enableSounds: boolean
+    settings: string // JSON format
   ): Promise<LoginResult> {
     const body = {
       email: email,
       password: password,
-      name: name,
-      numLetters: numLetters,
-      numHops: numHops,
-      gameMode: gameMode,
-      difficultyLevel: difficultyLevel,
-      hintType: hintType,
-      enableSounds: enableSounds
+      settings: settings
     };
-    console.log('Login: ' + JSON.stringify(body));
+    console.log('Dataservice Register: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<LoginResult>(
         'https://wordgameapi.mikebillings.com/api/v1/register',

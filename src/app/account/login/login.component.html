@@ -101,8 +101,14 @@
     </div>
 </div>
 <div class="modal-footer">
-    <label *ngIf="showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form">Login</label>
-    <label *ngIf="!showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form">Register</label>
+    <label *ngIf="showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Login
+    </label>
+    <label *ngIf="!showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Register
+    </label>
 
     <button
         type="button"

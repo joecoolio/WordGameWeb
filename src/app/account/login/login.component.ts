@@ -12,11 +12,12 @@ export class RegisterComponent implements OnInit {
   constructor(
     public activeModal: NgbActiveModal,
     private formBuilder: FormBuilder,
-    private playerService: PlayerService
+    private playerService: PlayerService,
   ) { }
 
   ngOnInit() {
     this.showLoginForm = true;
+    this.loading = false;
   }
 
   // Form fields
@@ -43,22 +44,46 @@ export class RegisterComponent implements OnInit {
     password: this.password
   });
 
+  // Flag to indicate that an API call is running
+  loading: boolean;
 
   onSubmitLogin(): void {
     // Process login
     console.log('Login: ', this.loginFormGroup.value);
-    this.playerService.email = this.email.value;
-    this.playerService.password = this.password.value;
   
-    this.playerService.login();
+    this.loading = true;
+    this.playerService.login(
+      this.email.value,
+      this.password.value,
+      false, // not a hashed password
+      // Success callback
+      ()=> {
+        console.log("Login success callback");
+        this.loading = false;
+      },
+      (error: string)=> {
+        console.log("Login failure callback", error);
+        this.loading = false;
+      }
+    );
   }
 
   onSubmitRegister(): void {
-    this.playerService.email = this.email.value;
-    this.playerService.password = this.password.value;
     this.playerService.name = this.name.value;
   
-    console.log('Register: ', this.registerFormGroup.value);
-    this.playerService.register();
+    this.loading = true;
+    this.playerService.register(
+      this.email.value,
+      this.password.value,
+      // Success callback
+      ()=> {
+        console.log("Register success callback");
+        this.loading = false;
+      },
+      (error: string)=> {
+        console.log("Register failure callback", error);
+        this.loading = false;
+      }
+    );
   }
 }

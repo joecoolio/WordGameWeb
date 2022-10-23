@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, from, Observable, of, takeWhile, tap } from 'rxjs';
 import { DataService, LoginResult } from './data.service';
+import { CookieService } from 'ngx-cookie-service';
 
 // Type of game the player wants to play
 export enum GameMode {
@@ -37,12 +38,8 @@ export enum PlayerStatus {
     OK                // Stable, use me now
 }
 
-// Set of player settings
 export interface PlayerSettings {
-    email: string,
-    password: string,
     name: string,
-    status: PlayerStatus,
     numLetters: number,
     numHops: number,
     gameMode: GameMode,
@@ -51,60 +48,80 @@ export interface PlayerSettings {
     enableSounds: boolean
 }
 
+// Set of all player info
+export interface PlayerInfo {
+    email: string,
+    password: string,
+    passwordIsHashed: boolean,
+    status: PlayerStatus,
+    settings: PlayerSettings
+}
+
 @Injectable({ providedIn: 'root' })
 export class PlayerService {
     // Current player settings
-    private _playerSettings : PlayerSettings;
+    private _playerInfo : PlayerInfo;
 
-    // Previous player settings (for change detection)
-    private _previousSettings : PlayerSettings;
+    // Previous player settings (for settings change detection)
+    private _previousPlayerInfo : PlayerInfo;
 
     // Subject for settings changed observer
-    private settingsChangesBehaviorSubject: BehaviorSubject<PlayerSettings>;
+    private settingsChangesBehaviorSubject: BehaviorSubject<PlayerInfo>;
 
-    constructor(private dataService: DataService) {
-        this._previousSettings = {
-            email: null,
-            password: null,
-            name: "",
-            status: -1,
-            numLetters: -1,
-            numHops: -1,
-            gameMode: -1,
-            difficultyLevel: -1,
-            hintType: -1,
-            enableSounds: false
+    constructor(private dataService: DataService, private cookieService: CookieService) {
+        if (cookieService.check('email')) {
+            let x = cookieService.get('email');
+            console.log("Stored email", x);
         }
 
-        this._playerSettings = {
+
+        this._previousPlayerInfo = {
             email: null,
             password: null,
-            name: "",
+            passwordIsHashed: false,
             status: PlayerStatus.NOT_INITIALIZED,
-            numLetters: DEFAULT_NUM_LETTERS,
-            numHops: DEFAULT_NUM_HOPS,
-            gameMode: DEFAULT_GAMEMODE,
-            difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
-            hintType: DEFAULT_HINTTYPE,
-            enableSounds: true
+            settings: {
+                name: "",
+                numLetters: -1,
+                numHops: -1,
+                gameMode: -1,
+                difficultyLevel: -1,
+                hintType: -1,
+                enableSounds: false
+            }
         }
 
-        this.settingsChangesBehaviorSubject = new BehaviorSubject(this._playerSettings);
+        this._playerInfo = {
+            email: null,
+            password: null,
+            passwordIsHashed: false,
+            status: PlayerStatus.NOT_INITIALIZED,
+            settings: {
+                name: "",
+                numLetters: DEFAULT_NUM_LETTERS,
+                numHops: DEFAULT_NUM_HOPS,
+                gameMode: DEFAULT_GAMEMODE,
+                difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
+                hintType: DEFAULT_HINTTYPE,
+                enableSounds: true
+            }
+        }
+
+        this.settingsChangesBehaviorSubject = new BehaviorSubject(this._playerInfo);
     }
 
     // Subscribe to this to be notified of player settings being changed
-    settingsChanged(): Observable<PlayerSettings> {
+    settingsChanged(): Observable<PlayerInfo> {
         return this.settingsChangesBehaviorSubject.pipe(takeWhile(val =>
-            val.email !== this._previousSettings.email
-            || val.password !== this._previousSettings.password
-            || val.name !== this._previousSettings.name
-            || val.status !== this._previousSettings.status
-            || val.numLetters !== this._previousSettings.numLetters
-            || val.numHops !== this._previousSettings.numHops
-            || val.gameMode !== this._previousSettings.gameMode
-            || val.difficultyLevel !== this._previousSettings.difficultyLevel
-            || val.hintType !== this._previousSettings.hintType
-            || val.enableSounds !== this._previousSettings.enableSounds
+            val.email !== this._previousPlayerInfo.email
+            || val.password !== this._previousPlayerInfo.password
+            || val.settings.name !== this._previousPlayerInfo.settings.name
+            || val.settings.numLetters !== this._previousPlayerInfo.settings.numLetters
+            || val.settings.numHops !== this._previousPlayerInfo.settings.numHops
+            || val.settings.gameMode !== this._previousPlayerInfo.settings.gameMode
+            || val.settings.difficultyLevel !== this._previousPlayerInfo.settings.difficultyLevel
+            || val.settings.hintType !== this._previousPlayerInfo.settings.hintType
+            || val.settings.enableSounds !== this._previousPlayerInfo.settings.enableSounds
         ))
         .pipe(tap(console.log))
         ;
@@ -113,74 +130,131 @@ export class PlayerService {
     // Request that the player is reloaded
     load(): void {
         // If the user settings are already loaded, do nothing here
-        this._playerSettings.status = PlayerStatus.LOADING;
+        this._playerInfo.status = PlayerStatus.LOADING;
 
         // TODO: This is where user information will be loaded from the db
         // For the time being, just return defaults
-        this._playerSettings = {
+        this._playerInfo = {
             email: null,
             password: null,
-            name: "",
+            passwordIsHashed: false,
             status: PlayerStatus.OK,
-            numLetters: DEFAULT_NUM_LETTERS,
-            numHops: DEFAULT_NUM_HOPS,
-            gameMode: DEFAULT_GAMEMODE,
-            difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
-            hintType: DEFAULT_HINTTYPE,
-            enableSounds: true
+            settings: {
+                name: "",
+                numLetters: DEFAULT_NUM_LETTERS,
+                numHops: DEFAULT_NUM_HOPS,
+                gameMode: DEFAULT_GAMEMODE,
+                difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
+                hintType: DEFAULT_HINTTYPE,
+                enableSounds: true
+            }
         };
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
-    register(): void {
-        // If the user settings are already loaded, do nothing here
-        this._playerSettings.status = PlayerStatus.SAVING;
-
-console.log("Player settings", this._playerSettings);
+    register(
+        email: string,
+        password: string,
+        successCallback: () => void,
+        failureCallback: (error: string) => void
+    ): void {
+        this._playerInfo.status = PlayerStatus.SAVING;
 
         // Get all the possible solutions so we can show the user why they lose
         this.dataService.register(
-            this._playerSettings.email,
-            this._playerSettings.password,
-            this._playerSettings.name,
-            this._playerSettings.numLetters,
-            this._playerSettings.numHops,
-            this._playerSettings.gameMode,
-            this._playerSettings.difficultyLevel,
-            this._playerSettings.hintType,
-            this._playerSettings.enableSounds
+            this._playerInfo.email,
+            this._playerInfo.password,
+            JSON.stringify(this._playerInfo.settings)
         )
         .then(
             // Success
-            (LoginResult : LoginResult) => {
-                console.log("Register result", LoginResult);
+            (loginResult : LoginResult) => {
+                console.log("Registration result", loginResult);
+                if (loginResult.result) {
+                    console.log("Registration succeeded", loginResult.email);
+
+                    // Grab the results
+                    this._playerInfo.email = loginResult.email;
+                    this._playerInfo.password = loginResult.password; // hashed
+                    this._playerInfo.passwordIsHashed = true;
+                    this._playerInfo.status = PlayerStatus.OK;
+                    this._playerInfo.settings = loginResult.settings;
+                    this.settingsChangesBehaviorSubject.next(this._playerInfo);
+
+                    // Save the email in a cookie for the next time
+                    this.cookieService.set('email', loginResult.email);
+                    this.cookieService.set('password', loginResult.password); //hashed
+
+                    // Run the callback for the UI
+                    successCallback();
+                } else {
+                    console.log("Registration failed", loginResult.error);
+
+                    // Run the callback for the UI
+                    failureCallback(loginResult.error);
+                }
             },
             // Failure
             (err) => {
             // API call for solutions failed, nothing to be done here
                 console.log("Register failed", err);
+
+                // Run the callback for the UI
+                failureCallback(err);
             }
         );
     }
 
-    login(): void {
-        // If the user settings are already loaded, do nothing here
-        this._playerSettings.status = PlayerStatus.SAVING;
+    login(
+        email: string,
+        password: string,
+        passwordIsHashed: boolean,
+        successCallback: () => void,
+        failureCallback: (error: string) => void
+    ): void {
+        this._playerInfo.status = PlayerStatus.SAVING;
 
-        // Get all the possible solutions so we can show the user why they lose
+        // Login and get settings
         this.dataService.login(
-            this._playerSettings.email,
-            this._playerSettings.password
+            email,
+            password,
+            passwordIsHashed
         )
         .then(
             // Success
-            (LoginResult : LoginResult) => {
-                console.log("Login result", LoginResult);
+            (loginResult : LoginResult) => {
+                console.log("Login result", loginResult);
+                if (loginResult.result) {
+                    console.log("Login succeeded", loginResult.email);
+
+                    // Grab the results
+                    this._playerInfo.email = loginResult.email;
+                    this._playerInfo.password = loginResult.password; // hashed
+                    this._playerInfo.passwordIsHashed = true;
+                    this._playerInfo.status = PlayerStatus.OK;
+                    this._playerInfo.settings = loginResult.settings;
+                    this.settingsChangesBehaviorSubject.next(this._playerInfo);
+
+                    // Save the email in a cookie for the next time
+                    this.cookieService.set('email', loginResult.email);
+                    this.cookieService.set('password', loginResult.password); //hashed
+
+                    // Run the callback for the UI
+                    successCallback();
+                } else {
+                    console.log("Login failed", loginResult.error);
+
+                    // Run the callback for the UI
+                    failureCallback(loginResult.error);
+                }
             },
             // Failure
             (err) => {
-            // API call for solutions failed, nothing to be done here
+            // API call for login failed, nothing to be done here
                 console.log("Login failed", err);
+
+                // Run the callback for the UI
+                failureCallback(err);
             }
         );
     }
@@ -188,95 +262,95 @@ console.log("Player settings", this._playerSettings);
     // Getters and Setters
     // The settings fire the subject of the settings observer
     public get email(): string {
-        return this._playerSettings.email;
+        return this._playerInfo.email;
     }
     public set email(s: string) {
-        this._previousSettings.email = this._playerSettings.email;
-        this._playerSettings.email = s;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.email = this._playerInfo.email;
+        this._playerInfo.email = s;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
     public get password(): string {
-        return this._playerSettings.password;
+        return this._playerInfo.password;
     }
     public set password(s: string) {
-        this._previousSettings.password = this._playerSettings.password;
-        this._playerSettings.password = s;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.password = this._playerInfo.password;
+        this._playerInfo.password = s;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
     public get status(): PlayerStatus {
-        return this._playerSettings.status;
+        return this._playerInfo.status;
     }
     private set status(s: PlayerStatus) {
-        this._previousSettings.status = this._playerSettings.status;
-        this._playerSettings.status = s;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.status = this._playerInfo.status;
+        this._playerInfo.status = s;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
     public get name(): string {
-        return this._playerSettings.name;
+        return this._playerInfo.settings.name;
     }
     public set name(s: string) {
-        this._previousSettings.name = this._playerSettings.name;
-        this._playerSettings.name = s;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.settings.name = this._playerInfo.settings.name;
+        this._playerInfo.settings.name = s;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
 
 
     get numLetters() : number {
-        return this._playerSettings.numLetters;
+        return this._playerInfo.settings.numLetters;
     }
     set numLetters(n: number) {
-        this._previousSettings.numLetters = this._playerSettings.numLetters;
-        this._playerSettings.numLetters = n;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.settings.numLetters = this._playerInfo.settings.numLetters;
+        this._playerInfo.settings.numLetters = n;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
     public get numHops(): number {
-        return this._playerSettings.numHops;
+        return this._playerInfo.settings.numHops;
     }
     public set numHops(value: number) {
-        this._previousSettings.numHops = this._playerSettings.numHops;
-        this._playerSettings.numHops = value;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.settings.numHops = this._playerInfo.settings.numHops;
+        this._playerInfo.settings.numHops = value;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
     public get gameMode(): GameMode {
-        return this._playerSettings.gameMode;
+        return this._playerInfo.settings.gameMode;
     }
     public set gameMode(value: GameMode) {
-        this._previousSettings.gameMode = this._playerSettings.gameMode;
-        this._playerSettings.gameMode = value;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.settings.gameMode = this._playerInfo.settings.gameMode;
+        this._playerInfo.settings.gameMode = value;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
     public get difficultyLevel(): DifficultyLevel {
-        return this._playerSettings.difficultyLevel;
+        return this._playerInfo.settings.difficultyLevel;
     }
     public set difficultyLevel(value: DifficultyLevel) {
-        this._previousSettings.difficultyLevel = this._playerSettings.difficultyLevel;
-        this._playerSettings.difficultyLevel = value;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.settings.difficultyLevel = this._playerInfo.settings.difficultyLevel;
+        this._playerInfo.settings.difficultyLevel = value;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
     public get hintType(): HintType {
-        return this._playerSettings.hintType;
+        return this._playerInfo.settings.hintType;
     }
     public set hintType(value: HintType) {
-        this._previousSettings.hintType = this._playerSettings.hintType;
-        this._playerSettings.hintType = value;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.settings.hintType = this._playerInfo.settings.hintType;
+        this._playerInfo.settings.hintType = value;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
     public get enableSounds(): boolean {
-        return this._playerSettings.enableSounds;
+        return this._playerInfo.settings.enableSounds;
     }
     public set enableSounds(value: boolean) {
-        this._previousSettings.enableSounds = this._playerSettings.enableSounds;
-        this._playerSettings.enableSounds = value;
-        this.settingsChangesBehaviorSubject.next(this._playerSettings);
+        this._previousPlayerInfo.settings.enableSounds = this._playerInfo.settings.enableSounds;
+        this._playerInfo.settings.enableSounds = value;
+        this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 
 }

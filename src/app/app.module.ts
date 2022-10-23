@@ -27,7 +27,7 @@ import { MatCardModule } from '@angular/material/card';
 // import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RegisterComponent as LoginComponent } from './account/login/login.component';
-
+import { CookieService } from 'ngx-cookie-service';
 
 // Bootstrap stuff
 // import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -59,7 +59,7 @@ import { RegisterComponent as LoginComponent } from './account/login/login.compo
     LoginComponent,
   ],
   bootstrap: [AppComponent],
-  providers: [],
+  providers: [CookieService],
   entryComponents: [],
 })
 export class AppModule {}

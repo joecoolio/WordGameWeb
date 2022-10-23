@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSet, ValidatedPuzzle } from './data.service';
 import { AudioService } from './audio.service';
-import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerSettings} from './player.service';
+import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerInfo} from './player.service';
 import { firstValueFrom, Subscription, timer } from 'rxjs';
 import { TimerService } from './timer.service';
 import { Board, Solution, WordStatus } from '../model/board';
@@ -37,7 +37,7 @@ export class GameService {
 
   // Parameters (that can change at any time) of the player
   private _playerSettingsSubscription: Subscription;
-  private _playerSettings: PlayerSettings;
+  private _playerSettings: PlayerInfo;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -104,11 +104,11 @@ export class GameService {
       this._gameStatus = GameStatus.Initialize;
 
       // Reset game parameters to the user's preferences
-      this._numLetters = this._playerSettings.numLetters;
-      this._numHops = this._playerSettings.numHops;
-      this._gameMode = this._playerSettings.gameMode;
-      this._difficultyLevel = this._playerSettings.difficultyLevel;
-      this._hintType = this._playerSettings.hintType;
+      this._numLetters = this._playerSettings.settings.numLetters;
+      this._numHops = this._playerSettings.settings.numHops;
+      this._gameMode = this._playerSettings.settings.gameMode;
+      this._difficultyLevel = this._playerSettings.settings.difficultyLevel;
+      this._hintType = this._playerSettings.settings.hintType;
 
       console.log(
         'Initialize new game: letters = ' + this._numLetters + ' / hops = ' + this._numHops +
@@ -176,7 +176,7 @@ export class GameService {
 
   private startGame() {
     // If it's a timed game, start the counter
-    if (this._playerSettings.gameMode == GameMode.Timed) {
+    if (this._playerSettings.settings.gameMode == GameMode.Timed) {
       this._timeExpired = false;
 
       // Stop the timer if it's already running
@@ -517,7 +517,7 @@ export class GameService {
     this._audioService.puzzleSolved();
 
     // Clean up timing stuff
-    if (this._playerSettings.gameMode == GameMode.Timed) {
+    if (this._playerSettings.settings.gameMode == GameMode.Timed) {
       this._timerService.stopTimer();
     }
   }
