@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, from, Observable, of, takeWhile, tap } from 'rxjs';
 import { DataService, LoginResult } from './data.service';
 import { CookieService } from 'ngx-cookie-service';
+import { HttpResponse } from '@angular/common/http';
 
 // Type of game the player wants to play
 export enum GameMode {
@@ -51,8 +52,6 @@ export interface PlayerSettings {
 // Set of all player info
 export interface PlayerInfo {
     email: string,
-    password: string,
-    passwordIsHashed: boolean,
     status: PlayerStatus,
     settings: PlayerSettings
 }
@@ -77,8 +76,6 @@ export class PlayerService {
 
         this._previousPlayerInfo = {
             email: null,
-            password: null,
-            passwordIsHashed: false,
             status: PlayerStatus.NOT_INITIALIZED,
             settings: {
                 name: "",
@@ -93,8 +90,6 @@ export class PlayerService {
 
         this._playerInfo = {
             email: null,
-            password: null,
-            passwordIsHashed: false,
             status: PlayerStatus.NOT_INITIALIZED,
             settings: {
                 name: "",
@@ -114,7 +109,6 @@ export class PlayerService {
     settingsChanged(): Observable<PlayerInfo> {
         return this.settingsChangesBehaviorSubject.pipe(takeWhile(val =>
             val.email !== this._previousPlayerInfo.email
-            || val.password !== this._previousPlayerInfo.password
             || val.settings.name !== this._previousPlayerInfo.settings.name
             || val.settings.numLetters !== this._previousPlayerInfo.settings.numLetters
             || val.settings.numHops !== this._previousPlayerInfo.settings.numHops
@@ -124,6 +118,7 @@ export class PlayerService {
             || val.settings.enableSounds !== this._previousPlayerInfo.settings.enableSounds
         ))
         .pipe(tap(console.log))
+        // TODO - save settings here
         ;
     }
 
@@ -132,24 +127,36 @@ export class PlayerService {
         // If the user settings are already loaded, do nothing here
         this._playerInfo.status = PlayerStatus.LOADING;
 
-        // TODO: This is where user information will be loaded from the db
-        // For the time being, just return defaults
-        this._playerInfo = {
-            email: null,
-            password: null,
-            passwordIsHashed: false,
-            status: PlayerStatus.OK,
-            settings: {
-                name: "",
-                numLetters: DEFAULT_NUM_LETTERS,
-                numHops: DEFAULT_NUM_HOPS,
-                gameMode: DEFAULT_GAMEMODE,
-                difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
-                hintType: DEFAULT_HINTTYPE,
-                enableSounds: true
+        // Get settings out of local storage if they are available
+        let email = localStorage.getItem('email');
+        let settings = localStorage.getItem('settings');
+        if (email != null && settings != null) {
+            this._playerInfo = {
+                email: email,
+                status: PlayerStatus.OK,
+                settings: JSON.parse(settings)
             }
-        };
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
+            this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        } else {
+            // TODO fire login somehow
+
+            // TODO: This is where user information will be loaded from the db
+            // For the time being, just return defaults
+            this._playerInfo = {
+                email: null,
+                status: PlayerStatus.OK,
+                settings: {
+                    name: "",
+                    numLetters: DEFAULT_NUM_LETTERS,
+                    numHops: DEFAULT_NUM_HOPS,
+                    gameMode: DEFAULT_GAMEMODE,
+                    difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
+                    hintType: DEFAULT_HINTTYPE,
+                    enableSounds: true
+                }
+            };
+            this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        }
     }
 
     register(
@@ -162,28 +169,28 @@ export class PlayerService {
 
         // Get all the possible solutions so we can show the user why they lose
         this.dataService.register(
-            this._playerInfo.email,
-            this._playerInfo.password,
+            email,
+            password,
             JSON.stringify(this._playerInfo.settings)
         )
         .then(
             // Success
-            (loginResult : LoginResult) => {
+            (resp : HttpResponse<LoginResult>) => {
+                let loginResult: LoginResult = resp.body;
                 console.log("Registration result", loginResult);
                 if (loginResult.result) {
                     console.log("Registration succeeded", loginResult.email);
 
                     // Grab the results
                     this._playerInfo.email = loginResult.email;
-                    this._playerInfo.password = loginResult.password; // hashed
-                    this._playerInfo.passwordIsHashed = true;
                     this._playerInfo.status = PlayerStatus.OK;
-                    this._playerInfo.settings = loginResult.settings;
+                    this._playerInfo.settings = JSON.parse(loginResult.settings);
                     this.settingsChangesBehaviorSubject.next(this._playerInfo);
 
-                    // Save the email in a cookie for the next time
-                    this.cookieService.set('email', loginResult.email);
-                    this.cookieService.set('password', loginResult.password); //hashed
+                    // Save stuff locally for later
+                    localStorage.setItem('email', loginResult.email);
+                    localStorage.setItem('jwt', resp.headers.get('Authorization'));
+                    localStorage.setItem('settings', loginResult.settings);
 
                     // Run the callback for the UI
                     successCallback();
@@ -208,7 +215,6 @@ export class PlayerService {
     login(
         email: string,
         password: string,
-        passwordIsHashed: boolean,
         successCallback: () => void,
         failureCallback: (error: string) => void
     ): void {
@@ -217,27 +223,26 @@ export class PlayerService {
         // Login and get settings
         this.dataService.login(
             email,
-            password,
-            passwordIsHashed
+            password
         )
         .then(
             // Success
-            (loginResult : LoginResult) => {
+            (resp : HttpResponse<LoginResult>) => {
+                let loginResult: LoginResult = resp.body;
                 console.log("Login result", loginResult);
                 if (loginResult.result) {
                     console.log("Login succeeded", loginResult.email);
 
                     // Grab the results
                     this._playerInfo.email = loginResult.email;
-                    this._playerInfo.password = loginResult.password; // hashed
-                    this._playerInfo.passwordIsHashed = true;
                     this._playerInfo.status = PlayerStatus.OK;
-                    this._playerInfo.settings = loginResult.settings;
+                    this._playerInfo.settings = JSON.parse(loginResult.settings);
                     this.settingsChangesBehaviorSubject.next(this._playerInfo);
 
                     // Save the email in a cookie for the next time
-                    this.cookieService.set('email', loginResult.email);
-                    this.cookieService.set('password', loginResult.password); //hashed
+                    localStorage.setItem('email', loginResult.email);
+                    localStorage.setItem('jwt', resp.headers.get('Authorization'));
+                    localStorage.setItem('settings', loginResult.settings);
 
                     // Run the callback for the UI
                     successCallback();
@@ -267,15 +272,6 @@ export class PlayerService {
     public set email(s: string) {
         this._previousPlayerInfo.email = this._playerInfo.email;
         this._playerInfo.email = s;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
-    }
-
-    public get password(): string {
-        return this._playerInfo.password;
-    }
-    public set password(s: string) {
-        this._previousPlayerInfo.password = this._playerInfo.password;
-        this._playerInfo.password = s;
         this.settingsChangesBehaviorSubject.next(this._playerInfo);
     }
 

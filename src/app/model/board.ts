@@ -7,8 +7,7 @@ export enum WordStatus {
     Wrong,        // Verified as wrong
     Testing,      // Currently being tested
     Loading,      // Currently being loaded
-    Broken,       // Something broke while talking to the server, try again
-    PairWord      // The word is part of the puzzle pair
+    Broken        // Something broke while talking to the server, try again
 }
 
 // A game board
@@ -39,20 +38,18 @@ export class Board {
             this._words.push(new Word(numLetters));
         }
 
-        // Setup pair word status
-        this.setPairWordStatus(WordStatus.PairWord);
+        // Preconfigure pair words
+        this._words[0].locked = true;
+        this._words[0].pairWord = true;
+        this._words[this.numHops].locked = true;
+        this._words[this.numHops].pairWord = true;
     };
 
     // Initialize the game with a pair of words
     initialize(startWord: string, endWord: string) {
         this._words[0].setText(startWord);
-        this._words[0].locked = true;
 
         this._words[this.numHops].setText(endWord);
-        this._words[this.numHops].locked = true;
-
-        // Setup pair word status
-        this.setPairWordStatus(WordStatus.PairWord);
 
         // Pair words are not user entered
         this._words[0].letters.forEach((letter) => { letter.userEntered = false; });
@@ -132,7 +129,7 @@ export class Board {
         );
         
         // Set the flip subscription to be unsubscribed when the game is disposed
-        return showSolutionSubscription
+        return showSolutionSubscription;
     }
 
     // Number of words on the board always = hops + 1
@@ -160,6 +157,9 @@ export class Word {
 
     // Can the word be changed
     private _locked: boolean;
+
+    // Is this word one of the pair words
+    private _pairWord: boolean;
 
     // Current word status
     private _status: WordStatus;
@@ -247,6 +247,12 @@ export class Word {
         for(let i = 0; i < length; i++) {
             this._letters[i].locked = value;
         }
+    }
+    public get pairWord(): boolean {
+        return this._pairWord;
+    }
+    public set pairWord(value: boolean) {
+        this._pairWord = value;
     }
     public get status(): WordStatus {
         return this._status;

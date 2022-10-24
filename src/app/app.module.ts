@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 
 // Neccessary for the app
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 
 // App components
 import { AppComponent } from './app.component';
@@ -28,6 +28,7 @@ import { MatCardModule } from '@angular/material/card';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RegisterComponent as LoginComponent } from './account/login/login.component';
 import { CookieService } from 'ngx-cookie-service';
+import { JwtInterceptor } from './services/interceptor.service';
 
 // Bootstrap stuff
 // import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -59,7 +60,14 @@ import { CookieService } from 'ngx-cookie-service';
     LoginComponent,
   ],
   bootstrap: [AppComponent],
-  providers: [CookieService],
+  providers: [
+    CookieService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: JwtInterceptor,
+      multi: true,
+    }
+  ],
   entryComponents: [],
 })
 export class AppModule {}

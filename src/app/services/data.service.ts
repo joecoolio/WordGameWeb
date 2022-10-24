@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, timeout } from 'rxjs';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { filter, firstValueFrom, tap, timeout } from 'rxjs';
 
 export interface WordPair {
   startWord: string;
@@ -8,20 +8,17 @@ export interface WordPair {
   letters: number;
   hops: number;
   words: number;
-  executionTime: number;
 }
 
 export interface TestedWord {
   testPosition: number;
   valid: boolean;
   error: string;
-  executionTime: number;
 }
 
 export interface ValidatedPuzzle {
   valid: boolean;
   error: string;
-  executionTime: number;
 }
 
 export interface BasicHint {
@@ -30,7 +27,6 @@ export interface BasicHint {
   hintLetter: string;
   valid: boolean;
   error: string;
-  executionTime: number;
 }
 
 export interface WholeWordHint {
@@ -38,30 +34,20 @@ export interface WholeWordHint {
   hintText: string;
   valid: boolean;
   error: string;
-  executionTime: number;
 }
 
 export interface SolutionSet {
   solutions: string[][],
   valid: boolean;
   error: string;
-  executionTime: number;
 }
 
 export interface LoginResult {
   result: boolean,
   error: string,
   email: string,
-  password: string,
-  settings: {
-    name: string,
-    numLetters: number,
-    numHops: number,
-    gameMode: number,
-    difficultyLevel: number,
-    hintType: number,
-    enableSounds: true
-  }
+  jwt: string,
+  settings: string
 }
 
 // Timeout for remote calls
@@ -73,12 +59,15 @@ const HTTP_TIMEOUT: number = 5000;
 export class DataService {
   constructor(private http: HttpClient) {}
 
+  // Execution time in ms of last command
+  private _lastExecutionTime: number;
+
   // Get a new pair of words to play
   async getPair(numLetters: number, numHops: number): Promise<WordPair> {
     const body = { letters: numLetters, hops: numHops };
     return await firstValueFrom(
       this.http.post<WordPair>(
-        'https://wordgameapi.mikebillings.com/api/v1/getWordPair',
+        'https://wordgameapi.mikebillings.com/api/v1/game/getWordPair',
         body
       ).pipe(
         // takeUntil(this.componentIsDestroyed$),
@@ -106,7 +95,7 @@ export class DataService {
     };
     return await firstValueFrom(
       this.http.post<TestedWord>(
-        'https://wordgameapi.mikebillings.com/api/v1/testWord',
+        'https://wordgameapi.mikebillings.com/api/v1/game/testWord',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -123,7 +112,7 @@ export class DataService {
     };
     return await firstValueFrom(
       this.http.post<ValidatedPuzzle>(
-        'https://wordgameapi.mikebillings.com/api/v1/validatePuzzle',
+        'https://wordgameapi.mikebillings.com/api/v1/game/validatePuzzle',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -139,7 +128,7 @@ export class DataService {
     console.log('Ask Hint: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<BasicHint>(
-        'https://wordgameapi.mikebillings.com/api/v1/getHint',
+        'https://wordgameapi.mikebillings.com/api/v1/game/getHint',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -155,7 +144,7 @@ export class DataService {
     console.log('Ask Hint: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<WholeWordHint>(
-        'https://wordgameapi.mikebillings.com/api/v1/getFullHint',
+        'https://wordgameapi.mikebillings.com/api/v1/game/getFullHint',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -170,7 +159,7 @@ export class DataService {
     console.log('Ask For Solutions: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<SolutionSet>(
-        'https://wordgameapi.mikebillings.com/api/v1/getAllSolutions',
+        'https://wordgameapi.mikebillings.com/api/v1/game/getAllSolutions',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -178,19 +167,26 @@ export class DataService {
     );
   }
 
-  async login(email: string, password: string, passwordIsHashed: boolean): Promise<LoginResult> {
+  async login(email: string, password: string): Promise<HttpResponse<LoginResult>> {
     const body = {
       email: email,
-      password: password,
-      passwordIsHashed: passwordIsHashed
+      password: password
     };
     console.log('Dataservice Login: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<LoginResult>(
-        'https://wordgameapi.mikebillings.com/api/v1/login',
-        body
+        'https://wordgameapi.mikebillings.com/api/v1/auth/login',
+        body,
+        { observe: 'response' }
       ).pipe(
-        timeout(HTTP_TIMEOUT)
+        timeout(HTTP_TIMEOUT),
+        filter(event => event instanceof HttpResponse),
+        tap<HttpResponse<any>>(
+          response => {
+            this._lastExecutionTime = parseFloat(response.headers.get('ExecutionTime'));
+            console.log("exec time:", this._lastExecutionTime);
+          }
+        )
       )
     );
   }
@@ -199,7 +195,7 @@ export class DataService {
     email: string,
     password: string,
     settings: string // JSON format
-  ): Promise<LoginResult> {
+  ): Promise<HttpResponse<LoginResult>> {
     const body = {
       email: email,
       password: password,
@@ -208,12 +204,23 @@ export class DataService {
     console.log('Dataservice Register: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<LoginResult>(
-        'https://wordgameapi.mikebillings.com/api/v1/register',
-        body
+        'https://wordgameapi.mikebillings.com/api/v1/auth/register',
+        body,
+        { observe: 'response' }
       ).pipe(
-        timeout(HTTP_TIMEOUT)
+        timeout(HTTP_TIMEOUT),
+        filter(event => event instanceof HttpResponse),
+        tap<HttpResponse<any>>(
+          response => {
+            this._lastExecutionTime = parseFloat(response.headers.get('ExecutionTime'))
+          }
+        )
       )
     );
+  }
+
+  public get lastExecutionTime(): number {
+    return this._lastExecutionTime;
   }
 
 }

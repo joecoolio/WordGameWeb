@@ -55,7 +55,6 @@ export class RegisterComponent implements OnInit {
     this.playerService.login(
       this.email.value,
       this.password.value,
-      false, // not a hashed password
       // Success callback
       ()=> {
         console.log("Login success callback");

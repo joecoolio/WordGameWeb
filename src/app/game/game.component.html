@@ -16,14 +16,14 @@
         [ngClass]="{
           'shake': word.status == enumWordStatus.Wrong && gameService.gameStatus == enumGameStatus.Run,
           'bounceSize': word.status == enumWordStatus.Solved && gameService.gameStatus == enumGameStatus.Run,
-          'locked': word.status == enumWordStatus.PairWord,
+          'locked': word.pairWord,
           'solved': word.status == enumWordStatus.Solved,
           'wrong': word.status == enumWordStatus.Wrong,
           'highlighted':
             gameService.selectedWord === i &&
             gameService.selectedLetter === j,
           'on-path': isLetterOnPath(letter, i, j),
-          'solution': word.status != enumWordStatus.PairWord && !letter.userEntered
+          'solution': !word.pairWord && !letter.userEntered
         }">
 
         <!-- Show the letter unless it's the first/last row insane mode and the letter doesn't match -->
@@ -42,10 +42,10 @@
         </ng-container>
         
         <!-- Spinner while the letter is loading -->
-        <fa-icon *ngIf="word.status == enumWordStatus.Loading" class="icon testing fa-spin" [style.font-size.px]="iconFontSize" [icon]="faSpinner"></fa-icon>
+        <fa-icon *ngIf="word.pairWord && word.status == enumWordStatus.Loading" class="icon testing fa-spin" [style.font-size.px]="iconFontSize" [icon]="faSpinner"></fa-icon>
 
         <!-- Frowny face if the game is broken -->
-        <fa-icon *ngIf="word.status == enumWordStatus.PairWord && gameService.gameStatus == enumGameStatus.Broken" class="icon" [icon]="faFaceFrown"></fa-icon>
+        <fa-icon *ngIf="word.pairWord && word.status == enumWordStatus.Broken" class="icon broken" [icon]="faFaceFrown"></fa-icon>
       </div>
 
       <!-- The rest of these are icons depending on the word -->
@@ -60,7 +60,7 @@
             unverified: gameService.gameStatus == enumGameStatus.Run,
             'fa-spin': gameService.gameStatus == enumGameStatus.Initialize
           }"
-          *ngIf="word.status == enumWordStatus.PairWord && i === 0" (click)="newGame()" [icon]="faRepeat"></fa-icon>
+          *ngIf="word.pairWord && i === 0" (click)="newGame()" [icon]="faRepeat"></fa-icon>
 
         <!-- Timer at bottom -->
         <div class="timer"
@@ -71,7 +71,7 @@
             solved: gameService.gameStatus == enumGameStatus.Win,
             expired: gameService.gameStatus == enumGameStatus.Timeout
           }"
-          *ngIf="word.status == enumWordStatus.PairWord && i != 0 && gameService.gameMode == enumGameMode.Timed">
+          *ngIf="word.pairWord && i != 0 && gameService.gameMode == enumGameMode.Timed">
           {{ formatTimer(gameService.timeRemaining) }}
         </div>
 
@@ -80,6 +80,7 @@
 
           <!-- Unverified word -->
           <fa-icon *ngIf="
+            !word.pairWord &&
             word.populated &&
             word.status == enumWordStatus.Initialized
           " class="icon unverified" (click)="testWord(i)" [icon]="faCircleQuestion"></fa-icon>
@@ -94,7 +95,7 @@
           <fa-icon *ngIf="word.status == enumWordStatus.Testing" class="icon testing fa-spin" (click)="testWord(i)" [icon]="faSpinner"></fa-icon>
 
           <!-- Broken word -->
-          <fa-icon *ngIf="word.status == enumWordStatus.Broken" class="icon broken" (click)="testWord(i)" [icon]="faCircleXmark"></fa-icon>
+          <fa-icon *ngIf="!word.pairWord && word.status == enumWordStatus.Broken" class="icon broken" (click)="testWord(i)" [icon]="faCircleXmark"></fa-icon>
           
           <!-- No icon -->
           <div *ngIf="

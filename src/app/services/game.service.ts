@@ -36,8 +36,8 @@ export class GameService {
   private _hintType: HintType;
 
   // Parameters (that can change at any time) of the player
-  private _playerSettingsSubscription: Subscription;
-  private _playerSettings: PlayerInfo;
+  private _playerInfoSubscription: Subscription;
+  private _playerInfo: PlayerInfo;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -47,7 +47,6 @@ export class GameService {
   private _message: string = '';
 
   // Execution time of the last api call
-  private _lastExecutionTimeAPI: number = 0; // Exec time on the server
   private _lastExecutionTime: number = 0; // Round trip execution
 
   // Timer subscriptions for timed game
@@ -66,11 +65,11 @@ export class GameService {
     private _timerService: TimerService)
   {
     // Subscribe to get player settings when they change
-    this._playerSettingsSubscription = this._playerService.settingsChanged().subscribe({
-      next: (newPlayerSettings) => {
+    this._playerInfoSubscription = this._playerService.settingsChanged().subscribe({
+      next: (newPlayerInfo) => {
           // User settings changed
-          console.log("Loaded user: " + JSON.stringify(newPlayerSettings));
-          this._playerSettings = newPlayerSettings;
+          console.log("Loaded user: " + JSON.stringify(newPlayerInfo));
+          this._playerInfo = newPlayerInfo;
       },
       error: (err) => {
           // User load failed
@@ -104,11 +103,11 @@ export class GameService {
       this._gameStatus = GameStatus.Initialize;
 
       // Reset game parameters to the user's preferences
-      this._numLetters = this._playerSettings.settings.numLetters;
-      this._numHops = this._playerSettings.settings.numHops;
-      this._gameMode = this._playerSettings.settings.gameMode;
-      this._difficultyLevel = this._playerSettings.settings.difficultyLevel;
-      this._hintType = this._playerSettings.settings.hintType;
+      this._numLetters = this._playerInfo.settings.numLetters;
+      this._numHops = this._playerInfo.settings.numHops;
+      this._gameMode = this._playerInfo.settings.gameMode;
+      this._difficultyLevel = this._playerInfo.settings.difficultyLevel;
+      this._hintType = this._playerInfo.settings.hintType;
 
       console.log(
         'Initialize new game: letters = ' + this._numLetters + ' / hops = ' + this._numHops +
@@ -120,7 +119,6 @@ export class GameService {
       // Setup a new board
       this._board = new Board(this._numLetters, this._numHops);
       this._message = 'Requesting a pair of words...';
-
       var execStartTime = performance.now();
 
       // Flag puzzle as loading
@@ -133,7 +131,6 @@ export class GameService {
           (wordpair: WordPair) => {
             this._wordPair = { ...wordpair };
             this._lastExecutionTime = performance.now() - execStartTime;
-            this._lastExecutionTimeAPI = this._wordPair.executionTime;
 
             console.log('Got wordpair: ' + JSON.stringify(this._wordPair));
             this._board.initialize(this._wordPair.startWord, this._wordPair.endWord);
@@ -176,7 +173,7 @@ export class GameService {
 
   private startGame() {
     // If it's a timed game, start the counter
-    if (this._playerSettings.settings.gameMode == GameMode.Timed) {
+    if (this._playerInfo.settings.gameMode == GameMode.Timed) {
       this._timeExpired = false;
 
       // Stop the timer if it's already running
@@ -376,7 +373,6 @@ export class GameService {
         (testedWord: TestedWord) => {
           // Test is done
           this._lastExecutionTime = performance.now() - execStartTime;
-          this._lastExecutionTimeAPI = testedWord.executionTime;
 
           if (testedWord.valid) {
             // Word is solved
@@ -472,7 +468,6 @@ export class GameService {
           if (validatedPuzzle.valid) {
             // Puzzle is valid
             this._lastExecutionTime = performance.now() - execStartTime;
-            this._lastExecutionTimeAPI = validatedPuzzle.executionTime;
   
             // You win!  Call this to report the completion.
             this.win();
@@ -517,7 +512,7 @@ export class GameService {
     this._audioService.puzzleSolved();
 
     // Clean up timing stuff
-    if (this._playerSettings.settings.gameMode == GameMode.Timed) {
+    if (this._playerInfo.settings.gameMode == GameMode.Timed) {
       this._timerService.stopTimer();
     }
   }
@@ -611,7 +606,6 @@ export class GameService {
             console.log('Got basic hint: ' + JSON.stringify(basicHint));
             // Test is done
             this._lastExecutionTime = performance.now() - execStartTime;
-            this._lastExecutionTimeAPI = basicHint.executionTime;
 
             if (basicHint.valid) {
               // Word is not solved, not wrong, not broken
@@ -659,7 +653,6 @@ export class GameService {
           (wordHint : WholeWordHint) => {
             console.log('Got whole-word hint: ' + JSON.stringify(wordHint));
             this._lastExecutionTime = performance.now() - execStartTime;
-            this._lastExecutionTimeAPI = wordHint.executionTime;
 
 
             if (wordHint.valid) {
@@ -753,10 +746,6 @@ export class GameService {
 
   get lastExecutionTime() {
     return this._lastExecutionTime;
-  }
-
-  get lastExecutionTimeAPI() {
-    return this._lastExecutionTimeAPI;
   }
 
   public get difficultyLevel(): DifficultyLevel {
