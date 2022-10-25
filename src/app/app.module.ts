@@ -29,6 +29,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RegisterComponent as LoginComponent } from './account/login/login.component';
 import { CookieService } from 'ngx-cookie-service';
 import { JwtInterceptor } from './services/interceptor.service';
+import { AuthInterceptor } from './services/auth.interceptor';
 
 // Bootstrap stuff
 // import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -64,7 +65,7 @@ import { JwtInterceptor } from './services/interceptor.service';
     CookieService,
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: JwtInterceptor,
+      useClass: AuthInterceptor,
       multi: true,
     }
   ],

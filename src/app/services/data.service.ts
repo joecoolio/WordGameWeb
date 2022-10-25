@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { filter, firstValueFrom, tap, timeout } from 'rxjs';
 
+const AUTH_API = 'https://wordgameapi.mikebillings.com/api/v2';
+
 export interface WordPair {
   startWord: string;
   endWord: string;
@@ -42,12 +44,14 @@ export interface SolutionSet {
   error: string;
 }
 
-export interface LoginResult {
-  result: boolean,
-  error: string,
-  email: string,
-  jwt: string,
-  settings: string
+export interface SettingsResult {
+  name: string,
+  numLetters: number,
+  numHops: number,
+  gameMode: number,
+  difficultyLevel: number,
+  hintType: number,
+  enableSounds: boolean
 }
 
 // Timeout for remote calls
@@ -62,12 +66,29 @@ export class DataService {
   // Execution time in ms of last command
   private _lastExecutionTime: number;
 
+  // Get user settings
+  async getSettings(): Promise<HttpResponse<SettingsResult>> {
+    return await firstValueFrom(
+      this.http.post<SettingsResult>(
+        AUTH_API + '/user/getSettings',
+        "",
+        { observe: 'response' }
+      ).pipe(
+        // takeUntil(this.componentIsDestroyed$),
+        // takeUntil(this.cancelRestCall$),
+        timeout(HTTP_TIMEOUT),
+        // retry(3)
+      )
+    );
+  }
+
+
   // Get a new pair of words to play
   async getPair(numLetters: number, numHops: number): Promise<WordPair> {
     const body = { letters: numLetters, hops: numHops };
     return await firstValueFrom(
       this.http.post<WordPair>(
-        'https://wordgameapi.mikebillings.com/api/v1/game/getWordPair',
+        AUTH_API + '/game/getWordPair',
         body
       ).pipe(
         // takeUntil(this.componentIsDestroyed$),
@@ -95,7 +116,7 @@ export class DataService {
     };
     return await firstValueFrom(
       this.http.post<TestedWord>(
-        'https://wordgameapi.mikebillings.com/api/v1/game/testWord',
+        AUTH_API + '/game/testWord',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -112,7 +133,7 @@ export class DataService {
     };
     return await firstValueFrom(
       this.http.post<ValidatedPuzzle>(
-        'https://wordgameapi.mikebillings.com/api/v1/game/validatePuzzle',
+        AUTH_API + '/game/validatePuzzle',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -128,7 +149,7 @@ export class DataService {
     console.log('Ask Hint: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<BasicHint>(
-        'https://wordgameapi.mikebillings.com/api/v1/game/getHint',
+        AUTH_API + '/game/getHint',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -144,7 +165,7 @@ export class DataService {
     console.log('Ask Hint: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<WholeWordHint>(
-        'https://wordgameapi.mikebillings.com/api/v1/game/getFullHint',
+        AUTH_API + '/game/getFullHint',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -159,62 +180,10 @@ export class DataService {
     console.log('Ask For Solutions: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<SolutionSet>(
-        'https://wordgameapi.mikebillings.com/api/v1/game/getAllSolutions',
+        AUTH_API + '/game/getAllSolutions',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
-      )
-    );
-  }
-
-  async login(email: string, password: string): Promise<HttpResponse<LoginResult>> {
-    const body = {
-      email: email,
-      password: password
-    };
-    console.log('Dataservice Login: ' + JSON.stringify(body));
-    return await firstValueFrom(
-      this.http.post<LoginResult>(
-        'https://wordgameapi.mikebillings.com/api/v1/auth/login',
-        body,
-        { observe: 'response' }
-      ).pipe(
-        timeout(HTTP_TIMEOUT),
-        filter(event => event instanceof HttpResponse),
-        tap<HttpResponse<any>>(
-          response => {
-            this._lastExecutionTime = parseFloat(response.headers.get('ExecutionTime'));
-            console.log("exec time:", this._lastExecutionTime);
-          }
-        )
-      )
-    );
-  }
-
-  async register(
-    email: string,
-    password: string,
-    settings: string // JSON format
-  ): Promise<HttpResponse<LoginResult>> {
-    const body = {
-      email: email,
-      password: password,
-      settings: settings
-    };
-    console.log('Dataservice Register: ' + JSON.stringify(body));
-    return await firstValueFrom(
-      this.http.post<LoginResult>(
-        'https://wordgameapi.mikebillings.com/api/v1/auth/register',
-        body,
-        { observe: 'response' }
-      ).pipe(
-        timeout(HTTP_TIMEOUT),
-        filter(event => event instanceof HttpResponse),
-        tap<HttpResponse<any>>(
-          response => {
-            this._lastExecutionTime = parseFloat(response.headers.get('ExecutionTime'))
-          }
-        )
       )
     );
   }

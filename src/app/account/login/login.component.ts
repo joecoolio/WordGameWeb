@@ -58,7 +58,21 @@ export class RegisterComponent implements OnInit {
       // Success callback
       ()=> {
         console.log("Login success callback");
+        
+        // Get user settings
+        this.playerService.getSettings(
+          ()=> {
+            console.log("Settings success callback");
+    
+          },
+          (error: string)=> {
+            console.log("Settings failure callback", error);
+            this.loading = false;
+          }
+        );
+          
         this.loading = false;
+
       },
       (error: string)=> {
         console.log("Login failure callback", error);

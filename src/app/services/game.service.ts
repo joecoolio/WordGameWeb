@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSet, ValidatedPuzzle } from './data.service';
 import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerInfo} from './player.service';
-import { firstValueFrom, Subscription, timer } from 'rxjs';
+import { firstValueFrom, skip, Subscription } from 'rxjs';
 import { TimerService } from './timer.service';
-import { Board, Solution, WordStatus } from '../model/board';
+import { Board, WordStatus } from '../model/board';
 
 export enum GameStatus {
   Initialize,  // The game isn't setup yet
@@ -65,7 +65,7 @@ export class GameService {
     private _timerService: TimerService)
   {
     // Subscribe to get player settings when they change
-    this._playerInfoSubscription = this._playerService.settingsChanged().subscribe({
+    this._playerInfoSubscription = this._playerService.settingsChanged().pipe(skip(1)).subscribe({
       next: (newPlayerInfo) => {
           // User settings changed
           console.log("Loaded user: " + JSON.stringify(newPlayerInfo));
@@ -78,7 +78,7 @@ export class GameService {
     });
 
     // Ask the player service to load (will be notified via settingsChanged observer)
-    this._playerService.load();
+    this._playerService.getSettings(()=>{}, ()=>{});
 
     // Setup the per game subscriptions
     this._perGameSubscriptions = new Subscription();
@@ -90,7 +90,7 @@ export class GameService {
   // Create a new game
   async newGame() : Promise<void> {
     // Do not try to start a game until the player has been loaded
-    await firstValueFrom(this._playerService.settingsChanged());
+    await firstValueFrom(this._playerService.settingsChanged().pipe(skip(1)));
     console.log("Initial player load has occured");
 
     // Reset anything required from the previous game

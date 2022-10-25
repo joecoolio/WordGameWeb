@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, from, Observable, of, takeWhile, tap } from 'rxjs';
-import { DataService, LoginResult } from './data.service';
+import { DataService, SettingsResult } from './data.service';
 import { CookieService } from 'ngx-cookie-service';
 import { HttpResponse } from '@angular/common/http';
+import { AuthService, LoginResult } from './auth.service';
+import { TokenService } from './token.service';
 
 // Type of game the player wants to play
 export enum GameMode {
@@ -25,11 +27,14 @@ export enum HintType {
 }
 
 // Defaults:
-export const DEFAULT_NUM_LETTERS: number = 5;
-export const DEFAULT_NUM_HOPS: number = 5;
-export const DEFAULT_GAMEMODE: GameMode = GameMode.Normal;
-export const DEFAULT_DIFFICULTYLEVEL: DifficultyLevel = DifficultyLevel.Normal;
-export const DEFAULT_HINTTYPE: HintType = HintType.Basic;
+const DEFAULT_NUM_LETTERS: number = 5;
+const DEFAULT_NUM_HOPS: number = 5;
+const DEFAULT_GAMEMODE: GameMode = GameMode.Normal;
+const DEFAULT_DIFFICULTYLEVEL: DifficultyLevel = DifficultyLevel.Normal;
+const DEFAULT_ENABLESOUNDS: boolean = true;
+const DEFAULT_HINTTYPE: HintType = HintType.Basic;
+const DEFAULT_NAME: string = "Guest";
+const DEFAULT_EMAIL: string = "guest@guest.com";
 
 // Status of the player settings
 export enum PlayerStatus {
@@ -67,7 +72,12 @@ export class PlayerService {
     // Subject for settings changed observer
     private settingsChangesBehaviorSubject: BehaviorSubject<PlayerInfo>;
 
-    constructor(private dataService: DataService, private cookieService: CookieService) {
+    constructor(
+        private dataService: DataService,
+        private cookieService: CookieService,
+        private authService: AuthService,
+        private tokenService: TokenService
+    ) {
         if (cookieService.check('email')) {
             let x = cookieService.get('email');
             console.log("Stored email", x);
@@ -117,46 +127,16 @@ export class PlayerService {
             || val.settings.hintType !== this._previousPlayerInfo.settings.hintType
             || val.settings.enableSounds !== this._previousPlayerInfo.settings.enableSounds
         ))
-        .pipe(tap(console.log))
-        // TODO - save settings here
-        ;
-    }
-
-    // Request that the player is reloaded
-    load(): void {
-        // If the user settings are already loaded, do nothing here
-        this._playerInfo.status = PlayerStatus.LOADING;
-
-        // Get settings out of local storage if they are available
-        let email = localStorage.getItem('email');
-        let settings = localStorage.getItem('settings');
-        if (email != null && settings != null) {
-            this._playerInfo = {
-                email: email,
-                status: PlayerStatus.OK,
-                settings: JSON.parse(settings)
-            }
-            this.settingsChangesBehaviorSubject.next(this._playerInfo);
-        } else {
-            // TODO fire login somehow
-
-            // TODO: This is where user information will be loaded from the db
-            // For the time being, just return defaults
-            this._playerInfo = {
-                email: null,
-                status: PlayerStatus.OK,
-                settings: {
-                    name: "",
-                    numLetters: DEFAULT_NUM_LETTERS,
-                    numHops: DEFAULT_NUM_HOPS,
-                    gameMode: DEFAULT_GAMEMODE,
-                    difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
-                    hintType: DEFAULT_HINTTYPE,
-                    enableSounds: true
+        .pipe(
+            tap<PlayerInfo>(
+                playerInfo => {
+                    this.saveSettings(
+                        ()=>{ console.log("Settings saved"); },
+                        (error: string)=>{ console.log("Save settings failed", error); }
+                    )
                 }
-            };
-            this.settingsChangesBehaviorSubject.next(this._playerInfo);
-        }
+            )
+        );
     }
 
     register(
@@ -165,46 +145,35 @@ export class PlayerService {
         successCallback: () => void,
         failureCallback: (error: string) => void
     ): void {
-        this._playerInfo.status = PlayerStatus.SAVING;
+        this._playerInfo.status = PlayerStatus.LOADING;
 
-        // Get all the possible solutions so we can show the user why they lose
-        this.dataService.register(
+        // Login and get settings
+        this.authService.register(
             email,
-            password,
-            JSON.stringify(this._playerInfo.settings)
+            password
         )
         .then(
             // Success
             (resp : HttpResponse<LoginResult>) => {
                 let loginResult: LoginResult = resp.body;
-                console.log("Registration result", loginResult);
-                if (loginResult.result) {
-                    console.log("Registration succeeded", loginResult.email);
+                console.log("Register result", loginResult);
 
-                    // Grab the results
-                    this._playerInfo.email = loginResult.email;
-                    this._playerInfo.status = PlayerStatus.OK;
-                    this._playerInfo.settings = JSON.parse(loginResult.settings);
-                    this.settingsChangesBehaviorSubject.next(this._playerInfo);
-
-                    // Save stuff locally for later
-                    localStorage.setItem('email', loginResult.email);
-                    localStorage.setItem('jwt', resp.headers.get('Authorization'));
-                    localStorage.setItem('settings', loginResult.settings);
-
-                    // Run the callback for the UI
-                    successCallback();
-                } else {
-                    console.log("Registration failed", loginResult.error);
-
-                    // Run the callback for the UI
-                    failureCallback(loginResult.error);
+                this.tokenService.token = loginResult.access_token;
+                if (loginResult.refresh_token) {
+                    this.tokenService.refreshToken =loginResult.refresh_token;
                 }
+
+                this._playerInfo.status = PlayerStatus.OK;
+
+                // Run the callback for the UI
+                successCallback();
             },
             // Failure
             (err) => {
-            // API call for solutions failed, nothing to be done here
-                console.log("Register failed", err);
+            // API call for login failed, nothing to be done here
+                console.log("Login failed", err);
+
+                this._playerInfo.status = PlayerStatus.NOT_INITIALIZED;
 
                 // Run the callback for the UI
                 failureCallback(err);
@@ -218,10 +187,10 @@ export class PlayerService {
         successCallback: () => void,
         failureCallback: (error: string) => void
     ): void {
-        this._playerInfo.status = PlayerStatus.SAVING;
+        this._playerInfo.status = PlayerStatus.LOADING;
 
         // Login and get settings
-        this.dataService.login(
+        this.authService.login(
             email,
             password
         )
@@ -230,38 +199,77 @@ export class PlayerService {
             (resp : HttpResponse<LoginResult>) => {
                 let loginResult: LoginResult = resp.body;
                 console.log("Login result", loginResult);
-                if (loginResult.result) {
-                    console.log("Login succeeded", loginResult.email);
 
-                    // Grab the results
-                    this._playerInfo.email = loginResult.email;
-                    this._playerInfo.status = PlayerStatus.OK;
-                    this._playerInfo.settings = JSON.parse(loginResult.settings);
-                    this.settingsChangesBehaviorSubject.next(this._playerInfo);
-
-                    // Save the email in a cookie for the next time
-                    localStorage.setItem('email', loginResult.email);
-                    localStorage.setItem('jwt', resp.headers.get('Authorization'));
-                    localStorage.setItem('settings', loginResult.settings);
-
-                    // Run the callback for the UI
-                    successCallback();
-                } else {
-                    console.log("Login failed", loginResult.error);
-
-                    // Run the callback for the UI
-                    failureCallback(loginResult.error);
+                this.tokenService.token = loginResult.access_token;
+                if (loginResult.refresh_token) {
+                    this.tokenService.refreshToken =loginResult.refresh_token;
                 }
+
+                this._playerInfo.status = PlayerStatus.OK;
+
+                // Run the callback for the UI
+                successCallback();
             },
             // Failure
             (err) => {
             // API call for login failed, nothing to be done here
                 console.log("Login failed", err);
 
+                this._playerInfo.status = PlayerStatus.NOT_INITIALIZED;
+
                 // Run the callback for the UI
                 failureCallback(err);
             }
         );
+    }
+
+    getSettings (
+        successCallback: () => void,
+        failureCallback: (error: string) => void
+    ): void {
+        this._playerInfo.status = PlayerStatus.LOADING;
+
+        // Login and get settings
+        this.dataService.getSettings()
+        .then(
+            // Success
+            (resp : HttpResponse<SettingsResult>) => {
+                let settingsResult: SettingsResult = resp.body;
+                console.log("Settings result", settingsResult);
+
+                this._playerInfo.email = this.tokenService.email ? this.tokenService.email : DEFAULT_EMAIL;
+                this._playerInfo.settings.difficultyLevel = settingsResult.difficultyLevel ? settingsResult.difficultyLevel : DEFAULT_DIFFICULTYLEVEL;
+                this._playerInfo.settings.enableSounds = settingsResult.enableSounds ? settingsResult.enableSounds : DEFAULT_ENABLESOUNDS;
+                this._playerInfo.settings.gameMode = settingsResult.gameMode ? settingsResult.gameMode : DEFAULT_GAMEMODE;
+                this._playerInfo.settings.hintType = settingsResult.hintType ? settingsResult.hintType : DEFAULT_HINTTYPE;
+                this._playerInfo.settings.name = settingsResult.name ? settingsResult.name : DEFAULT_NAME;
+                this._playerInfo.settings.numHops = settingsResult.numHops ? settingsResult.numHops : DEFAULT_NUM_HOPS;
+                this._playerInfo.settings.numLetters = settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
+
+                this.settingsChangesBehaviorSubject.next(this._playerInfo);
+
+                this._playerInfo.status = PlayerStatus.OK;
+
+                successCallback();
+            },
+            // Failure
+            (err) => {
+            // API call for login failed, nothing to be done here
+                console.log("Get settings failed", err);
+
+                this._playerInfo.status = PlayerStatus.NOT_INITIALIZED;
+
+                // Run the callback for the UI
+                failureCallback(err);
+            }
+        );
+    }
+
+    saveSettings(
+        successCallback: () => void,
+        failureCallback: (error: string) => void
+    ): void {
+        //TODO
     }
 
     // Getters and Setters
