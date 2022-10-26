@@ -61,12 +61,12 @@ import { TimingInterceptor } from './services/timing.interceptor';
   ],
   bootstrap: [AppComponent],
   providers: [
-    {
+    { // Handles token authentication on outgoing requests.  Also handles expired access tokens.
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true,
     },
-    {
+    { // Grabs the ExecutionTime header off of responses.
       provide: HTTP_INTERCEPTORS,
       useClass: TimingInterceptor,
       multi: true,
