@@ -127,6 +127,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Start over with new words
   // Resize the screen if the number of letters or hops changed
   newGame() {
+  console.log("newgame called in game component");
     let lastNumLetters = this.gameService.numLetters;
     let lastNumHops = this.gameService.numHops;
     let lastDifficultlyLevel = this.gameService.difficultyLevel;
@@ -139,8 +140,8 @@ export class GameComponent implements OnInit, AfterViewInit {
       ()=>{
         console.log("Game initialized correctly");
       },
-      ()=>{
-        console.log("Game didn't initialize correctly");
+      (error)=>{
+        console.log("Game didn't initialize correctly", error);
       }
     )
     .finally(

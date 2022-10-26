@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSet, ValidatedPuzzle } from './data.service';
 import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerInfo} from './player.service';
-import { firstValueFrom, skip, Subscription } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, skip, Subscription, takeWhile } from 'rxjs';
 import { TimerService } from './timer.service';
 import { Board, WordStatus } from '../model/board';
 
@@ -38,7 +38,9 @@ export class GameService {
   // Parameters (that can change at any time) of the player
   private _playerInfoSubscription: Subscription;
   private _playerInfo: PlayerInfo;
-
+  // Set to true when player info first becomes available
+  private _playerInfoLoaded: boolean;
+  
   // Selected row/cell indexes
   private _selectedWord: number = 1;
   private _selectedLetter: number = 0;
@@ -64,12 +66,17 @@ export class GameService {
     private _playerService: PlayerService,
     private _timerService: TimerService)
   {
+    // Player info is not loaded yet
+    this._playerInfoLoaded = false;
+
     // Subscribe to get player settings when they change
     this._playerInfoSubscription = this._playerService.settingsChanged().pipe(skip(1)).subscribe({
       next: (newPlayerInfo) => {
           // User settings changed
           console.log("Loaded user: " + JSON.stringify(newPlayerInfo));
           this._playerInfo = newPlayerInfo;
+
+          this._playerInfoLoaded = true;
       },
       error: (err) => {
           // User load failed
@@ -90,8 +97,10 @@ export class GameService {
   // Create a new game
   async newGame() : Promise<void> {
     // Do not try to start a game until the player has been loaded
-    await firstValueFrom(this._playerService.settingsChanged().pipe(skip(1)));
-    console.log("Initial player load has occured");
+    if (!this._playerInfoLoaded) {
+      await firstValueFrom(this._playerService.settingsChanged().pipe(skip(1)));
+    }
+    console.log("Player info is available");
 
     // Reset anything required from the previous game
     console.log("Unsubscribing from per-game subscriptions");

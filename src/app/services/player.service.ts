@@ -130,16 +130,6 @@ export class PlayerService {
             || val.settings.hintType !== this._previousPlayerInfo.settings.hintType
             || val.settings.enableSounds !== this._previousPlayerInfo.settings.enableSounds
         ));
-        // .pipe(
-        //     tap<PlayerInfo>(
-        //         playerInfo => {
-        //             this.saveSettings(
-        //                 ()=>{ console.log("Settings saved"); },
-        //                 (error: string)=>{ console.log("Save settings failed", error); }
-        //             )
-        //         }
-        //     )
-        // );
     }
 
     // Subscribe to get player settings when they change
