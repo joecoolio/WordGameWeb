@@ -322,8 +322,13 @@ export class Solution {
             let solutionWord: SolutionWord = new SolutionWord(wordArray[i].length);
             solutionWord.setText(wordArray[i]);
             this._words.push(solutionWord);
-
         }
+
+        // Preconfigure pair words
+        this._words[0].locked = true;
+        this._words[0].pairWord = true;
+        this._words[wordArray.length - 1].locked = true;
+        this._words[wordArray.length - 1].pairWord = true;
     }
 
     stringify(): string {
