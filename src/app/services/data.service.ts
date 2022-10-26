@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { filter, firstValueFrom, tap, timeout } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 
 const AUTH_API = 'https://wordgameapi.mikebillings.com/api/v2';
 
@@ -62,9 +62,6 @@ const HTTP_TIMEOUT: number = 5000;
 })
 export class DataService {
   constructor(private http: HttpClient) {}
-
-  // Execution time in ms of last command
-  private _lastExecutionTime: number;
 
   // Get user settings
   async getSettings(): Promise<HttpResponse<SettingsResult>> {
@@ -204,10 +201,6 @@ export class DataService {
         timeout(HTTP_TIMEOUT)
       )
     );
-  }
-
-  public get lastExecutionTime(): number {
-    return this._lastExecutionTime;
   }
 
 }

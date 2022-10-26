@@ -27,8 +27,8 @@ import { MatCardModule } from '@angular/material/card';
 // import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RegisterComponent as LoginComponent } from './account/login/login.component';
-import { CookieService } from 'ngx-cookie-service';
 import { AuthInterceptor } from './services/auth.interceptor';
+import { TimingInterceptor } from './services/timing.interceptor';
 
 // Bootstrap stuff
 // import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -61,10 +61,14 @@ import { AuthInterceptor } from './services/auth.interceptor';
   ],
   bootstrap: [AppComponent],
   providers: [
-    CookieService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TimingInterceptor,
       multi: true,
     }
   ],

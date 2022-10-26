@@ -10,6 +10,8 @@ const USER_KEY = 'auth-user';
 export class TokenService {
     constructor() { }
 
+    private _lastAPIExecutionTime: number;
+
     signOut(): void {
         localStorage.clear();
     }
@@ -39,5 +41,12 @@ export class TokenService {
 
     public get email(): string {
         return localStorage.getItem(USER_KEY);
+    }
+
+    public get lastAPIExecutionTime(): number {
+        return this._lastAPIExecutionTime;
+    }
+    public set lastAPIExecutionTime(value: number) {
+        this._lastAPIExecutionTime = value;
     }
 }

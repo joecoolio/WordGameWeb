@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, from, Observable, of, skip, Subscription, takeWhile, tap } from 'rxjs';
 import { DataService, SettingsResult } from './data.service';
-import { CookieService } from 'ngx-cookie-service';
 import { HttpResponse } from '@angular/common/http';
 import { AuthService, LoginResult } from './auth.service';
 import { TokenService } from './token.service';
@@ -77,16 +76,9 @@ export class PlayerService {
 
     constructor(
         private dataService: DataService,
-        private cookieService: CookieService,
         private authService: AuthService,
         private tokenService: TokenService
     ) {
-        if (cookieService.check('email')) {
-            let x = cookieService.get('email');
-            console.log("Stored email", x);
-        }
-
-
         this._previousPlayerInfo = {
             email: null,
             status: PlayerStatus.NOT_INITIALIZED,

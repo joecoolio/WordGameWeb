@@ -7,6 +7,7 @@ import { RegisterComponent } from './account/login/login.component';
 import { Subscription } from 'rxjs';
 import { PlayerService } from './services/player.service';
 import { DataService } from './services/data.service';
+import { TokenService } from './services/token.service';
 
 @Component({
   selector: 'wordgame-app',
@@ -23,6 +24,7 @@ export class AppComponent {
   private _dialogOpen: boolean;
 
   constructor(
+    public tokenService: TokenService,
     public dataService: DataService,
     public gameService: GameService,
     private modalService: NgbModal,

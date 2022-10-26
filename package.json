@@ -29,7 +29,6 @@
     "@ng-bootstrap/ng-bootstrap": "^13.0.0",
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.2",
-    "ngx-cookie-service": "^14.0.1",
     "rxjs": "^7.5.7",
     "simple-keyboard": "^3.4.169",
     "tslib": "^2.4.0",
