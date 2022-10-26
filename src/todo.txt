@@ -17,4 +17,5 @@ Move api to AWS
 Store refresh tokens in the db
 -- Show login screen at startup if not logged in
 Test that login pops up when your refresh token expires
-Add "play as guest" functionality
+-- Add "play as guest" functionality
+Auto-delete guest IDs from database when they aren't used

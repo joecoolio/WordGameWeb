@@ -90,16 +90,41 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmitRegister(): void {
-    this.playerService.name = this.name.value;
+    this.__doRegister(this.name.value, this.email.value, this.password.value, false);
+  }
+
+  loginAsGuest(): void {
+    // Create a random username and password
+    this.__doRegister('Guest', "Guest-" + crypto.randomUUID() + "@guestuser.com", crypto.randomUUID(), true);
+  }
+
+  private __doRegister(name: string, email: string, password: string, applyExpiry: boolean): void {
+    this.playerService.name = name;
   
     this.loading = true;
     this.playerService.register(
-      this.email.value,
-      this.password.value,
+      email,
+      password,
+      applyExpiry,
       // Success callback
       ()=> {
         console.log("Register success callback");
+        
+        // Get user settings
+        this.playerService.getSettings(
+          ()=> {
+            console.log("Get settings success callback");
+          },
+          (error: string)=> {
+            console.log("Get settings failure callback", error);
+            this.loading = false;
+          }
+        );
+          
         this.loading = false;
+
+        // Close the window
+        this.activeModal.close('Register success')
       },
       (error: string)=> {
         this.errorMessage = "Registration failed, user exists with a different password?"
@@ -109,7 +134,4 @@ export class LoginComponent implements OnInit {
     );
   }
 
-  loginAsGuest(): void {
-    
-  }
 }

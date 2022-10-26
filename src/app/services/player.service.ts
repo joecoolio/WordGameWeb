@@ -154,6 +154,7 @@ export class PlayerService {
     register(
         email: string,
         password: string,
+        applyExpiry: boolean,
         successCallback: () => void,
         failureCallback: (error: string) => void
     ): void {
@@ -162,7 +163,8 @@ export class PlayerService {
         // Login and get settings
         this.authService.register(
             email,
-            password
+            password,
+            applyExpiry
         )
         .then(
             // Success

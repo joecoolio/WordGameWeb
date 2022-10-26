@@ -26,22 +26,23 @@ export class AuthService {
     constructor(private http: HttpClient, private tokenStorage: TokenService) { }
 
     // Register
-    async register(email: string, password: string): Promise<HttpResponse<LoginResult>> {
-        return this.__loginOrRegister(email, password, '/register');
+    async register(email: string, password: string, applyExpiry: boolean): Promise<HttpResponse<LoginResult>> {
+        return this.__loginOrRegister(email, password, '/register', applyExpiry);
     }
 
     // Login
     async login(email: string, password: string): Promise<HttpResponse<LoginResult>> {
-        return this.__loginOrRegister(email, password, '/login');
+        return this.__loginOrRegister(email, password, '/login', false);
     }
 
     // Login & register have the same API
-    private async __loginOrRegister(email: string, password: string, path: string): Promise<HttpResponse<LoginResult>> {
+    private async __loginOrRegister(email: string, password: string, path: string, applyExpiry: boolean): Promise<HttpResponse<LoginResult>> {
         const body = {
             email: email,
-            password: password
+            password: password,
+            applyExpiry: applyExpiry
         };
-        console.log('Authservice Login: ' + JSON.stringify(body));
+        console.log('Authservice Login/Register: ' + path + ": " + JSON.stringify(body));
 
         return await firstValueFrom(
             this.http.post<LoginResult>(
