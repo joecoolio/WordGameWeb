@@ -14,7 +14,5 @@ In API, convert spaces to null should be a middleware in slim
 Save games
 Move pairs from mysql to dynamo
 Move api to AWS
-
--- sounds setting doesn't load right
-pair words change format after timeout
-
+Store refresh tokens in the db
+Show login screen at startup if not logged in
