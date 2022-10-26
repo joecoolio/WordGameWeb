@@ -69,9 +69,31 @@ console.log("Authservice: saving new tokens");
     }
 
     // Refresh token
-    refreshToken(token: string) {
-        return this.http.post(AUTH_API + 'refresh', {
-            refreshToken: token
-        }, httpOptions);
+    refreshToken(token: string): Observable<HttpResponse<LoginResult>> {
+        const body = {
+            grant_type: 'refresh_token',
+            refresh_token: token
+        };
+        console.log('Authservice Refresh Token');
+
+        return this.http.post<LoginResult>(
+            AUTH_API + '/refresh',
+            body,
+            { observe: 'response' }
+        ).pipe(
+            timeout(HTTP_TIMEOUT),
+            filter(event => event instanceof HttpResponse),
+            tap<HttpResponse<LoginResult>>(
+                response => {
+                    if (response.status == 200) {
+                        let loginResult: LoginResult = response.body;
+
+                        this.tokenStorage.token = loginResult.access_token;
+                        this.tokenStorage.refreshToken = loginResult.refresh_token;
+                    }
+                }
+            )
+        )
     }
+
 }
