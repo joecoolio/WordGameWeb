@@ -98,7 +98,7 @@ export class Board {
         let showSolutionSubscription: Subscription = timer(3000, 5000).subscribe(
             event => {
                 // This executes when it's time to switch to the solution overlay
-                console.log("Flipping to: #" + solutionToShow + ": " + this._solutions[solutionToShow].stringify());
+                // console.log("Flipping to: #" + solutionToShow + ": " + this._solutions[solutionToShow].stringify());
 
                 // Solution to show
                 let solution = this._solutions[solutionToShow];
@@ -116,7 +116,7 @@ export class Board {
                 let showOriginalSubscription: Subscription = timer(2000).subscribe(
                     event => {
                         this._words = puzzleWords;
-                        console.log("Flipping back to puzzle: " + this.stringify());
+                        // console.log("Flipping back to puzzle: " + this.stringify());
                         
                         showOriginalSubscription.unsubscribe;
                     }
