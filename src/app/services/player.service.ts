@@ -248,10 +248,9 @@ export class PlayerService {
             // Success
             (resp : HttpResponse<SettingsResult>) => {
                 let settingsResult: SettingsResult = resp.body;
-
                 this._playerInfo.email = this.tokenService.email ? this.tokenService.email : DEFAULT_EMAIL;
                 this._playerInfo.settings.difficultyLevel = settingsResult.difficultyLevel ? settingsResult.difficultyLevel : DEFAULT_DIFFICULTYLEVEL;
-                this._playerInfo.settings.enableSounds = settingsResult.enableSounds ? settingsResult.enableSounds : DEFAULT_ENABLESOUNDS;
+                this._playerInfo.settings.enableSounds = settingsResult.enableSounds;
                 this._playerInfo.settings.gameMode = settingsResult.gameMode ? settingsResult.gameMode : DEFAULT_GAMEMODE;
                 this._playerInfo.settings.hintType = settingsResult.hintType ? settingsResult.hintType : DEFAULT_HINTTYPE;
                 this._playerInfo.settings.name = settingsResult.name ? settingsResult.name : DEFAULT_NAME;
