@@ -62,11 +62,11 @@ export class RegisterComponent implements OnInit {
         // Get user settings
         this.playerService.getSettings(
           ()=> {
-            console.log("Settings success callback");
+            console.log("Get settings success callback");
     
           },
           (error: string)=> {
-            console.log("Settings failure callback", error);
+            console.log("Get settings failure callback", error);
             this.loading = false;
           }
         );

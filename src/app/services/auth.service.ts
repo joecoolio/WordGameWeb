@@ -45,7 +45,7 @@ export class AuthService {
 
         return await firstValueFrom(
             this.http.post<LoginResult>(
-                AUTH_API + 'path',
+                AUTH_API + path,
                 body,
                 { observe: 'response' }
             ).pipe(

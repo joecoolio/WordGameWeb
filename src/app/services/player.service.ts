@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, Observable, of, takeWhile, tap } from 'rxjs';
+import { BehaviorSubject, from, Observable, of, skip, Subscription, takeWhile, tap } from 'rxjs';
 import { DataService, SettingsResult } from './data.service';
 import { CookieService } from 'ngx-cookie-service';
 import { HttpResponse } from '@angular/common/http';
@@ -72,6 +72,9 @@ export class PlayerService {
     // Subject for settings changed observer
     private settingsChangesBehaviorSubject: BehaviorSubject<PlayerInfo>;
 
+    // Subscription to the settings changed observer to fire save events
+    private _settingsChangedSubscription: Subscription;
+
     constructor(
         private dataService: DataService,
         private cookieService: CookieService,
@@ -126,17 +129,42 @@ export class PlayerService {
             || val.settings.difficultyLevel !== this._previousPlayerInfo.settings.difficultyLevel
             || val.settings.hintType !== this._previousPlayerInfo.settings.hintType
             || val.settings.enableSounds !== this._previousPlayerInfo.settings.enableSounds
-        ))
-        .pipe(
-            tap<PlayerInfo>(
-                playerInfo => {
+        ));
+        // .pipe(
+        //     tap<PlayerInfo>(
+        //         playerInfo => {
+        //             this.saveSettings(
+        //                 ()=>{ console.log("Settings saved"); },
+        //                 (error: string)=>{ console.log("Save settings failed", error); }
+        //             )
+        //         }
+        //     )
+        // );
+    }
+
+    // Subscribe to get player settings when they change
+    private subscribe() {
+        if (!this._settingsChangedSubscription) {
+            this._settingsChangedSubscription = this.settingsChanged().pipe(skip(1)).subscribe({
+                next: (newPlayerInfo) => {
+                    // User settings changed
+                    console.log("Calling save");
                     this.saveSettings(
-                        ()=>{ console.log("Settings saved"); },
-                        (error: string)=>{ console.log("Save settings failed", error); }
-                    )
+                        newPlayerInfo,
+                        ()=>{ console.log("Settings saved", newPlayerInfo)},
+                        (err)=>{ console.log("Save settings failed", err)}
+                    );``
                 }
-            )
-        );
+            });
+        }
+    }
+
+    // Stop listening for player settings changes
+    private unsubscribe() {
+        if (this._settingsChangedSubscription) {
+            this._settingsChangedSubscription.unsubscribe();
+            this._settingsChangedSubscription = null;
+        }
     }
 
     register(
@@ -229,13 +257,15 @@ export class PlayerService {
     ): void {
         this._playerInfo.status = PlayerStatus.LOADING;
 
+        // We're about to overwrite settings so unsubscribe from changes
+        this.unsubscribe()
+
         // Login and get settings
         this.dataService.getSettings()
         .then(
             // Success
             (resp : HttpResponse<SettingsResult>) => {
                 let settingsResult: SettingsResult = resp.body;
-                console.log("Settings result", settingsResult);
 
                 this._playerInfo.email = this.tokenService.email ? this.tokenService.email : DEFAULT_EMAIL;
                 this._playerInfo.settings.difficultyLevel = settingsResult.difficultyLevel ? settingsResult.difficultyLevel : DEFAULT_DIFFICULTYLEVEL;
@@ -247,6 +277,9 @@ export class PlayerService {
                 this._playerInfo.settings.numLetters = settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
 
                 this.settingsChangesBehaviorSubject.next(this._playerInfo);
+
+                // Start listening for changes to settings so save can get called
+                this.subscribe();
 
                 this._playerInfo.status = PlayerStatus.OK;
 
@@ -266,10 +299,32 @@ export class PlayerService {
     }
 
     saveSettings(
+        playerInfo: PlayerInfo,
         successCallback: () => void,
         failureCallback: (error: string) => void
     ): void {
-        //TODO
+        this._playerInfo.status = PlayerStatus.SAVING;
+
+        // Login and get settings
+        this.dataService.saveSettings(JSON.stringify(playerInfo.settings))
+        .then(
+            // Success
+            (resp : HttpResponse<void>) => {
+                console.log("Settings saved", playerInfo.settings);
+
+                this._playerInfo.status = PlayerStatus.OK;
+
+                successCallback();
+            },
+            // Failure
+            (err) => {
+            // API call for login failed, nothing to be done here
+                console.log("Save settings failed", err);
+
+                // Run the callback for the UI
+                failureCallback(err);
+            }
+        );
     }
 
     // Getters and Setters

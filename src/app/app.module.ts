@@ -28,7 +28,7 @@ import { MatCardModule } from '@angular/material/card';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RegisterComponent as LoginComponent } from './account/login/login.component';
 import { CookieService } from 'ngx-cookie-service';
-import { JwtInterceptor } from './services/interceptor.service';
+// import { JwtInterceptor } from './services/interceptor.service';
 import { AuthInterceptor } from './services/auth.interceptor';
 
 // Bootstrap stuff

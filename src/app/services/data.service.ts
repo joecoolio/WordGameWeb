@@ -82,6 +82,23 @@ export class DataService {
     );
   }
 
+  // Get user settings
+  async saveSettings(settings: string): Promise<HttpResponse<void>> {
+    const body = { settings: settings };
+    return await firstValueFrom(
+      this.http.post<void>(
+        AUTH_API + '/user/saveSettings',
+        body,
+        { observe: 'response' }
+      ).pipe(
+        // takeUntil(this.componentIsDestroyed$),
+        // takeUntil(this.cancelRestCall$),
+        timeout(HTTP_TIMEOUT),
+        // retry(3)
+      )
+    );
+  }
+
 
   // Get a new pair of words to play
   async getPair(numLetters: number, numHops: number): Promise<WordPair> {
@@ -98,6 +115,7 @@ export class DataService {
       )
     );
   }
+
   // Test the whole puzzle
   testPuzzle(words: any[]): boolean {
     return true;

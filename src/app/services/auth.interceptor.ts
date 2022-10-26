@@ -16,23 +16,26 @@ export class AuthInterceptor implements HttpInterceptor {
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<Object>> {
         // Put the access token onto each outgoing http request
-        let authReq = req;
         const token = this.tokenService.token;
         if (token != null) {
-            authReq = this.addAccessTokenHeader(req, token);
+            // We have a token, add it to the request
+            let authReq = this.addAccessTokenHeader(req, token);
+
+            // Watch responses for 400 statuses.  If you find one, refresh the token and try again.
+            return next.handle(authReq).pipe(
+                catchError((error: HttpErrorResponse) => {
+                    // 400 is returned when an access token is no good
+                    if (error.status === 400) {
+                        return this.refreshToken(authReq, next);
+                    }
+
+                    return throwError(() => error);
+                })
+            );
+        } else {
+            // We have no token, not much to do here
+            return next.handle(req);
         }
-
-        // Watch responses for 400 statuses.  If you find one, refresh the token and try again.
-        return next.handle(authReq).pipe(
-            catchError(error => {
-                // 400 is returned when an access token is no good
-                if (error instanceof HttpErrorResponse && error.status === 400) {
-                    return this.refreshToken(authReq, next);
-                }
-
-                return throwError(() => error);
-            })
-        );
     }
 
     private refreshToken(request: HttpRequest<any>, next: HttpHandler) {
