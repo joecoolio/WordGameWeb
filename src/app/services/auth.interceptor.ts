@@ -7,12 +7,17 @@ import { AuthService, LoginResult } from './auth.service';
 
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+import { EventBusService, EventData } from './eventbus.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
     private isRefreshing = false;
 
-    constructor(private tokenService: TokenService, private authService: AuthService) { }
+    constructor(
+        private tokenService: TokenService,
+        private authService: AuthService,
+        private eventbusService: EventBusService
+    ) { }
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<Object>> {
         // Put the access token onto each outgoing http request
@@ -33,7 +38,7 @@ export class AuthInterceptor implements HttpInterceptor {
                 })
             );
         } else {
-            // We have no token, not much to do here
+            // We have no token, send without (for login/register/etc.)
             return next.handle(req);
         }
     }
@@ -55,7 +60,10 @@ export class AuthInterceptor implements HttpInterceptor {
                     catchError((err) => {
                         this.isRefreshing = false;
 
-                        // this.tokenService.signOut();
+                        // If you get here, the refresh token is no good and you need to re-login
+                        this.tokenService.logout();
+                        this.eventbusService.emit(new EventData('logout', null));
+
                         return throwError(() => err);
                     })
                 );

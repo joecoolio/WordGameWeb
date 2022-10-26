@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { PlayerService } from '../services/player.service';
 
 @Component({
   selector: 'app-header',
@@ -7,14 +7,25 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./header.component.css'],
 })
 export class HeaderComponent implements OnInit {
+  @Output() parentOpenLogin = new EventEmitter();
   @Output() parentOpenProfile = new EventEmitter();
   @Output() parentOpenSettings = new EventEmitter();
 
   public isCollapsed = true;
 
-  constructor(private modalService: NgbModal) {}
+  constructor(
+    private playerService: PlayerService
+  ) {}
 
   ngOnInit() {}
+
+  logout() {
+    this.playerService.logout();
+  }
+
+  openLogin() {
+    this.parentOpenLogin.emit();
+  }
 
   openSettings() {
     this.parentOpenSettings.emit();

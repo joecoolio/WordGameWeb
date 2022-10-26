@@ -8,12 +8,14 @@ import { PlayerService } from 'src/app/services/player.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class RegisterComponent implements OnInit {
+export class LoginComponent implements OnInit {
   constructor(
     public activeModal: NgbActiveModal,
     private formBuilder: FormBuilder,
     private playerService: PlayerService,
-  ) { }
+  ) {
+    this.errorMessage = "";
+  }
 
   ngOnInit() {
     this.showLoginForm = true;
@@ -44,6 +46,9 @@ export class RegisterComponent implements OnInit {
     password: this.password
   });
 
+  // Error message if anything goes wrong
+  errorMessage: string;
+
   // Flag to indicate that an API call is running
   loading: boolean;
 
@@ -63,7 +68,6 @@ export class RegisterComponent implements OnInit {
         this.playerService.getSettings(
           ()=> {
             console.log("Get settings success callback");
-    
           },
           (error: string)=> {
             console.log("Get settings failure callback", error);
@@ -73,8 +77,12 @@ export class RegisterComponent implements OnInit {
           
         this.loading = false;
 
+        // Close the window
+        this.activeModal.close('Login success')
+
       },
       (error: string)=> {
+        this.errorMessage = "Login failed, try again?"
         console.log("Login failure callback", error);
         this.loading = false;
       }
@@ -94,9 +102,14 @@ export class RegisterComponent implements OnInit {
         this.loading = false;
       },
       (error: string)=> {
+        this.errorMessage = "Registration failed, user exists with a different password?"
         console.log("Register failure callback", error);
         this.loading = false;
       }
     );
+  }
+
+  loginAsGuest(): void {
+    
   }
 }

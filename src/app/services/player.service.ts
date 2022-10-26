@@ -4,6 +4,7 @@ import { DataService, SettingsResult } from './data.service';
 import { HttpResponse } from '@angular/common/http';
 import { AuthService, LoginResult } from './auth.service';
 import { TokenService } from './token.service';
+import { EventBusService, EventData } from './eventbus.service';
 
 // Type of game the player wants to play
 export enum GameMode {
@@ -77,7 +78,8 @@ export class PlayerService {
     constructor(
         private dataService: DataService,
         private authService: AuthService,
-        private tokenService: TokenService
+        private tokenService: TokenService,
+        private eventbusService: EventBusService
     ) {
         this._previousPlayerInfo = {
             email: null,
@@ -103,7 +105,7 @@ export class PlayerService {
                 gameMode: DEFAULT_GAMEMODE,
                 difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
                 hintType: DEFAULT_HINTTYPE,
-                enableSounds: true
+                enableSounds: DEFAULT_ENABLESOUNDS
             }
         }
 
@@ -306,6 +308,14 @@ export class PlayerService {
                 failureCallback(err);
             }
         );
+    }
+
+    logout(): void {
+        // Destroy tokens
+        this.tokenService.logout();
+
+        // Tell folks that logout happened
+        this.eventbusService.emit(new EventData('logout', null));
     }
 
     // Getters and Setters

@@ -12,8 +12,13 @@ export class TokenService {
 
     private _lastAPIExecutionTime: number;
 
-    signOut(): void {
-        localStorage.clear();
+    isLoggedIn(): boolean {
+        return this.refreshToken != null;
+    }
+
+    logout(): void {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(REFRESHTOKEN_KEY);
     }
 
     public set token(value: string) {

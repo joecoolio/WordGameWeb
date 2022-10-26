@@ -26,7 +26,7 @@ import { MatCardModule } from '@angular/material/card';
 
 // import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { RegisterComponent as LoginComponent } from './account/login/login.component';
+import { LoginComponent as LoginComponent } from './account/login/login.component';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { TimingInterceptor } from './services/timing.interceptor';
 

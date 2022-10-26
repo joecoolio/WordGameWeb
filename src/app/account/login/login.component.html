@@ -1,11 +1,11 @@
 <div class="modal-header">
     <h4 class="modal-title">{{ showLoginForm ? "User Login" : "New User Registration" }}</h4>
-    <button
+    <!-- <button
         type="button"
         class="btn-close"
         aria-label="Close"
         (click)="activeModal.dismiss('Cross click')"
-    ></button>
+    ></button> -->
 </div>
 <div class="modal-body">
     <div class="bodycontainer">
@@ -36,8 +36,13 @@
                         </mat-form-field>
                     </div>
 
+                    <!-- Submission error message -->
+                    <mat-error *ngIf="errorMessage.length > 0">
+                        {{ errorMessage }}
+                    </mat-error>
+
                     <div class="donthavea">
-                        <span (click)="showLoginForm = !showLoginForm">
+                        <span (click)="showLoginForm = !showLoginForm; errorMessage = '';">
                             Don't have an account?
                         </span>
                     </div>
@@ -58,7 +63,7 @@
                     <!-- Name -->
                     <div>
                         <mat-form-field>
-                            <input matInput placeholder="Name" type="text" formControlName="name" ngModel required>
+                            <input matInput placeholder="Name (for the leaderboard!)" type="text" formControlName="name" ngModel required>
                             <ng-container *ngIf="name.invalid && (name.dirty || name.touched)">
                                 <mat-hint *ngIf="!name.value">Enter your name</mat-hint>
                             </ng-container>
@@ -85,8 +90,13 @@
                         </mat-form-field>
                     </div>
 
+                    <!-- Submission error message -->
+                    <mat-error *ngIf="errorMessage.length > 0">
+                        {{ errorMessage }}
+                    </mat-error>
+
                     <div class="donthavea">
-                        <span (click)="showLoginForm = !showLoginForm">
+                        <span (click)="showLoginForm = !showLoginForm; errorMessage = '';">
                             Already have an account?
                         </span>
                     </div>
@@ -101,21 +111,33 @@
     </div>
 </div>
 <div class="modal-footer">
-    <label *ngIf="showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form">
+    <button
+        type="button"
+        class="btn btn-outline-dark btn-secondary"
+        (click)="loginAsGuest()"
+    >
+      Play As Guest
+    </button>  
+
+    <label *ngIf="showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form"
+        [ngClass]="{ disabled: this.email.value == '' || this.password.value == '' }"
+    >
         <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         Login
     </label>
-    <label *ngIf="!showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form">
+    <label *ngIf="!showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form"
+        [ngClass]="{ disabled: this.name.value == '' || this.email.value == '' || this.password.value == '' }"
+    >
         <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         Register
     </label>
 
-    <button
+    <!-- <button
         type="button"
         class="btn btn-outline-dark btn-secondary"
         (click)="activeModal.close('Close click')"
     >
       Cancel
-    </button>  
+    </button>   -->
 </div>
   

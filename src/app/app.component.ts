@@ -3,11 +3,12 @@ import Keyboard from 'simple-keyboard';
 import { GameService } from './services/game.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
-import { RegisterComponent } from './account/login/login.component';
+import { LoginComponent } from './account/login/login.component';
 import { Subscription } from 'rxjs';
 import { PlayerService } from './services/player.service';
 import { DataService } from './services/data.service';
 import { TokenService } from './services/token.service';
+import { EventBusService } from './services/eventbus.service';
 
 @Component({
   selector: 'wordgame-app',
@@ -28,17 +29,36 @@ export class AppComponent {
     public dataService: DataService,
     public gameService: GameService,
     private modalService: NgbModal,
-    private playerService: PlayerService
+    private playerService: PlayerService,
+    private eventBusService: EventBusService
   ) {
+    this._subscriptions = new Subscription();
+
+    // Watch for logout events to be fired and show the login screen
+    let eventBusSubscription: Subscription = this.eventBusService.on('logout', () => {
+      this.logoutOccurred();
+    });
+    this._subscriptions.add(eventBusSubscription)
+  }
+
+  private logoutOccurred(): void {
+    console.log("App component notified of logout!");
+    this.openLogin();
+  }
+
+  openLogin() {
+    // Show the login/register screen
+    const modalRef = this.modalService.open(LoginComponent);
   }
 
   openProfile() {
+    // TODO
     if (this.playerService.email != null) {
       // Not logged in, show the login/register screen
-      const modalRef = this.modalService.open(RegisterComponent);
+      const modalRef = this.modalService.open(LoginComponent);
     } else {
       // Already logged in, show the profile/stats screen
-      const modalRef = this.modalService.open(RegisterComponent);
+      const modalRef = this.modalService.open(LoginComponent);
     }
   }
 
@@ -50,7 +70,6 @@ export class AppComponent {
   ngAfterViewInit() {
     // Register subscription to the modal service to keep an eye on it
     // When a dialog is open, keystrokes won't be sent to the game
-    this._subscriptions = new Subscription();
     this._dialogOpen = false;
     let sub: Subscription = this.modalService.activeInstances.subscribe(
       (value) => {
@@ -79,6 +98,11 @@ export class AppComponent {
     // Force destroy to run
     // Might record abandoned games here?
     window.onbeforeunload = () => this.ngOnDestroy();
+
+    // Popup login screen if not already logged in
+    if (!this.tokenService.isLoggedIn()) {
+      this.openLogin();
+    }
   }
 
   ngOnDestroy() {
