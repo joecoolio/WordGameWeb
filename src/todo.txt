@@ -16,5 +16,4 @@ Move pairs from mysql to dynamo
 Move api to AWS
 
 sounds setting doesn't load right
-pair words change format after timeout
 

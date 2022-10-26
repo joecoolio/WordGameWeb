@@ -374,6 +374,7 @@ export class Solution {
             }
 
             overlayWord.status = puzzleWord.status;
+            overlayWord.pairWord = puzzleWord.pairWord;
             overlay.push(overlayWord);
         }
         
