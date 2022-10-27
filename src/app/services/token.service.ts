@@ -1,24 +1,31 @@
 import { Injectable } from '@angular/core';
+import { EventBusService } from './eventbus.service';
 
 const TOKEN_KEY = 'auth-token';
 const REFRESHTOKEN_KEY = 'auth-refreshtoken';
 const USER_KEY = 'auth-user';
 
+// Sends: 
+// Receives: doLogout
 @Injectable({
   providedIn: 'root'
 })
 export class TokenService {
-    constructor() { }
+    constructor(private eventBusService: EventBusService) {
+
+        // Watch for logout events and wipe the stored tokens
+        this.eventBusService.onCommand('doLogout', () => {
+            console.log("TokenService: logout requested");
+            localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem(REFRESHTOKEN_KEY);
+        });
+
+    }
 
     private _lastAPIExecutionTime: number;
 
     isLoggedIn(): boolean {
         return this.refreshToken != null;
-    }
-
-    logout(): void {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(REFRESHTOKEN_KEY);
     }
 
     public set token(value: string) {

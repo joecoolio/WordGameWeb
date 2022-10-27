@@ -63,20 +63,11 @@ export interface PlayerInfo {
 
 // Sends: login, loginFailed, register, registerFailed, settingsLoaded, settingsLoadFailed,
 //        settingsSaved, settingsSaveFailed, logout
-// Receives: getSettings
+// Receives: getSettings, saveSettings
 @Injectable({ providedIn: 'root' })
 export class PlayerService {
     // Current player settings
     private _playerInfo : PlayerInfo;
-
-    // Previous player settings (for settings change detection)
-    private _previousPlayerInfo : PlayerInfo;
-
-    // Subject for settings changed observer
-    private settingsChangesBehaviorSubject: BehaviorSubject<PlayerInfo>;
-
-    // Subscription to the settings changed observer to fire save events
-    private _settingsChangedSubscription: Subscription;
 
     constructor(
         private dataService: DataService,
@@ -84,20 +75,6 @@ export class PlayerService {
         private tokenService: TokenService,
         private eventBusService: EventBusService
     ) {
-        this._previousPlayerInfo = {
-            email: null,
-            status: PlayerStatus.NOT_INITIALIZED,
-            settings: {
-                name: "",
-                numLetters: -1,
-                numHops: -1,
-                gameMode: -1,
-                difficultyLevel: -1,
-                hintType: -1,
-                enableSounds: false
-            }
-        }
-
         this._playerInfo = {
             email: null,
             status: PlayerStatus.NOT_INITIALIZED,
@@ -112,60 +89,18 @@ export class PlayerService {
             }
         }
 
-        this.settingsChangesBehaviorSubject = new BehaviorSubject(this._playerInfo);
-
-        // Watch for logout events to be fired and show the login screen
+        // Watch for getSettings commands and execute them
         this.eventBusService.onCommand('getSettings', () => {
-            console.log("PlayerService: requested to get settings");
-            this.getSettings(
-                () => {
-                    console.log("Get settings success callback");
-                },
-                (error: string) => {
-                    console.log("Get settings failure callback", error);
-                }
-            );
+            console.log("PlayerService: get settings requested");
+            this.getSettings(() => {},(error: string) => {});
+        });
+
+        // Watch for save settings events to be fired and handle them
+        this.eventBusService.onCommand('saveSettings', () => {
+            console.log("PlayerService: saveSettings requested");
+            this.saveSettings(this._playerInfo, ()=>{}, (error: string)=>{});
         });
   
-    }
-
-    // Subscribe to this to be notified of player settings being changed
-    settingsChanged(): Observable<PlayerInfo> {
-        return this.settingsChangesBehaviorSubject.pipe(takeWhile(val =>
-            val.email !== this._previousPlayerInfo.email
-            || val.settings.name !== this._previousPlayerInfo.settings.name
-            || val.settings.numLetters !== this._previousPlayerInfo.settings.numLetters
-            || val.settings.numHops !== this._previousPlayerInfo.settings.numHops
-            || val.settings.gameMode !== this._previousPlayerInfo.settings.gameMode
-            || val.settings.difficultyLevel !== this._previousPlayerInfo.settings.difficultyLevel
-            || val.settings.hintType !== this._previousPlayerInfo.settings.hintType
-            || val.settings.enableSounds !== this._previousPlayerInfo.settings.enableSounds
-        ));
-    }
-
-    // Subscribe to get player settings when they change
-    private subscribe() {
-        if (!this._settingsChangedSubscription) {
-            this._settingsChangedSubscription = this.settingsChanged().pipe(skip(1)).subscribe({
-                next: (newPlayerInfo) => {
-                    // User settings changed
-                    console.log("Calling save");
-                    this.saveSettings(
-                        newPlayerInfo,
-                        ()=>{ console.log("Settings saved", newPlayerInfo)},
-                        (err)=>{ console.log("Save settings failed", err)}
-                    );``
-                }
-            });
-        }
-    }
-
-    // Stop listening for player settings changes
-    private unsubscribe() {
-        if (this._settingsChangedSubscription) {
-            this._settingsChangedSubscription.unsubscribe();
-            this._settingsChangedSubscription = null;
-        }
     }
 
     register(
@@ -270,52 +205,51 @@ export class PlayerService {
         successCallback: () => void,
         failureCallback: (error: string) => void
     ): void {
-        this._playerInfo.status = PlayerStatus.LOADING;
+        if (this.tokenService.isLoggedIn()) {
+            this._playerInfo.status = PlayerStatus.LOADING;
 
-        // We're about to overwrite settings so unsubscribe from changes
-        this.unsubscribe()
+            // // We're about to overwrite settings so unsubscribe from changes
+            // this.unsubscribe()
 
-        // Login and get settings
-        this.dataService.getSettings()
-        .then(
-            // Success
-            (resp : HttpResponse<SettingsResult>) => {
-                let settingsResult: SettingsResult = resp.body;
-                this._playerInfo.email = this.tokenService.email ? this.tokenService.email : DEFAULT_EMAIL;
-                this._playerInfo.settings.difficultyLevel = settingsResult && settingsResult.difficultyLevel ? settingsResult.difficultyLevel : DEFAULT_DIFFICULTYLEVEL;
-                this._playerInfo.settings.enableSounds = settingsResult ? settingsResult.enableSounds : DEFAULT_ENABLESOUNDS;
-                this._playerInfo.settings.gameMode = settingsResult && settingsResult.gameMode ? settingsResult.gameMode : DEFAULT_GAMEMODE;
-                this._playerInfo.settings.hintType = settingsResult && settingsResult.hintType ? settingsResult.hintType : DEFAULT_HINTTYPE;
-                this._playerInfo.settings.name = settingsResult && settingsResult.name ? settingsResult.name : DEFAULT_NAME;
-                this._playerInfo.settings.numHops = settingsResult && settingsResult.numHops ? settingsResult.numHops : DEFAULT_NUM_HOPS;
-                this._playerInfo.settings.numLetters = settingsResult && settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
+            // Login and get settings
+            this.dataService.getSettings()
+            .then(
+                // Success
+                (resp : HttpResponse<SettingsResult>) => {
+                    let settingsResult: SettingsResult = resp.body;
+                    this._playerInfo.email = this.tokenService.email ? this.tokenService.email : DEFAULT_EMAIL;
+                    this._playerInfo.settings.difficultyLevel = settingsResult && settingsResult.difficultyLevel ? settingsResult.difficultyLevel : DEFAULT_DIFFICULTYLEVEL;
+                    this._playerInfo.settings.enableSounds = settingsResult ? settingsResult.enableSounds : DEFAULT_ENABLESOUNDS;
+                    this._playerInfo.settings.gameMode = settingsResult && settingsResult.gameMode ? settingsResult.gameMode : DEFAULT_GAMEMODE;
+                    this._playerInfo.settings.hintType = settingsResult && settingsResult.hintType ? settingsResult.hintType : DEFAULT_HINTTYPE;
+                    this._playerInfo.settings.name = settingsResult && settingsResult.name ? settingsResult.name : DEFAULT_NAME;
+                    this._playerInfo.settings.numHops = settingsResult && settingsResult.numHops ? settingsResult.numHops : DEFAULT_NUM_HOPS;
+                    this._playerInfo.settings.numLetters = settingsResult && settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
 
-                this.settingsChangesBehaviorSubject.next(this._playerInfo);
+                    this._playerInfo.status = PlayerStatus.OK;
 
-                // Start listening for changes to settings so save can get called
-                this.subscribe();
+                    // Tell the game service
+                    this.eventBusService.emitNotification('settingsLoaded', null);
 
-                this._playerInfo.status = PlayerStatus.OK;
+                    successCallback();
+                },
+                // Failure
+                (err) => {
+                // API call for login failed, nothing to be done here
+                    console.log("PlayerService: Get settings failed", err);
 
-                // Tell the game service
-                this.eventBusService.emitNotification('settingsLoaded', null);
+                    this._playerInfo.status = PlayerStatus.NOT_INITIALIZED;
 
-                successCallback();
-            },
-            // Failure
-            (err) => {
-            // API call for login failed, nothing to be done here
-                console.log("Get settings failed", err);
+                    // Tell the game service
+                    this.eventBusService.emitNotification('settingsLoadFailed', null);
 
-                this._playerInfo.status = PlayerStatus.NOT_INITIALIZED;
-
-                // Tell the game service
-                this.eventBusService.emitNotification('settingsLoadFailed', null);
-
-                // Run the callback for the UI
-                failureCallback(err);
-            }
-        );
+                    // Run the callback for the UI
+                    failureCallback(err);
+                }
+            );
+        } else {
+            console.log("PlayerService: Not getting settings because we're not logged in");
+        }
     }
 
     saveSettings(
@@ -323,42 +257,38 @@ export class PlayerService {
         successCallback: () => void,
         failureCallback: (error: string) => void
     ): void {
-        this._playerInfo.status = PlayerStatus.SAVING;
+        if (this.tokenService.isLoggedIn()) {
+            this._playerInfo.status = PlayerStatus.SAVING;
 
-        // Login and get settings
-        this.dataService.saveSettings(JSON.stringify(playerInfo.settings))
-        .then(
-            // Success
-            (resp : HttpResponse<void>) => {
-                console.log("Settings saved", playerInfo.settings);
+            // Login and get settings
+            this.dataService.saveSettings(JSON.stringify(playerInfo.settings))
+            .then(
+                // Success
+                (resp : HttpResponse<void>) => {
+                    console.log("PlayerService: Settings saved", playerInfo.settings);
 
-                this._playerInfo.status = PlayerStatus.OK;
+                    this._playerInfo.status = PlayerStatus.OK;
 
-                // Tell the game service
-                this.eventBusService.emitNotification('settingsSaved', null);
+                    // Tell the game service
+                    this.eventBusService.emitNotification('settingsSaved', null);
 
-                successCallback();
-            },
-            // Failure
-            (err) => {
-            // API call for login failed, nothing to be done here
-                console.log("Save settings failed", err);
+                    successCallback();
+                },
+                // Failure
+                (err) => {
+                // API call for login failed, nothing to be done here
+                    console.log("PlayerService: Save settings failed", err);
 
-                // Tell the game service
-                this.eventBusService.emitNotification('settingsSaveFailed', null);
+                    // Tell the game service
+                    this.eventBusService.emitNotification('settingsSaveFailed', null);
 
-                // Run the callback for the UI
-                failureCallback(err);
-            }
-        );
-    }
-
-    logout(): void {
-        // Destroy tokens
-        this.tokenService.logout();
-
-        // Tell the game service that logout happened
-        this.eventBusService.emitNotification('logout', null);
+                    // Run the callback for the UI
+                    failureCallback(err);
+                }
+            );
+        } else {
+            console.log("PlayerService: Not saving settings because we're not logged in");
+        }
     }
 
     // Getters and Setters
@@ -367,27 +297,33 @@ export class PlayerService {
         return this._playerInfo.email;
     }
     public set email(s: string) {
-        this._previousPlayerInfo.email = this._playerInfo.email;
+        let oldval = this._playerInfo.email;
         this._playerInfo.email = s;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        if (oldval != s) {
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
     }
 
     public get status(): PlayerStatus {
         return this._playerInfo.status;
     }
     private set status(s: PlayerStatus) {
-        this._previousPlayerInfo.status = this._playerInfo.status;
+        let oldval = this._playerInfo.status;
         this._playerInfo.status = s;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        if (oldval != s) {
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
     }
 
     public get name(): string {
         return this._playerInfo.settings.name;
     }
     public set name(s: string) {
-        this._previousPlayerInfo.settings.name = this._playerInfo.settings.name;
+        let oldval = this._playerInfo.settings.name;
         this._playerInfo.settings.name = s;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        if (oldval != s) {
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
     }
 
 
@@ -396,54 +332,66 @@ export class PlayerService {
         return this._playerInfo.settings.numLetters;
     }
     set numLetters(n: number) {
-        this._previousPlayerInfo.settings.numLetters = this._playerInfo.settings.numLetters;
+        let oldval = this._playerInfo.settings.numLetters;
         this._playerInfo.settings.numLetters = n;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        if (oldval != n) {
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
     }
 
     public get numHops(): number {
         return this._playerInfo.settings.numHops;
     }
     public set numHops(value: number) {
-        this._previousPlayerInfo.settings.numHops = this._playerInfo.settings.numHops;
+        let oldval = this._playerInfo.settings.numHops;
         this._playerInfo.settings.numHops = value;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        if (oldval != value) {
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
     }
 
     public get gameMode(): GameMode {
         return this._playerInfo.settings.gameMode;
     }
     public set gameMode(value: GameMode) {
-        this._previousPlayerInfo.settings.gameMode = this._playerInfo.settings.gameMode;
+        let oldval = this._playerInfo.settings.gameMode;
         this._playerInfo.settings.gameMode = value;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        if (oldval != value) {
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
     }
 
     public get difficultyLevel(): DifficultyLevel {
         return this._playerInfo.settings.difficultyLevel;
     }
     public set difficultyLevel(value: DifficultyLevel) {
-        this._previousPlayerInfo.settings.difficultyLevel = this._playerInfo.settings.difficultyLevel;
+        let oldval = this._playerInfo.settings.difficultyLevel;
         this._playerInfo.settings.difficultyLevel = value;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        if (oldval != value) {
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
     }
 
     public get hintType(): HintType {
         return this._playerInfo.settings.hintType;
     }
     public set hintType(value: HintType) {
-        this._previousPlayerInfo.settings.hintType = this._playerInfo.settings.hintType;
+        let oldval = this._playerInfo.settings.hintType;
         this._playerInfo.settings.hintType = value;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
+        if (oldval != value) {
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
     }
 
     public get enableSounds(): boolean {
         return this._playerInfo.settings.enableSounds;
     }
     public set enableSounds(value: boolean) {
-        this._previousPlayerInfo.settings.enableSounds = this._playerInfo.settings.enableSounds;
+        let oldval = this._playerInfo.settings.enableSounds;
         this._playerInfo.settings.enableSounds = value;
-        this.settingsChangesBehaviorSubject.next(this._playerInfo);
-    }
+        if (oldval != value) {
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
+   }
 
 }

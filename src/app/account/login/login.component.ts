@@ -56,7 +56,7 @@ export class LoginComponent implements OnInit {
   // Login an existing user
   onSubmitLogin(): void {
     // Process login
-    console.log('Login: ', this.loginFormGroup.value);
+    console.log('LoginComponent: ', this.loginFormGroup.value);
   
     this.loginRunning = true;
     this.guestRunning = false;
@@ -66,18 +66,7 @@ export class LoginComponent implements OnInit {
       this.password.value,
       // Success callback
       ()=> {
-        console.log("Login success callback");
-        
-        // Get user settings
-        this.playerService.getSettings(
-          ()=> {
-            console.log("Get settings success callback");
-          },
-          (error: string)=> {
-            console.log("Get settings failure callback", error);
-            this.loginRunning = false;
-          }
-        );
+        console.log("LoginComponent: Login success callback");
           
         this.loginRunning = false;
 
@@ -87,7 +76,7 @@ export class LoginComponent implements OnInit {
       },
       (error: string)=> {
         this.errorMessage = "Login failed, try again?"
-        console.log("Login failure callback", error);
+        console.log("LoginComponent: Login failure callback", error);
         this.loginRunning = false;
       }
     );

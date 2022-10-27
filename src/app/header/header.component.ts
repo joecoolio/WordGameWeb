@@ -1,5 +1,5 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { PlayerService } from '../services/player.service';
+import { EventBusService } from '../services/eventbus.service';
 
 @Component({
   selector: 'app-header',
@@ -14,13 +14,14 @@ export class HeaderComponent implements OnInit {
   public isCollapsed = true;
 
   constructor(
-    private playerService: PlayerService
+    private eventbusService: EventBusService
   ) {}
 
   ngOnInit() {}
 
   logout() {
-    this.playerService.logout();
+    console.log("Header: logout requested");
+    this.eventbusService.emitNotification('logout', null);
   }
 
   openLogin() {

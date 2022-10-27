@@ -11,6 +11,7 @@ import { TokenService } from './token.service';
   register:          User registered
   settingsLoaded:    User settings were loaded from remote
   settingsSaved:     User settings were saved to remote
+  settingsChanged:   User settings were changed
   newGameRequested:  User requested a new game
   logout:            User logged out
   gameWon:           Game won
@@ -18,9 +19,11 @@ import { TokenService } from './token.service';
 
  Outgoing commands:
   getSettings:    Load user settings from remote
+  saveSettings:   Save user settings
   newGame:        Start a new game
   terminateGame:  Terminate the current game
   showLogin:      Show the login screen
+  doLogout:       Do whatever logout processes are needed
 
 */
 @Injectable({ providedIn: 'root' })
@@ -32,7 +35,6 @@ export class GameWorkflowService {
         private tokenService: TokenService
     ) {
         this._subscriptions = new Subscription();
-console.log("Workflow constructor");
         // Setup monitoring for all the various different notifications that can happen.
         // Make stuff happen when appropriate based on these things
         // Notifications to this service come in on notification channel of the event bus
@@ -89,6 +91,14 @@ console.log("Workflow constructor");
             }
         ));
 
+        // User settings were saved to remote
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'settingsChanged', () => {
+                // Save settings
+                this.eventBusService.emitCommand("saveSettings", null);
+            }
+        ));
+
         // User requested a new game
         this._subscriptions.add(this.eventBusService.onNotification(
             'newGameRequested', () => {
@@ -102,6 +112,9 @@ console.log("Workflow constructor");
             'logout', () => {
                 // Stop any current game
                 this.eventBusService.emitCommand("terminateGame", null);
+
+                // Do other logoff housekeeping
+                this.eventBusService.emitCommand("doLogout", null);
 
                 // Show the login screen
             }
