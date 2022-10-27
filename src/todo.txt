@@ -14,8 +14,9 @@ In API, convert spaces to null should be a middleware in slim
 Save games
 Move pairs from mysql to dynamo
 Move api to AWS
-Store refresh tokens in the db
+-- Store refresh tokens in the db
 -- Show login screen at startup if not logged in
 Test that login pops up when your refresh token expires
 -- Add "play as guest" functionality
-Auto-delete guest IDs from database when they aren't used
+-- Auto-delete guest IDs from database when they aren't used
+When refreshing tokens for guest users, reset the expiration date of the user
