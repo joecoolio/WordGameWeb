@@ -4,7 +4,7 @@ import { DataService, SettingsResult } from './data.service';
 import { HttpResponse } from '@angular/common/http';
 import { AuthService, LoginResult } from './auth.service';
 import { TokenService } from './token.service';
-import { EventBusService, EventData } from './eventbus.service';
+import { EventBusService } from './eventbus.service';
 
 // Type of game the player wants to play
 export enum GameMode {
@@ -61,6 +61,9 @@ export interface PlayerInfo {
     settings: PlayerSettings
 }
 
+// Sends: login, loginFailed, register, registerFailed, settingsLoaded, settingsLoadFailed,
+//        settingsSaved, settingsSaveFailed, logout
+// Receives: getSettings
 @Injectable({ providedIn: 'root' })
 export class PlayerService {
     // Current player settings
@@ -79,7 +82,7 @@ export class PlayerService {
         private dataService: DataService,
         private authService: AuthService,
         private tokenService: TokenService,
-        private eventbusService: EventBusService
+        private eventBusService: EventBusService
     ) {
         this._previousPlayerInfo = {
             email: null,
@@ -110,6 +113,20 @@ export class PlayerService {
         }
 
         this.settingsChangesBehaviorSubject = new BehaviorSubject(this._playerInfo);
+
+        // Watch for logout events to be fired and show the login screen
+        this.eventBusService.onCommand('getSettings', () => {
+            console.log("PlayerService: requested to get settings");
+            this.getSettings(
+                () => {
+                    console.log("Get settings success callback");
+                },
+                (error: string) => {
+                    console.log("Get settings failure callback", error);
+                }
+            );
+        });
+  
     }
 
     // Subscribe to this to be notified of player settings being changed
@@ -179,6 +196,9 @@ export class PlayerService {
 
                 this._playerInfo.status = PlayerStatus.OK;
 
+                // Tell the game service
+                this.eventBusService.emitNotification('register', null);
+
                 // Run the callback for the UI
                 successCallback();
             },
@@ -189,6 +209,9 @@ export class PlayerService {
 
                 this._playerInfo.status = PlayerStatus.NOT_INITIALIZED;
 
+                // Tell the game service
+                this.eventBusService.emitNotification('registerFailed', null);
+                
                 // Run the callback for the UI
                 failureCallback(err);
             }
@@ -221,6 +244,9 @@ export class PlayerService {
 
                 this._playerInfo.status = PlayerStatus.OK;
 
+                // Tell the game service
+                this.eventBusService.emitNotification('login', null);
+
                 // Run the callback for the UI
                 successCallback();
             },
@@ -230,6 +256,9 @@ export class PlayerService {
                 console.log("Login failed", err);
 
                 this._playerInfo.status = PlayerStatus.NOT_INITIALIZED;
+
+                // Tell the game service
+                this.eventBusService.emitNotification('loginFailed', null);
 
                 // Run the callback for the UI
                 failureCallback(err);
@@ -253,13 +282,13 @@ export class PlayerService {
             (resp : HttpResponse<SettingsResult>) => {
                 let settingsResult: SettingsResult = resp.body;
                 this._playerInfo.email = this.tokenService.email ? this.tokenService.email : DEFAULT_EMAIL;
-                this._playerInfo.settings.difficultyLevel = settingsResult.difficultyLevel ? settingsResult.difficultyLevel : DEFAULT_DIFFICULTYLEVEL;
-                this._playerInfo.settings.enableSounds = settingsResult.enableSounds;
-                this._playerInfo.settings.gameMode = settingsResult.gameMode ? settingsResult.gameMode : DEFAULT_GAMEMODE;
-                this._playerInfo.settings.hintType = settingsResult.hintType ? settingsResult.hintType : DEFAULT_HINTTYPE;
-                this._playerInfo.settings.name = settingsResult.name ? settingsResult.name : DEFAULT_NAME;
-                this._playerInfo.settings.numHops = settingsResult.numHops ? settingsResult.numHops : DEFAULT_NUM_HOPS;
-                this._playerInfo.settings.numLetters = settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
+                this._playerInfo.settings.difficultyLevel = settingsResult && settingsResult.difficultyLevel ? settingsResult.difficultyLevel : DEFAULT_DIFFICULTYLEVEL;
+                this._playerInfo.settings.enableSounds = settingsResult ? settingsResult.enableSounds : DEFAULT_ENABLESOUNDS;
+                this._playerInfo.settings.gameMode = settingsResult && settingsResult.gameMode ? settingsResult.gameMode : DEFAULT_GAMEMODE;
+                this._playerInfo.settings.hintType = settingsResult && settingsResult.hintType ? settingsResult.hintType : DEFAULT_HINTTYPE;
+                this._playerInfo.settings.name = settingsResult && settingsResult.name ? settingsResult.name : DEFAULT_NAME;
+                this._playerInfo.settings.numHops = settingsResult && settingsResult.numHops ? settingsResult.numHops : DEFAULT_NUM_HOPS;
+                this._playerInfo.settings.numLetters = settingsResult && settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
 
                 this.settingsChangesBehaviorSubject.next(this._playerInfo);
 
@@ -267,6 +296,9 @@ export class PlayerService {
                 this.subscribe();
 
                 this._playerInfo.status = PlayerStatus.OK;
+
+                // Tell the game service
+                this.eventBusService.emitNotification('settingsLoaded', null);
 
                 successCallback();
             },
@@ -276,6 +308,9 @@ export class PlayerService {
                 console.log("Get settings failed", err);
 
                 this._playerInfo.status = PlayerStatus.NOT_INITIALIZED;
+
+                // Tell the game service
+                this.eventBusService.emitNotification('settingsLoadFailed', null);
 
                 // Run the callback for the UI
                 failureCallback(err);
@@ -299,12 +334,18 @@ export class PlayerService {
 
                 this._playerInfo.status = PlayerStatus.OK;
 
+                // Tell the game service
+                this.eventBusService.emitNotification('settingsSaved', null);
+
                 successCallback();
             },
             // Failure
             (err) => {
             // API call for login failed, nothing to be done here
                 console.log("Save settings failed", err);
+
+                // Tell the game service
+                this.eventBusService.emitNotification('settingsSaveFailed', null);
 
                 // Run the callback for the UI
                 failureCallback(err);
@@ -316,8 +357,8 @@ export class PlayerService {
         // Destroy tokens
         this.tokenService.logout();
 
-        // Tell folks that logout happened
-        this.eventbusService.emit(new EventData('logout', null));
+        // Tell the game service that logout happened
+        this.eventBusService.emitNotification('logout', null);
     }
 
     // Getters and Setters

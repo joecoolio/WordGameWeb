@@ -114,30 +114,23 @@
     <button
         type="button"
         class="btn btn-outline-dark btn-secondary"
-        (click)="loginAsGuest()"
+        (click)="registerAsGuest()"
     >
-      Play As Guest
+        <span *ngIf="guestRunning" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Play As Guest
     </button>  
 
     <label *ngIf="showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form"
         [ngClass]="{ disabled: this.email.value == '' || this.password.value == '' }"
     >
-        <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span *ngIf="loginRunning" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         Login
     </label>
     <label *ngIf="!showLoginForm" class="btn btn-outline-dark btn-primary" for="submit-form"
         [ngClass]="{ disabled: this.name.value == '' || this.email.value == '' || this.password.value == '' }"
     >
-        <span *ngIf="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span *ngIf="loginRunning" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         Register
     </label>
-
-    <!-- <button
-        type="button"
-        class="btn btn-outline-dark btn-secondary"
-        (click)="activeModal.close('Close click')"
-    >
-      Cancel
-    </button>   -->
 </div>
   

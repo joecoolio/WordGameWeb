@@ -14,6 +14,7 @@ import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 import { DifficultyLevel, GameMode } from '../services/player.service';
 import { Letter, WordStatus } from '../model/board';
+import { EventBusService } from '../services/eventbus.service';
 
 @Component({
   selector: 'game',
@@ -47,32 +48,49 @@ export class GameComponent implements OnInit, AfterViewInit {
   letterFontSize: number = 10; // Letter font size
   iconFontSize: number = 10;   // Icon font size
 
+  // Subscription Stuff
+  private subscriptions: Subscription;
+
   // Stuff for catching and dealing with window resizes (to adjust the board's size)
   resizeObservable$: Observable<Event>
-  resizeSubscription$: Subscription
  
-  // constructor(private dialog: MatDialog, private applicationRef: ApplicationRef, private el: ElementRef) {}
+  // Sends: newGameRequested
+  // Receives:
   constructor(
     // private dialog: MatDialog,
     public gameService: GameService,
+    private eventBusService: EventBusService,
     private cdRef: ChangeDetectorRef
-  ) {}
+  ) {
+      this.subscriptions = new Subscription();
+
+        // Watch for logout events to be fired and show the login screen
+      this.subscriptions.add(
+        this.eventBusService.onCommand('newGame', () => {
+          console.log("GameComponent: requested to start new game");
+          this.__newGame();
+        })
+      );
+
+  }
 
   ngOnInit() {
   }
 
   ngAfterViewInit() {
     this.resizeObservable$ = fromEvent(window, 'resize')
-    this.resizeSubscription$ = this.resizeObservable$.subscribe( evt => {
+    this.subscriptions.add(
+      this.resizeObservable$.subscribe( evt => {
       // Handle window resize events here
       this.handleScreenResize();
-    });
+      })
+    );
 
-    this.newGame();
+    // this.newGame();
   }
 
   ngOnDestroy() {
-    this.resizeSubscription$.unsubscribe()
+    this.subscriptions.unsubscribe()
   }
 
   isLetterOnPath(letter: Letter, wordIndex: number, letterIndex: number): boolean {
@@ -127,7 +145,13 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Start over with new words
   // Resize the screen if the number of letters or hops changed
   newGame() {
-  console.log("newgame called in game component");
+    console.log("New Game Requested");
+    this.eventBusService.emitNotification('newGameRequested', null);
+  }
+
+  // Actually start the new game, fired by the game state events
+  private __newGame() {
+    console.log("Game component starting new game");
     let lastNumLetters = this.gameService.numLetters;
     let lastNumHops = this.gameService.numHops;
     let lastDifficultlyLevel = this.gameService.difficultyLevel;

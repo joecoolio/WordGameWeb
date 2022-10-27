@@ -19,7 +19,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit() {
     this.showLoginForm = true;
-    this.loading = false;
+    this.loginRunning = false;
   }
 
   // Form fields
@@ -49,14 +49,18 @@ export class LoginComponent implements OnInit {
   // Error message if anything goes wrong
   errorMessage: string;
 
-  // Flag to indicate that an API call is running
-  loading: boolean;
+  // Flags to indicate that buttons were pushed causing an API call to be running
+  loginRunning: boolean;
+  guestRunning: boolean;
 
+  // Login an existing user
   onSubmitLogin(): void {
     // Process login
     console.log('Login: ', this.loginFormGroup.value);
   
-    this.loading = true;
+    this.loginRunning = true;
+    this.guestRunning = false;
+
     this.playerService.login(
       this.email.value,
       this.password.value,
@@ -71,11 +75,11 @@ export class LoginComponent implements OnInit {
           },
           (error: string)=> {
             console.log("Get settings failure callback", error);
-            this.loading = false;
+            this.loginRunning = false;
           }
         );
           
-        this.loading = false;
+        this.loginRunning = false;
 
         // Close the window
         this.activeModal.close('Login success')
@@ -84,16 +88,24 @@ export class LoginComponent implements OnInit {
       (error: string)=> {
         this.errorMessage = "Login failed, try again?"
         console.log("Login failure callback", error);
-        this.loading = false;
+        this.loginRunning = false;
       }
     );
   }
 
+  // Register a new user (non-guest)
   onSubmitRegister(): void {
+    this.loginRunning = true;
+    this.guestRunning = false;
+
     this.__doRegister(this.name.value, this.email.value, this.password.value, false);
   }
 
-  loginAsGuest(): void {
+  // Register a new user (guest)
+  registerAsGuest(): void {
+    this.loginRunning = false;
+    this.guestRunning = true;
+
     // Create a random username and password
     this.__doRegister('Guest', "Guest-" + crypto.randomUUID() + "@guestuser.com", crypto.randomUUID(), true);
   }
@@ -101,7 +113,6 @@ export class LoginComponent implements OnInit {
   private __doRegister(name: string, email: string, password: string, applyExpiry: boolean): void {
     this.playerService.name = name;
   
-    this.loading = true;
     this.playerService.register(
       email,
       password,
@@ -109,19 +120,9 @@ export class LoginComponent implements OnInit {
       // Success callback
       ()=> {
         console.log("Register success callback");
-        
-        // Get user settings
-        this.playerService.getSettings(
-          ()=> {
-            console.log("Get settings success callback");
-          },
-          (error: string)=> {
-            console.log("Get settings failure callback", error);
-            this.loading = false;
-          }
-        );
           
-        this.loading = false;
+        this.loginRunning = false;
+        this.guestRunning = false;
 
         // Close the window
         this.activeModal.close('Register success')
@@ -129,7 +130,8 @@ export class LoginComponent implements OnInit {
       (error: string)=> {
         this.errorMessage = "Registration failed, user exists with a different password?"
         console.log("Register failure callback", error);
-        this.loading = false;
+        this.loginRunning = false;
+        this.guestRunning = false;
       }
     );
   }

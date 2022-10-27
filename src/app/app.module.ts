@@ -29,6 +29,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { LoginComponent as LoginComponent } from './account/login/login.component';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { TimingInterceptor } from './services/timing.interceptor';
+import { GameWorkflowService } from './services/gameworkflow.service';
 
 // Bootstrap stuff
 // import { NgbModule } from '@ng-bootstrap/ng-bootstrap';

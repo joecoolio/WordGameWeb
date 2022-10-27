@@ -9,7 +9,10 @@ import { PlayerService } from './services/player.service';
 import { DataService } from './services/data.service';
 import { TokenService } from './services/token.service';
 import { EventBusService } from './services/eventbus.service';
+import { GameWorkflowService } from './services/gameworkflow.service';
 
+// Sends: applicationStart
+// Receives: showLogin
 @Component({
   selector: 'wordgame-app',
   templateUrl: './app.component.html',
@@ -30,20 +33,15 @@ export class AppComponent {
     public gameService: GameService,
     private modalService: NgbModal,
     private playerService: PlayerService,
-    private eventBusService: EventBusService
+    private eventBusService: EventBusService,
+    private gameWorkflowService: GameWorkflowService
   ) {
     this._subscriptions = new Subscription();
 
-    // Watch for logout events to be fired and show the login screen
-    let eventBusSubscription: Subscription = this.eventBusService.on('logout', () => {
-      this.logoutOccurred();
-    });
-    this._subscriptions.add(eventBusSubscription)
-  }
-
-  private logoutOccurred(): void {
-    console.log("App component notified of logout!");
-    this.openLogin();
+    // Watch for showLogin events to be fired to open the login screen
+    this._subscriptions.add(this.eventBusService.onCommand('showLogin', () => {
+      this.openLogin();
+    }));
   }
 
   openLogin() {
@@ -99,10 +97,8 @@ export class AppComponent {
     // Might record abandoned games here?
     window.onbeforeunload = () => this.ngOnDestroy();
 
-    // Popup login screen if not already logged in
-    if (!this.tokenService.isLoggedIn()) {
-      this.openLogin();
-    }
+    // Tell the game state engine that the game has started
+    this.eventBusService.emitNotification('applicationStart', null);
   }
 
   ngOnDestroy() {

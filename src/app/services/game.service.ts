@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSet, ValidatedPuzzle } from './data.service';
 import { AudioService } from './audio.service';
-import { PlayerService, GameMode, HintType, DifficultyLevel, PlayerInfo} from './player.service';
-import { BehaviorSubject, firstValueFrom, skip, Subscription, takeWhile } from 'rxjs';
+import { PlayerService, GameMode, HintType, DifficultyLevel} from './player.service';
+import { Subscription } from 'rxjs';
 import { TimerService } from './timer.service';
 import { Board, WordStatus } from '../model/board';
+import { EventBusService } from './eventbus.service';
 
 export enum GameStatus {
   Initialize,  // The game isn't setup yet
@@ -14,6 +15,9 @@ export enum GameStatus {
   Timeout      // Timed mode & time is up, you lose sucka
 }
 
+
+// Sends: gameStarted, gameWon, gameLost, gameTerminated
+// Receives: logout, terminateGame
 @Injectable({ providedIn: 'root' })
 export class GameService {
   // Min & max number of letters & hops
@@ -34,13 +38,8 @@ export class GameService {
   private _gameMode: GameMode;
   private _difficultyLevel: DifficultyLevel;
   private _hintType: HintType;
+  private _numHintsGiven: number;
 
-  // Parameters (that can change at any time) of the player
-  private _playerInfoSubscription: Subscription;
-  private _playerInfo: PlayerInfo;
-  // Set to true when player info first becomes available
-  private _playerInfoLoaded: boolean;
-  
   // Selected row/cell indexes
   private _selectedWord: number = 1;
   private _selectedLetter: number = 0;
@@ -57,51 +56,47 @@ export class GameService {
   private _timeRemaining: number;
   private _timeExpired: boolean = false;
 
+  // All service level subscriptions
+  private _subscriptions: Subscription;
+
   // Everything in here should be unsubscribed at the start of every game
   private _perGameSubscriptions: Subscription;
+
+  // Word pair for the game
+  private _wordPair: WordPair;
+
 
   constructor(
     private _dataService: DataService,
     private _audioService: AudioService,
     private _playerService: PlayerService,
-    private _timerService: TimerService)
+    private _timerService: TimerService,
+    private _eventBusService: EventBusService)
   {
-    // Player info is not loaded yet
-    this._playerInfoLoaded = false;
+    this._subscriptions = new Subscription();
 
-    // Subscribe to get player settings when they change
-    this._playerInfoSubscription = this._playerService.settingsChanged().pipe(skip(1)).subscribe({
-      next: (newPlayerInfo) => {
-          // User settings changed
-          console.log("Loaded user: " + JSON.stringify(newPlayerInfo));
-          this._playerInfo = newPlayerInfo;
+    // Watch for logout events to be fired and handle them
+    this._subscriptions.add(this._eventBusService.onCommand('logout', () => {
+      this.logoutOccurred();
+    }));
 
-          this._playerInfoLoaded = true;
-      },
-      error: (err) => {
-          // User load failed
-          console.log("Failed to load user: " + err);
-      }
-    });
-
-    // Ask the player service to load (will be notified via settingsChanged observer)
-    this._playerService.getSettings(()=>{}, ()=>{});
-
+    // Watch for logout events to be fired and handle them
+    this._subscriptions.add(this._eventBusService.onCommand('terminateGame', () => {
+      this.terminate();
+    }));
+    
     // Setup the per game subscriptions
     this._perGameSubscriptions = new Subscription();
   }
 
-  // Word pair retrieved from the server
-  private _wordPair: WordPair | undefined;
+  // Runs when a logout occurs
+  private logoutOccurred(): void {
+    // End/give up the current game
+    // TODO
+  }
 
   // Create a new game
-  async newGame() : Promise<void> {
-    // Do not try to start a game until the player has been loaded
-    if (!this._playerInfoLoaded) {
-      await firstValueFrom(this._playerService.settingsChanged().pipe(skip(1)));
-    }
-    console.log("Player info is available");
-
+  public async newGame() : Promise<void> {
     // Reset anything required from the previous game
     console.log("Unsubscribing from per-game subscriptions");
     this._perGameSubscriptions.unsubscribe();
@@ -112,11 +107,12 @@ export class GameService {
       this._gameStatus = GameStatus.Initialize;
 
       // Reset game parameters to the user's preferences
-      this._numLetters = this._playerInfo.settings.numLetters;
-      this._numHops = this._playerInfo.settings.numHops;
-      this._gameMode = this._playerInfo.settings.gameMode;
-      this._difficultyLevel = this._playerInfo.settings.difficultyLevel;
-      this._hintType = this._playerInfo.settings.hintType;
+      this._numLetters = this._playerService.numLetters;
+      this._numHops = this._playerService.numHops;
+      this._gameMode = this._playerService.gameMode;
+      this._difficultyLevel = this._playerService.difficultyLevel;
+      this._hintType = this._playerService.hintType;
+      this._numHintsGiven = 0;
 
       console.log(
         'Initialize new game: letters = ' + this._numLetters + ' / hops = ' + this._numHops +
@@ -182,7 +178,7 @@ export class GameService {
 
   private startGame() {
     // If it's a timed game, start the counter
-    if (this._playerInfo.settings.gameMode == GameMode.Timed) {
+    if (this._gameMode == GameMode.Timed) {
       this._timeExpired = false;
 
       // Stop the timer if it's already running
@@ -239,6 +235,9 @@ export class GameService {
       // Start the timer
       this._timerService.startTimer(timeS * 1000);
     }
+
+    // Tell the game service that the game started
+    this._eventBusService.emitNotification('gameStarted', null);
   }
 
   // Keyboard entry occurred
@@ -521,9 +520,12 @@ export class GameService {
     this._audioService.puzzleSolved();
 
     // Clean up timing stuff
-    if (this._playerInfo.settings.gameMode == GameMode.Timed) {
+    if (this._gameMode == GameMode.Timed) {
       this._timerService.stopTimer();
     }
+
+    // Tell the game service
+    this._eventBusService.emitNotification('gameWon', null);
   }
 
   // TODO: use this to report a loss
@@ -573,6 +575,17 @@ export class GameService {
         // API call for solutions failed, nothing to be done here
       }
     );
+
+    // Tell the game service
+    this._eventBusService.emitNotification('gameLost', null);
+  }
+
+  // If a game is running, kill it
+  private terminate() {
+    console.log("GameService: terminate game requested");
+
+    // Tell the game service
+    this._eventBusService.emitNotification('gameTerminated', null);
   }
 
   // Get a hint for the current word
@@ -627,6 +640,9 @@ export class GameService {
               // Play a sound
               this._audioService.hintGiven();
 
+              // Record the number of hints given
+              this._numHintsGiven++;
+
               return;
             } else {
               // Couldn't get a hint, tell the player
@@ -670,6 +686,9 @@ export class GameService {
 
               // Plug in the hint by moving to the cell and typing (to get other events)
               this._board.words[wordHint.hintWord].setText(wordHint.hintText);
+
+              // Record the number of hints given
+              this._numHintsGiven++;
 
               // Run the test routine (which should always work)
               this.testSingleWord();

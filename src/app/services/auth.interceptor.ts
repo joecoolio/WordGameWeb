@@ -7,7 +7,7 @@ import { AuthService, LoginResult } from './auth.service';
 
 import { Observable, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { EventBusService, EventData } from './eventbus.service';
+import { EventBusService } from './eventbus.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -62,7 +62,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
                         // If you get here, the refresh token is no good and you need to re-login
                         this.tokenService.logout();
-                        this.eventbusService.emit(new EventData('logout', null));
+                        this.eventbusService.emitNotification('logout', null);
 
                         return throwError(() => err);
                     })
