@@ -18,5 +18,6 @@ Move api to AWS
 -- Show login screen at startup if not logged in
 Test that login pops up when your refresh token expires
 -- Add "play as guest" functionality
-Auto-delete guest IDs from database when they aren't used
+-- Auto-delete guest IDs from database when they aren't used
+When refreshing tokens for guest users, reset the expiration date of the user
 -- Redo the newgame() routine and other stuff to be event driven.
