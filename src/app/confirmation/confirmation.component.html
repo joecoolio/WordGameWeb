@@ -1,0 +1,30 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{ headerText }}</h4>
+    <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="activeModal.dismiss('cancel')"
+    ></button>
+</div>
+<div class="modal-body">
+    {{ messageText }}
+</div>
+<div class="modal-footer">
+    <button
+        type="button"
+        class="btn btn-outline-dark btn-secondary"
+        (click)="activeModal.close('yes')"
+    >
+        Yes
+    </button>  
+
+    <button
+        type="button"
+        class="btn btn-outline-dark btn-secondary"
+        (click)="activeModal.close('no')"
+    >
+        No
+    </button>  
+</div>
+  

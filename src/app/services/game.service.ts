@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSet, ValidatedPuzzle } from './data.service';
 import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel} from './player.service';
-import { Subscription } from 'rxjs';
+import { skip, Subscription } from 'rxjs';
 import { TimerService } from './timer.service';
 import { Board, WordStatus } from '../model/board';
 import { EventBusService } from './eventbus.service';
@@ -51,8 +51,6 @@ export class GameService {
   private _lastExecutionTime: number = 0; // Round trip execution
 
   // Timer subscriptions for timed game
-  private _timerTickSub: Subscription;
-  private _timerFinishedSub: Subscription;
   private _timeRemaining: number;
   private _timeExpired: boolean = false;
 
@@ -102,10 +100,10 @@ export class GameService {
     this._perGameSubscriptions.unsubscribe();
     this._perGameSubscriptions = new Subscription();    
 
+    this._gameStatus = GameStatus.Initialize;
+
     // Once you have player settings, you can create a game
     return new Promise((resolve, reject) => {
-      this._gameStatus = GameStatus.Initialize;
-
       // Reset game parameters to the user's preferences
       this._numLetters = this._playerService.numLetters;
       this._numHops = this._playerService.numHops;
@@ -145,11 +143,14 @@ export class GameService {
             this._selectedWord = 1;
             this._selectedLetter = 0;
 
+            // The game is ready, start the timer if needed
+            this.startTimer();
+
             // The game is now running
             this._gameStatus = GameStatus.Run;
 
-            // The game is ready, do any other stuff necessary
-            this.startGame();
+            // Tell the game service that the game started
+            this._eventBusService.emitNotification('gameStarted', null);
 
             resolve();
           },
@@ -176,7 +177,7 @@ export class GameService {
     });
   }
 
-  private startGame() {
+  private startTimer() {
     // If it's a timed game, start the counter
     if (this._gameMode == GameMode.Timed) {
       this._timeExpired = false;
@@ -185,8 +186,8 @@ export class GameService {
       this._timerService.stopTimer();
 
       // Register subscriptions if needed
-      if (this._timerTickSub === undefined) {
-        this._timerTickSub = this._timerService.tick().subscribe({
+      this._perGameSubscriptions.add(
+        this._timerService.tick().pipe(skip(1)).subscribe({
           next: (msRemaining) => {
             // console.log("Tick: " + sRemaining);
             this._timeRemaining = msRemaining;
@@ -210,11 +211,11 @@ export class GameService {
               }
             }
           }
-        });
-      }
+        })
+      );
 
-      if (this._timerFinishedSub === undefined) {
-        this._timerFinishedSub = this._timerService.finished().subscribe({
+      this._perGameSubscriptions.add(
+        this._timerService.finished().pipe(skip(1)).subscribe({
           next: () => {
             // console.log("Finished!");
             this._timeRemaining = 0;
@@ -226,8 +227,8 @@ export class GameService {
             // You lose
             this.lose();
           }
-        });
-      }
+        })
+      );
 
       // Allocate 10 seconds per word to fill in
       let timeS = 10 * (this._numHops - 1);
@@ -235,9 +236,6 @@ export class GameService {
       // Start the timer
       this._timerService.startTimer(timeS * 1000);
     }
-
-    // Tell the game service that the game started
-    this._eventBusService.emitNotification('gameStarted', null);
   }
 
   // Keyboard entry occurred

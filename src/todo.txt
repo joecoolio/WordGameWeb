@@ -25,3 +25,6 @@ Build out gametracker to record game results
 Consider preloading audio files to avoid any delays
 Add "give up/terminate" option in game
 Add "are you sure" before new game or terminate
+Build user stats
+Build leaderboard
+Modify header to adjust buttons

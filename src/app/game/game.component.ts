@@ -12,9 +12,12 @@ import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
 import { DifficultyLevel, GameMode } from '../services/player.service';
 import { Letter, WordStatus } from '../model/board';
 import { EventBusService } from '../services/eventbus.service';
+import { ConfirmationComponent } from '../confirmation/confirmation.component';
 
 @Component({
   selector: 'game',
@@ -59,6 +62,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   constructor(
     // private dialog: MatDialog,
     public gameService: GameService,
+    private modalService: NgbModal,
     private eventBusService: EventBusService,
     private cdRef: ChangeDetectorRef
   ) {
@@ -141,10 +145,26 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   // Start over with new words
-  // Resize the screen if the number of letters or hops changed
   newGame() {
-    console.log("New Game Requested");
-    this.eventBusService.emitNotification('newGameRequested', null);
+    if (this.gameService.gameStatus == GameStatus.Run) {
+      // A game is already running, get a confirmation before you wipe it out
+      const modalRef = this.modalService.open(ConfirmationComponent);
+      modalRef.componentInstance.headerText = "New Game?";
+      modalRef.componentInstance.messageText = "Are you sure you want to start a new game? The current incomplete game will be marked as a loss.";
+      modalRef.result.then(
+        (result: string) => {
+          if (result == "yes") {
+            console.log("New Game Requested");
+            this.eventBusService.emitNotification('newGameRequested', null);
+          }
+        },
+        (err) => { /* ignore */ }
+      );
+    } else {
+      // No need for confirmation if the game isn't running
+      console.log("New Game Requested");
+      this.eventBusService.emitNotification('newGameRequested', null);
+    }
   }
 
   // Actually start the new game, fired by the game state events
