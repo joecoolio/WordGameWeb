@@ -12,7 +12,7 @@ export enum GameStatus {
   Run,         // The game is running
   Win,         // You win!
   Broken,      // Something is borked
-  Timeout      // Timed mode & time is up, you lose sucka
+  Lose      // Timed mode & time is up, you lose sucka
 }
 
 
@@ -185,11 +185,11 @@ export class GameService {
       // Stop the timer if it's already running
       this._timerService.stopTimer();
 
-      // Register subscriptions if needed
+      // Register subscriptions for the timer
       this._perGameSubscriptions.add(
         this._timerService.tick().pipe(skip(1)).subscribe({
           next: (msRemaining) => {
-            // console.log("Tick: " + sRemaining);
+            // console.log("Tick: " + msRemaining);
             this._timeRemaining = msRemaining;
             
             // Play sounds every second until 8.0.
@@ -217,12 +217,12 @@ export class GameService {
       this._perGameSubscriptions.add(
         this._timerService.finished().pipe(skip(1)).subscribe({
           next: () => {
-            // console.log("Finished!");
+            console.log("Timer ran out!");
             this._timeRemaining = 0;
             this._timeExpired = true;
     
             // Move the game to timeout status if it's still running
-            this._gameStatus = GameStatus.Timeout;
+            this._gameStatus = GameStatus.Lose;
 
             // You lose
             this.lose();
@@ -242,7 +242,7 @@ export class GameService {
   letterEntered(letter: string) {
     // Only accept entry on unlocked cells and if the game is not timed out and not won
     if (!this._board.words[this._selectedWord].letters[this._selectedLetter].locked
-      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Lose)
       && (this._gameStatus != GameStatus.Win)
     ) {
       // Backspace & Delete (mostly shared logic)
@@ -350,7 +350,7 @@ export class GameService {
   public testSingleWord() {
     // Only allowed if the difficulty is Advanced or lower and not timed out and not won
     if (this._difficultyLevel < DifficultyLevel.Expert
-      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Lose)
       && (this._gameStatus != GameStatus.Win)
     ) {
 
@@ -447,7 +447,7 @@ export class GameService {
   public testEntirePuzzle() {
     // Only allowed if not timed out and not won
     if (
-      (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Lose)
       && (this._gameStatus != GameStatus.Win)
     ) {
 
@@ -526,11 +526,17 @@ export class GameService {
     this._eventBusService.emitNotification('gameWon', null);
   }
 
-  // TODO: use this to report a loss
+  // Stop the current game prematurely
   private lose() {
-    this._message = "Time ran out, you lose!";
+    this._message = "Game over! You lose!";
     this._audioService.puzzleLost();
+    this._gameStatus = GameStatus.Lose;
 
+    // Reset anything required from the current game (including the timer)
+    console.log("Unsubscribing from per-game subscriptions");
+    this._perGameSubscriptions.unsubscribe();
+    this._perGameSubscriptions = new Subscription();    
+    
     // Get all the solutions
 
     // Inputs to remote call
@@ -582,6 +588,9 @@ export class GameService {
   private terminate() {
     console.log("GameService: terminate game requested");
 
+    // All that's needed is to call lose() here 
+    this.lose();
+
     // Tell the game service
     this._eventBusService.emitNotification('gameTerminated', null);
   }
@@ -592,7 +601,7 @@ export class GameService {
   public getHint() {
     // Only allowed if the difficulty is Normal and not timed out and not won
     if (this._difficultyLevel < DifficultyLevel.Advanced
-      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Lose)
       && (this._gameStatus != GameStatus.Win)
     ) {
       // Inputs to remote call
@@ -724,7 +733,7 @@ export class GameService {
     // And the game is not timed out and not won
     if (
       !this._board.words[word].locked
-      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Timeout)
+      && (this._gameMode != GameMode.Timed || this._gameStatus != GameStatus.Lose)
       && (this._gameStatus != GameStatus.Win)
     ) {
       this._selectedWord = word;

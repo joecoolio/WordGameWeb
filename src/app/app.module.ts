@@ -23,13 +23,13 @@ import { MatSliderModule } from '@angular/material/slider';
 // import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip'
 
 // import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { LoginComponent as LoginComponent } from './account/login/login.component';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { TimingInterceptor } from './services/timing.interceptor';
-import { GameWorkflowService } from './services/gameworkflow.service';
 
 // Bootstrap stuff
 // import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -49,6 +49,7 @@ import { GameWorkflowService } from './services/gameworkflow.service';
     MatSliderModule,
     MatSlideToggleModule,
     MatCardModule,
+    MatTooltipModule,
     // NgbModule,
   ],
 

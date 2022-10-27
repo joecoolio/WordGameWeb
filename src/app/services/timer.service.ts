@@ -17,14 +17,14 @@ export class TimerService {
     private _remainingTime: number;
 
     // Subject for countdown callbacks
-    private _tickBehaviorSubject: ReplaySubject<number>;
+    private _tickBehaviorSubject: BehaviorSubject<number>;
 
     // Subject for countdown callbacks
-    private _finishedBehaviorSubject: ReplaySubject<void>;
+    private _finishedBehaviorSubject: BehaviorSubject<void>;
 
     constructor() {
-        this._tickBehaviorSubject = new ReplaySubject(this._remainingTime);
-        this._finishedBehaviorSubject = new ReplaySubject(null);
+        this._tickBehaviorSubject = new BehaviorSubject(this._remainingTime);
+        this._finishedBehaviorSubject = new BehaviorSubject(null);
     }
 
     // Subscribe to this to see the clock ticking down

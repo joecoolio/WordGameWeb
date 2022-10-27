@@ -4,9 +4,13 @@
       [ngClass]="{ 'highlighted': gameService.selectedWord === i }">
       
       <!-- Left side holds the hint button -->
+      <!-- On the first row, put the give up button -->
       <div class="letter-box" [style.width.px]="letterBoxSize * .85" [style.height.px]="letterBoxSize * .85" [style.font-size.px]="iconFontSize"
       *ngIf="hintsEnabled()">
-        <fa-icon *ngIf="gameService.selectedWord === i && word.status != enumWordStatus.Solved" class="icon hint" [icon]="faLightbulb" (click)="hint()"></fa-icon>
+        <fa-icon class="icon unverified" *ngIf="word.pairWord && i === 0 && gameService.gameStatus == enumGameStatus.Run"
+          (click)="giveUp()" [icon]="faSadTear" matTooltip="Give up and take the L?"></fa-icon>
+        <fa-icon *ngIf="gameService.selectedWord === i && word.status != enumWordStatus.Solved && gameService.gameStatus == enumGameStatus.Run"
+          class="icon hint" [icon]="faLightbulb" (click)="hint()" matTooltip="Get a hint?"></fa-icon>
       </div>
 
       <!-- The letters of the word -->
@@ -53,11 +57,12 @@
 
         <!-- Pair word, either invisible/timer icon (at bottom) or reload icon (at top) -->
         <!-- New game at top -->
-        <fa-icon class="icon"
+        <fa-icon class="icon" matTooltip="Start a new game?"
           [ngClass]="{
-            win: gameService.gameStatus == enumGameStatus.Win,
-            broken: gameService.gameStatus == enumGameStatus.Broken,
-            unverified: gameService.gameStatus == enumGameStatus.Run,
+            'win': gameService.gameStatus == enumGameStatus.Win,
+            'wrong': gameService.gameStatus == enumGameStatus.Lose,
+            'broken': gameService.gameStatus == enumGameStatus.Broken,
+            'unverified': gameService.gameStatus == enumGameStatus.Run,
             'fa-spin': gameService.gameStatus == enumGameStatus.Initialize
           }"
           *ngIf="word.pairWord && i === 0" (click)="newGame()" [icon]="faRepeat"></fa-icon>
@@ -69,7 +74,7 @@
             medium: gameService.gameStatus == enumGameStatus.Run && gameService.timeRemaining >= 5000 && gameService.timeRemaining < 10000,
             low: gameService.gameStatus == enumGameStatus.Run && gameService.timeRemaining < 5000,
             solved: gameService.gameStatus == enumGameStatus.Win,
-            expired: gameService.gameStatus == enumGameStatus.Timeout
+            expired: gameService.gameStatus == enumGameStatus.Lose
           }"
           *ngIf="word.pairWord && i != 0 && gameService.gameMode == enumGameMode.Timed">
           {{ formatTimer(gameService.timeRemaining) }}
@@ -83,13 +88,13 @@
             !word.pairWord &&
             word.populated &&
             word.status == enumWordStatus.Initialized
-          " class="icon unverified" (click)="testWord(i)" [icon]="faCircleQuestion"></fa-icon>
+          " class="icon unverified" (click)="testWord(i)" [icon]="faCircleQuestion" matTooltip="Test this word?"></fa-icon>
 
           <!-- Solved word -->
-          <fa-icon *ngIf="word.status == enumWordStatus.Solved" class="icon solved" (click)="testWord(i)" [icon]="faCircleCheck"></fa-icon>
+          <fa-icon *ngIf="word.status == enumWordStatus.Solved" class="icon solved" (click)="testWord(i)" [icon]="faCircleCheck" matTooltip="You got it right!"></fa-icon>
 
           <!-- Wrong word -->
-          <fa-icon *ngIf="word.status == enumWordStatus.Wrong" class="icon wrong" (click)="testWord(i)" [icon]="faCircleExclamation"></fa-icon>
+          <fa-icon *ngIf="word.status == enumWordStatus.Wrong" class="icon wrong" (click)="testWord(i)" [icon]="faCircleExclamation" matTooltip="Wrong, try harder!"></fa-icon>
 
           <!-- Testing word -->
           <fa-icon *ngIf="word.status == enumWordStatus.Testing" class="icon testing fa-spin" (click)="testWord(i)" [icon]="faSpinner"></fa-icon>

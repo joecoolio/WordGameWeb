@@ -1,4 +1,4 @@
-import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { fromEvent, Observable, Subscription } from "rxjs";
 import { GameService, GameStatus } from '../services//game.service';
 
@@ -11,6 +11,7 @@ import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faSadTear } from '@fortawesome/free-solid-svg-icons';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -34,6 +35,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   faCircleXmark = faCircleXmark;
   faLightbulb = faLightbulb;
   faEyeSlash = faEyeSlash;
+  faSadTear = faSadTear;
 
   public enumGameStatus = GameStatus;
   public enumGameMode = GameMode;
@@ -130,7 +132,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   testWord(index: number) {
     // If the word clicked isn't the selected word, change to it
     // Not after the game is won or timed out
-    if (this.gameService.gameStatus != GameStatus.Timeout && this.gameService.gameStatus != GameStatus.Win) {
+    if (this.gameService.gameStatus != GameStatus.Lose && this.gameService.gameStatus != GameStatus.Win) {
       if (this.gameService.selectedWord != index) {
         this.gameService.selectedWord = index;
         this.gameService.selectedLetter = 0;
@@ -144,6 +146,29 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.gameService.testEntirePuzzle();
   }
 
+  // Give up
+  giveUp() {
+    if (this.gameService.gameStatus == GameStatus.Run) {
+      // A game is already running, get a confirmation before you wipe it out
+      const modalRef = this.modalService.open(ConfirmationComponent);
+      modalRef.componentInstance.headerText = "Give up?";
+      modalRef.componentInstance.messageText = "Are you sure you want to give up? The current incomplete game will be marked as a loss.";
+      modalRef.result.then(
+        (result: string) => {
+          if (result == "yes") {
+            console.log("GameComponent: Terminate game requested");
+            this.eventBusService.emitNotification('gameQuit', null);
+          }
+        },
+        (err) => { /* ignore */ }
+      );
+    } else {
+      // No need for confirmation if the game isn't running
+      console.log("GameComponent: Terminate game requested");
+      this.eventBusService.emitNotification('gameQuit', null);
+    }
+  }
+  
   // Start over with new words
   newGame() {
     if (this.gameService.gameStatus == GameStatus.Run) {
@@ -154,7 +179,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       modalRef.result.then(
         (result: string) => {
           if (result == "yes") {
-            console.log("New Game Requested");
+            console.log("GameComponent: New Game Requested");
             this.eventBusService.emitNotification('newGameRequested', null);
           }
         },
@@ -162,7 +187,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       );
     } else {
       // No need for confirmation if the game isn't running
-      console.log("New Game Requested");
+      console.log("GameComponent: New Game Requested");
       this.eventBusService.emitNotification('newGameRequested', null);
     }
   }
@@ -224,11 +249,6 @@ export class GameComponent implements OnInit, AfterViewInit {
     // Calculate number of cells to be drawn horizontal & vertical
     var numHCells = this.gameService.numLetters + 2; // To account for icons on either side
     var numVCells = this.gameService.numHops + 1; // There are 1 more rows than number of hops
-
-    // Adjust horizontal cells based on game settings
-    if (this.gameService.difficultyLevel >= DifficultyLevel.Advanced) {
-      numHCells--; // Hints are disabled so that column is gone
-    }
     
     // Figure out ideal width/height size of a single letter square cell
     var hSize = totWidth / numHCells;

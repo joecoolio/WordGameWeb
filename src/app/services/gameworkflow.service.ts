@@ -17,6 +17,7 @@ import { TokenService } from './token.service';
   gameStarted:       Game started
   gameWon:           Game won
   gameLost:          Game lost
+  gameQuit:          Game quit (give up)
 
  Outgoing commands:
   getSettings:      Load user settings from remote
@@ -145,6 +146,12 @@ export class GameWorkflowService {
             }
         ));
 
+        // Game quit (give up)
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'gameQuit', () => {
+                this.eventBusService.emitCommand("terminateGame", null);
+            }
+        ));
     }
 
 }
