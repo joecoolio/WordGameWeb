@@ -3,15 +3,19 @@ import { PlayerService } from './player.service';
 
 @Injectable({ providedIn: 'root' })
 export class AudioService {
+  private _audio;
 
-  constructor(private playerService: PlayerService) { }
+  constructor(private playerService: PlayerService) {
+    this._audio = new Audio();
+  }
 
   private playSound(filename: string) {
     if (this.playerService.enableSounds) {
-      const audio = new Audio();
-      audio.src = filename;
-      audio.load();
-      audio.play();
+      if (this._audio.src != filename) {
+        this._audio.src = filename;
+        this._audio.load();
+      }
+      this._audio.play();
     }
   }
 

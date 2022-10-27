@@ -22,3 +22,6 @@ Test that login pops up when your refresh token expires
 -- When refreshing tokens for guest users, reset the expiration date of the user
 -- Redo the newgame() routine and other stuff to be event driven.
 Build out gametracker to record game results
+Consider preloading audio files to avoid any delays
+Add "give up/terminate" option in game
+Add "are you sure" before new game or terminate
