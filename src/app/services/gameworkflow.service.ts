@@ -14,16 +14,20 @@ import { TokenService } from './token.service';
   settingsChanged:   User settings were changed
   newGameRequested:  User requested a new game
   logout:            User logged out
+  gameStarted:       Game started
   gameWon:           Game won
   gameLost:          Game lost
 
  Outgoing commands:
-  getSettings:    Load user settings from remote
-  saveSettings:   Save user settings
-  newGame:        Start a new game
-  terminateGame:  Terminate the current game
-  showLogin:      Show the login screen
-  doLogout:       Do whatever logout processes are needed
+  getSettings:      Load user settings from remote
+  saveSettings:     Save user settings
+  newGame:          Start a new game
+  terminateGame:    Terminate the current game
+  showLogin:        Show the login screen
+  doLogout:         Do whatever logout processes are needed
+  recordGameStart:  Record that a game started
+  recordGameWin:    Record that a game was won
+  recordGameLoss:   Record that a game was lost
 
 */
 @Injectable({ providedIn: 'root' })
@@ -117,20 +121,27 @@ export class GameWorkflowService {
                 this.eventBusService.emitCommand("doLogout", null);
 
                 // Show the login screen
+                this.eventBusService.emitCommand("showLogin", null);
             }
         ));
         
+        // Game started
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'gameStarted', () => {
+                this.eventBusService.emitCommand("recordGameStart", null);
+            }
+        ))
         // Game won
         this._subscriptions.add(this.eventBusService.onNotification(
             'gameWon', () => {
-                // TODO: Save the game to the database
+                this.eventBusService.emitCommand("recordGameWon", null);
             }
         ));
 
         // Game lost
         this._subscriptions.add(this.eventBusService.onNotification(
             'gameLost', () => {
-                // TODO: Save the game to the database
+                this.eventBusService.emitCommand("recordGameLost", null);
             }
         ));
 

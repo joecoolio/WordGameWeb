@@ -10,6 +10,7 @@ import { DataService } from './services/data.service';
 import { TokenService } from './services/token.service';
 import { EventBusService } from './services/eventbus.service';
 import { GameWorkflowService } from './services/gameworkflow.service';
+import { GameTrackerService } from './services/gametracker.service';
 
 // Sends: applicationStart
 // Receives: showLogin
@@ -34,12 +35,15 @@ export class AppComponent {
     private modalService: NgbModal,
     private playerService: PlayerService,
     private eventBusService: EventBusService,
-    private gameWorkflowService: GameWorkflowService
+    // These have to be referenced to get them running
+    private gameWorkflowService: GameWorkflowService,
+    private gameTrackerService: GameTrackerService
   ) {
     this._subscriptions = new Subscription();
 
     // Watch for showLogin events to be fired to open the login screen
     this._subscriptions.add(this.eventBusService.onCommand('showLogin', () => {
+      console.log("AppComponent: open login requested")
       this.openLogin();
     }));
   }

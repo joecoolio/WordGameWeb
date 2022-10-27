@@ -19,5 +19,6 @@ Move api to AWS
 Test that login pops up when your refresh token expires
 -- Add "play as guest" functionality
 -- Auto-delete guest IDs from database when they aren't used
-When refreshing tokens for guest users, reset the expiration date of the user
+-- When refreshing tokens for guest users, reset the expiration date of the user
 -- Redo the newgame() routine and other stuff to be event driven.
+Build out gametracker to record game results

@@ -85,8 +85,6 @@ export class GameComponent implements OnInit, AfterViewInit {
       this.handleScreenResize();
       })
     );
-
-    // this.newGame();
   }
 
   ngOnDestroy() {
