@@ -183,13 +183,13 @@ export class Word {
     // or if you're creating non-user-entered letters for a solution
     protected populateLetters() {
         for(let i = 0; i < this._length; i++) {
-            this._letters[i] = new Letter(true, ()=> { this.checkPopulated(); });
+            this._letters.push(new Letter(true, ()=> { this.checkPopulated(); }));
         }
     }
 
     // Set the entire text of a word
     setText(wordText: string) {
-        let letterArray = wordText.split('');
+        let letterArray = Array.from(wordText);
         for(let i = 0; i < this._length; i++) {
             this._letters[i].character = letterArray[i];
         }
@@ -220,7 +220,7 @@ export class Word {
                     temp += this._letters[i].character;
                 }
             } else {
-                temp += "x";
+                temp += " ";
             }
         }
 

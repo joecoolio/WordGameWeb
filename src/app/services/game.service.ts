@@ -839,8 +839,12 @@ export class GameService {
   }
 
   public get board_stringified(): string {
-    if (this.board)
-      return this.board.stringify();
+    // if (this.board)
+    //   return this.board.stringify();
+    // else
+    //   return "not yet";
+    if (this._wordPair)
+      JSON.stringify(this._wordPair)
     else
       return "not yet";
   }
