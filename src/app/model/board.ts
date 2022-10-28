@@ -48,8 +48,14 @@ export class Board {
 
     // Initialize the game with a pair of words
     initialize(startWord: string, endWord: string) {
+        // Can't set letters while the word is locked
+        this._words[0].locked = false;
         this._words[0].setText(startWord);
+        this._words[0].locked = true;
+
+        this._words[this.numHops].locked = false;
         this._words[this.numHops].setText(endWord);
+        this._words[this.numHops].locked = true;
 
         // Pair words are not user entered
         this._words[0].letters.forEach((letter) => { letter.userEntered = false; });
@@ -191,9 +197,7 @@ export class Word {
     setText(wordText: string) {
         let letterArray = Array.from(wordText);
         for(let i = 0; i < this._length; i++) {
-confirm("Letter set? [" + this._letters[i] + "] [" + this._letters[i].character + "]");
             this._letters[i].character = letterArray[i];
-confirm("Letter [" + letterArray[i] + "] [" + this._letters[i].character + "]");
         }
     }
 
@@ -246,8 +250,7 @@ confirm("Letter [" + letterArray[i] + "] [" + this._letters[i].character + "]");
         this._locked = value;
 
         // When you lock/unlock a word, apply the same to all of its letters
-confirm("Length [" + this._length + "] [" + length + "]");
-        for(let i = 0; i < length; i++) {
+        for(let i = 0; i < this._length; i++) {
             this._letters[i].locked = value;
         }
     }
