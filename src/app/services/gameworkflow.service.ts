@@ -5,30 +5,32 @@ import { TokenService } from './token.service';
 
 /*
  Incoming notifications:
-  applicationStart:  Application started (init called on app)
-  login:             User logged in
-  loginFailed:       User failed to log in
-  register:          User registered
-  settingsLoaded:    User settings were loaded from remote
-  settingsSaved:     User settings were saved to remote
-  settingsChanged:   User settings were changed
-  newGameRequested:  User requested a new game
-  logout:            User logged out
-  gameStarted:       Game started
-  gameWon:           Game won
-  gameLost:          Game lost
-  gameQuit:          Game quit (give up)
+  applicationStart:    Application started (init called on app)
+  login:               User logged in
+  loginFailed:         User failed to log in
+  register:            User registered
+  settingsLoaded:      User settings were loaded from remote
+  settingsSaved:       User settings were saved to remote
+  settingsChanged:     User settings were changed
+  newGameRequested:    User requested a new game
+  logout:              User logged out
+  gameStarted:         Game started
+  gameWon:             Game won
+  gameLost:            Game lost
+  gameQuit:            Game quit (give up) [[user request to quit]]
+  gameTerminated:      Game was terminated [[system reporting that the game is killed]]
 
  Outgoing commands:
-  getSettings:      Load user settings from remote
-  saveSettings:     Save user settings
-  newGame:          Start a new game
-  terminateGame:    Terminate the current game
-  showLogin:        Show the login screen
-  doLogout:         Do whatever logout processes are needed
-  recordGameStart:  Record that a game started
-  recordGameWin:    Record that a game was won
-  recordGameLoss:   Record that a game was lost
+  getSettings:         Load user settings from remote
+  saveSettings:        Save user settings
+  newGame:             Start a new game
+  terminateGame:       Terminate the current game
+  showLogin:           Show the login screen
+  doLogout:            Do whatever logout processes are needed
+  recordGameStart:     Record that a game started
+  recordGameWin:       Record that a game was won
+  recordGameLoss:      Record that a game was lost
+  recordGameAbandon:   Record that a game was terminated (give up)
 
 */
 @Injectable({ providedIn: 'root' })
@@ -152,6 +154,14 @@ export class GameWorkflowService {
                 this.eventBusService.emitCommand("terminateGame", null);
             }
         ));
+
+        // Game quit (give up)
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'gameTerminated', () => {
+                this.eventBusService.emitCommand("recordGameAbandon", null);
+            }
+        ));
+        
     }
 
 }

@@ -33,12 +33,17 @@ export class GameService {
   private _gameStatus: GameStatus = GameStatus.Initialize;
 
   // Parameters of the current game
+  private _gameId: string;
   private _numLetters: number;
   private _numHops: number;
   private _gameMode: GameMode;
   private _difficultyLevel: DifficultyLevel;
   private _hintType: HintType;
   private _numHintsGiven: number;
+  
+  // To calculate game duration
+  private _gameStartMs: number;
+  private _gameEndMs: number;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -62,7 +67,6 @@ export class GameService {
 
   // Word pair for the game
   private _wordPair: WordPair;
-
 
   constructor(
     private _dataService: DataService,
@@ -101,10 +105,13 @@ export class GameService {
     this._perGameSubscriptions = new Subscription();    
 
     this._gameStatus = GameStatus.Initialize;
+    this._gameStartMs = Date.now();
+    this._gameEndMs = 0;
 
     // Once you have player settings, you can create a game
     return new Promise((resolve, reject) => {
       // Reset game parameters to the user's preferences
+      this._gameId = crypto.randomUUID();
       this._numLetters = this._playerService.numLetters;
       this._numHops = this._playerService.numHops;
       this._gameMode = this._playerService.gameMode;
@@ -509,6 +516,8 @@ export class GameService {
   
   // TODO: use this to report a completion
   private win() {
+    this._gameEndMs = Date.now();
+
     // Make all words solved
     // All words are solved
     this._board.setUserWordStatus(WordStatus.Solved);
@@ -527,7 +536,9 @@ export class GameService {
   }
 
   // Stop the current game prematurely
-  private lose() {
+  private __loseOrTerminate() {
+    this._gameEndMs = Date.now();
+
     this._message = "Game over! You lose!";
     this._audioService.puzzleLost();
     this._gameStatus = GameStatus.Lose;
@@ -579,17 +590,26 @@ export class GameService {
         // API call for solutions failed, nothing to be done here
       }
     );
+  }
+
+  // You lose
+  private lose() {
+    console.log("GameService: lose");
+
+    // Shared lose/abandon logic 
+    this.__loseOrTerminate();
 
     // Tell the game service
     this._eventBusService.emitNotification('gameLost', null);
   }
+  
 
   // If a game is running, kill it
   private terminate() {
     console.log("GameService: terminate game requested");
 
-    // All that's needed is to call lose() here 
-    this.lose();
+    // Shared lose/abandon logic
+    this.__loseOrTerminate();
 
     // Tell the game service
     this._eventBusService.emitNotification('gameTerminated', null);
@@ -799,5 +819,21 @@ export class GameService {
     return this._timeExpired;
   }
 
+  // Unique ID of the game
+  public get gameId(): string {
+    return this._gameId;
+  }
+  // Word pair
+  public get wordPair(): WordPair {
+    return this._wordPair;
+  }
+  // Number of hints given
+  public get numHintsGiven(): number {
+    return this._numHintsGiven;
+  }
+  // Game execution time (assuming it's finished)
+  public get gameExecutionMs(): number {
+    return this._gameEndMs - this._gameStartMs;
+  }
 
 }

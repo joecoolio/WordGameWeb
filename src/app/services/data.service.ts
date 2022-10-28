@@ -203,4 +203,45 @@ export class DataService {
     );
   }
 
+  async recordNewGame(gameId: string, pair: string, letters: number, hops: number, gameMode: number): Promise<void> {
+    const body = {
+      gameId: gameId,
+      pair: pair,
+      letters: letters,
+      hops: hops,
+      gameMode: gameMode
+    };
+    console.log('DataService: Record new game: ' + JSON.stringify(body));
+    return await firstValueFrom(
+      this.http.post<void>(
+        AUTH_API + '/game/recordNewGame',
+        body,
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
+    );
+  }
+
+  async recordGameResult(gameId: string, result: string, numHints: number, execMs: number): Promise<void> {
+    let apiPath = "";
+    switch (result) {
+      case 'win': apiPath = 'recordGameWin'; break;
+      case 'loss': apiPath = 'recordGameLoss'; break;
+      case 'abandon': apiPath = 'recordGameAbandon'; break;
+    }
+    const body = {
+      gameId: gameId,
+      numHints: numHints,
+      execMs: execMs
+    };
+    console.log('DataService: Record game result: ' + apiPath + " = " + JSON.stringify(body));
+    return await firstValueFrom(
+      this.http.post<void>(
+        AUTH_API + '/game/' + apiPath,
+        body,
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
+    );
+  }
 }
