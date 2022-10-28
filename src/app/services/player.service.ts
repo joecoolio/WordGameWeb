@@ -205,7 +205,7 @@ export class PlayerService {
         successCallback: () => void,
         failureCallback: (error: string) => void
     ): void {
-        if (this.tokenService.isLoggedIn()) {
+        if (this.tokenService.isLoggedIn) {
             this._playerInfo.status = PlayerStatus.LOADING;
 
             // // We're about to overwrite settings so unsubscribe from changes
@@ -257,7 +257,7 @@ export class PlayerService {
         successCallback: () => void,
         failureCallback: (error: string) => void
     ): void {
-        if (this.tokenService.isLoggedIn()) {
+        if (this.tokenService.isLoggedIn) {
             this._playerInfo.status = PlayerStatus.SAVING;
 
             // Login and get settings

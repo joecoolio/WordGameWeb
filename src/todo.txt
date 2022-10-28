@@ -27,4 +27,4 @@ Consider preloading audio files to avoid any delays
 -- Add "are you sure" before new game or terminate
 Build user stats
 Build leaderboard
-Modify header to adjust buttons
+-- Modify header to adjust buttons

@@ -24,7 +24,7 @@ export class TokenService {
 
     private _lastAPIExecutionTime: number;
 
-    isLoggedIn(): boolean {
+    public get isLoggedIn(): boolean {
         return this.refreshToken != null;
     }
 

@@ -606,13 +606,15 @@ export class GameService {
 
   // If a game is running, kill it
   private terminate() {
-    console.log("GameService: terminate game requested");
+    if (this._gameStatus == GameStatus.Run) {
+      console.log("GameService: terminate game requested");
 
-    // Shared lose/abandon logic
-    this.__loseOrTerminate();
+      // Shared lose/abandon logic
+      this.__loseOrTerminate();
 
-    // Tell the game service
-    this._eventBusService.emitNotification('gameTerminated', null);
+      // Tell the game service
+      this._eventBusService.emitNotification('gameTerminated', null);
+    }
   }
 
   // Get a hint for the current word

@@ -52,7 +52,7 @@ export class GameWorkflowService {
             'applicationStart', () => {
                 // If the user is already logged in, get settings
                 // If not, just show the login screen
-                if (this.tokenService.isLoggedIn()) {
+                if (this.tokenService.isLoggedIn) {
                     this.eventBusService.emitCommand("getSettings", null);
                 } else {
                     this.eventBusService.emitCommand("showLogin", null);
