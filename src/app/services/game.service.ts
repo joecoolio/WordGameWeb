@@ -91,6 +91,13 @@ export class GameService {
     this._perGameSubscriptions = new Subscription();
   }
 
+  public get board_stringified(): string {
+    if (this.board)
+      return this.board.stringify();
+    else
+      return "not yet";
+  }
+  
   // Runs when a logout occurs
   private logoutOccurred(): void {
     // End/give up the current game
