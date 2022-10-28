@@ -40,7 +40,7 @@ export class Board {
         }
 
         // Preconfigure pair words
-        this._words[0].locked = true;
+        // this._words[0].locked = true;
         this._words[0].pairWord = true;
         this._words[this.numHops].locked = true;
         this._words[this.numHops].pairWord = true;
@@ -190,7 +190,6 @@ export class Word {
     // Set the entire text of a word
     setText(wordText: string) {
         let letterArray = Array.from(wordText);
-confirm("Length [" + this._length + "]");
         for(let i = 0; i < this._length; i++) {
 confirm("Letter set? [" + this._letters[i] + "] [" + this._letters[i].character + "]");
             this._letters[i].character = letterArray[i];
