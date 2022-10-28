@@ -220,7 +220,7 @@ export class Word {
                     temp += this._letters[i].character;
                 }
             } else {
-                temp += " ";
+                temp += "x";
             }
         }
 
