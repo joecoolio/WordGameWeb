@@ -25,7 +25,8 @@ export class GameTrackerService {
                 gameService.wordPair.startWord + "_" + gameService.wordPair.endWord,
                 gameService.numLetters,
                 gameService.numHops,
-                gameService.gameMode
+                gameService.gameMode,
+                gameService.difficultyLevel
             );
         }));
 

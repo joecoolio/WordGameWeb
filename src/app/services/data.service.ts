@@ -203,13 +203,14 @@ export class DataService {
     );
   }
 
-  async recordNewGame(gameId: string, pair: string, letters: number, hops: number, gameMode: number): Promise<void> {
+  async recordNewGame(gameId: string, pair: string, letters: number, hops: number, gameMode: number, difficultyLevel: number): Promise<void> {
     const body = {
       gameId: gameId,
       pair: pair,
       letters: letters,
       hops: hops,
-      gameMode: gameMode
+      gameMode: gameMode,
+      difficultyLevel: difficultyLevel
     };
     console.log('DataService: Record new game: ' + JSON.stringify(body));
     return await firstValueFrom(
