@@ -49,8 +49,6 @@ export class Board {
     // Initialize the game with a pair of words
     initialize(startWord: string, endWord: string) {
         this._words[0].setText(startWord);
-
-confirm("Start word [" + this._words[0].stringify() + "]");
         this._words[this.numHops].setText(endWord);
 
         // Pair words are not user entered
@@ -192,8 +190,10 @@ export class Word {
     // Set the entire text of a word
     setText(wordText: string) {
         let letterArray = Array.from(wordText);
+confirm("Length [" + this._length + "]");
         for(let i = 0; i < this._length; i++) {
             this._letters[i].character = letterArray[i];
+confirm("Letter [" + letterArray[i] + "] [" + this._letters[i].character + "]");
         }
     }
 
