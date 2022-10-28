@@ -31,6 +31,7 @@
         }">
 
         <!-- Show the letter unless it's the first/last row insane mode and the letter doesn't match -->
+{{ i }}
         <ng-container *ngIf=
           "i == 0 || i == gameService.numHops
           || gameService.difficultyLevel != enumDifficultyLevel.Insane || isLetterOnPath(letter, i, j)"

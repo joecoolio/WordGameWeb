@@ -200,7 +200,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     let lastDifficultlyLevel = this.gameService.difficultyLevel ? this.gameService.difficultyLevel : -1;
 
     // Disable change detection while the game changes
-    // this.cdRef.detach();
+    this.cdRef.detach();
 
     this.gameService.newGame()
     .then(
@@ -225,7 +225,7 @@ export class GameComponent implements OnInit, AfterViewInit {
         }
 
         // Re-enable change detection
-        // this.cdRef.reattach();
+        this.cdRef.reattach();
       }
     );
 }
