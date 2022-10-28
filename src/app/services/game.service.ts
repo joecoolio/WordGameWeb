@@ -844,7 +844,7 @@ export class GameService {
     // else
     //   return "not yet";
     if (this._wordPair)
-      JSON.stringify(this._wordPair)
+      return JSON.stringify(this._wordPair)
     else
       return "not yet";
   }
