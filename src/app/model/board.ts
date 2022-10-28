@@ -1,3 +1,4 @@
+import { start } from "@popperjs/core";
 import { Subscription, timer } from "rxjs";
 
 // Status of a word at any point in time
@@ -49,6 +50,7 @@ export class Board {
     initialize(startWord: string, endWord: string) {
         this._words[0].setText(startWord);
 
+confirm("Start word [" + startWord + "]");
         this._words[this.numHops].setText(endWord);
 
         // Pair words are not user entered
