@@ -192,6 +192,7 @@ export class Word {
         let letterArray = Array.from(wordText);
 confirm("Length [" + this._length + "]");
         for(let i = 0; i < this._length; i++) {
+confirm("Letter set? [" + this._letters[i] + "] [" + this._letters[i].character + "]");
             this._letters[i].character = letterArray[i];
 confirm("Letter [" + letterArray[i] + "] [" + this._letters[i].character + "]");
         }
