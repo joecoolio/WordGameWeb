@@ -183,7 +183,7 @@ export class Word {
     // or if you're creating non-user-entered letters for a solution
     protected populateLetters() {
         for(let i = 0; i < this._length; i++) {
-            this._letters.push(new Letter(true, ()=> { this.checkPopulated(); }));
+            this._letters[i] = new Letter(true, ()=> { this.checkPopulated(); });
         }
     }
 

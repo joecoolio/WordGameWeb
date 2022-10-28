@@ -91,13 +91,6 @@ export class GameService {
     this._perGameSubscriptions = new Subscription();
   }
 
-  public get board_stringified(): string {
-    if (this.board)
-      return this.board.stringify();
-    else
-      return "not yet";
-  }
-  
   // Runs when a logout occurs
   private logoutOccurred(): void {
     // End/give up the current game
@@ -142,7 +135,7 @@ export class GameService {
       this._board.setPairWordStatus(WordStatus.Loading);
 
       this._dataService
-        .getPair(this.numLetters, this._numHops)
+        .getPair(this._numLetters, this._numHops)
         .then(
           // Success
           (wordpair: WordPair) => {
@@ -843,6 +836,13 @@ export class GameService {
   // Game execution time (assuming it's finished)
   public get gameExecutionMs(): number {
     return this._gameEndMs - this._gameStartMs;
+  }
+
+  public get board_stringified(): string {
+    if (this.board)
+      return this.board.stringify();
+    else
+      return "not yet";
   }
 
 }
