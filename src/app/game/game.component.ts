@@ -206,6 +206,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     .then(
       ()=>{
         console.log("Game initialized correctly");
+        console.log("Board: " + this.gameService.board.stringify());
       },
       (error)=>{
         console.log("Game didn't initialize correctly", error);

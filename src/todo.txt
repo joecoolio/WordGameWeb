@@ -28,3 +28,6 @@ Consider preloading audio files to avoid any delays
 Build user stats
 Build leaderboard
 -- Modify header to adjust buttons
+Weird timing issue - 5 letter word pair only shows last 4 letters upon new login
+Popup "ready/set/go" for new games instead of just dumping you in
+Hide whole screen (including keyboard) before launching game instead of just the board
