@@ -40,7 +40,7 @@ export class Board {
         }
 
         // Preconfigure pair words
-        // this._words[0].locked = true;
+        this._words[0].locked = true;
         this._words[0].pairWord = true;
         this._words[this.numHops].locked = true;
         this._words[this.numHops].pairWord = true;
@@ -246,6 +246,7 @@ confirm("Letter [" + letterArray[i] + "] [" + this._letters[i].character + "]");
         this._locked = value;
 
         // When you lock/unlock a word, apply the same to all of its letters
+confirm("Length [" + this._length + "] [" + length + "]");
         for(let i = 0; i < length; i++) {
             this._letters[i].locked = value;
         }
