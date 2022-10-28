@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { fromEvent, Observable, Subscription } from "rxjs";
+import { fromEvent, last, Observable, Subscription } from "rxjs";
 import { GameService, GameStatus } from '../services//game.service';
 
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
@@ -195,9 +195,9 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Actually start the new game, fired by the game state events
   private __newGame() {
     console.log("Game component starting new game");
-    let lastNumLetters = this.gameService.numLetters;
-    let lastNumHops = this.gameService.numHops;
-    let lastDifficultlyLevel = this.gameService.difficultyLevel;
+    let lastNumLetters = this.gameService.numLetters ? this.gameService.numLetters : 0;
+    let lastNumHops = this.gameService.numHops ? this.gameService.numHops : 0;
+    let lastDifficultlyLevel = this.gameService.difficultyLevel ? this.gameService.difficultyLevel : -1;
 
     // Disable change detection while the game changes
     this.cdRef.detach();
