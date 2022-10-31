@@ -11,7 +11,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class HeaderComponent implements OnInit {
   @Output() parentOpenLogin = new EventEmitter();
-  @Output() parentOpenProfile = new EventEmitter();
+  @Output() parentOpenStats = new EventEmitter();
+  @Output() parentOpenLeaderboard = new EventEmitter();
   @Output() parentOpenSettings = new EventEmitter();
 
   public isCollapsed = true;
@@ -49,8 +50,12 @@ export class HeaderComponent implements OnInit {
     this.parentOpenSettings.emit();
   }
 
-  openProfile() {
-    this.parentOpenProfile.emit();
+  openStats() {
+    this.parentOpenStats.emit();
+  }
+
+  openLeaderboard() {
+    this.parentOpenLeaderboard.emit();
   }
 
   public get loggedIn(): boolean {

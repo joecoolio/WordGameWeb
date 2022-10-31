@@ -13,6 +13,8 @@ import { GameComponent } from './game/game.component';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 import { SettingsComponent } from './settings/settings.component';
+import { LoginComponent } from './account/login/login.component';
+import { LeaderboardComponent } from './account/leaderboard/leaderboard.component';
 
 // Material
 import { MatDialogModule } from '@angular/material/dialog';
@@ -23,11 +25,11 @@ import { MatSliderModule } from '@angular/material/slider';
 // import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCardModule } from '@angular/material/card';
-import { MatTooltipModule } from '@angular/material/tooltip'
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatRadioModule } from '@angular/material/radio';
 
 // import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { LoginComponent as LoginComponent } from './account/login/login.component';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { TimingInterceptor } from './services/timing.interceptor';
 
@@ -50,6 +52,7 @@ import { TimingInterceptor } from './services/timing.interceptor';
     MatSlideToggleModule,
     MatCardModule,
     MatTooltipModule,
+    MatRadioModule,
     // NgbModule,
   ],
 
@@ -60,6 +63,7 @@ import { TimingInterceptor } from './services/timing.interceptor';
     FooterComponent,
     SettingsComponent,
     LoginComponent,
+    LeaderboardComponent
   ],
   bootstrap: [AppComponent],
   providers: [

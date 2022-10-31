@@ -54,6 +54,12 @@ export interface SettingsResult {
   enableSounds: boolean
 }
 
+export interface Leader {
+  rank: number,
+  name: string,
+  score: number
+}
+
 // Timeout for remote calls
 const HTTP_TIMEOUT: number = 5000;
 
@@ -244,5 +250,27 @@ export class DataService {
         timeout(HTTP_TIMEOUT)
       )
     );
+  }
+
+  async getLeaderboard(letters: number, hops: number, boardname: string): Promise<Leader[]> {
+    // Sort high to low except for the fastest win list
+    let lowToHigh = boardname === "fastestwin";
+
+    const body = {
+      letters: letters,
+      hops: hops,
+      boardname: boardname,
+      lowToHigh: lowToHigh
+    };
+    console.log('DataService: Get leaderboard: ' + JSON.stringify(body));
+    return await firstValueFrom(
+      this.http.post<Leader[]>(
+        AUTH_API + '/game/leaderboard',
+        body,
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
+    );
+    
   }
 }

@@ -1,0 +1,39 @@
+<div class="modal-header">
+    <h4 class="modal-title">Leaderboard!</h4>
+    <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="activeModal.dismiss('cancel')"
+    ></button>
+</div>
+<div class="modal-body">
+    <mat-radio-group aria-label="Select an option">
+        <mat-radio-button value="1" checked (click)="getLeaderboard('winpct')">Win Percentage</mat-radio-button>
+        <mat-radio-button value="2" (click)="getLeaderboard('numwins')">Most Wins</mat-radio-button>
+        <mat-radio-button value="3" (click)="getLeaderboard('fastestwin')">Fastest Win</mat-radio-button>
+    </mat-radio-group>
+
+    <div class="table-container" role="table" aria-label="Leaderboard">
+        <div class="flex-table header" role="rowgroup">
+            <div class="flex-row first" role="columnheader">Rank</div>
+            <div class="flex-row" role="columnheader">Name</div>
+            <div class="flex-row" role="columnheader">Score</div>
+        </div>
+        <div class="flex-table row" role="rowgroup" *ngFor="let leader of leaders; let i = index">
+            <div class="flex-row first" role="cell">{{ leader.rank }}</div>
+            <div class="flex-row" role="cell">{{ leader.name }}</div>
+            <div class="flex-row" role="cell">{{ formatScore(leader.score) }}</div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer">
+    <button
+        type="button"
+        class="btn btn-outline-dark btn-secondary"
+        (click)="activeModal.close()"
+    >
+        Close
+    </button>  
+</div>
+  

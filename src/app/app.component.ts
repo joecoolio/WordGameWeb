@@ -11,6 +11,7 @@ import { TokenService } from './services/token.service';
 import { EventBusService } from './services/eventbus.service';
 import { GameWorkflowService } from './services/gameworkflow.service';
 import { GameTrackerService } from './services/gametracker.service';
+import { LeaderboardComponent } from './account/leaderboard/leaderboard.component';
 
 // Sends: applicationStart
 // Receives: showLogin
@@ -53,15 +54,13 @@ export class AppComponent {
     const modalRef = this.modalService.open(LoginComponent);
   }
 
-  openProfile() {
+  openStats() {
     // TODO
-    if (this.playerService.email != null) {
-      // Not logged in, show the login/register screen
-      const modalRef = this.modalService.open(LoginComponent);
-    } else {
-      // Already logged in, show the profile/stats screen
-      const modalRef = this.modalService.open(LoginComponent);
-    }
+  }
+
+  openLeaderboard() {
+    // Show the leaderboard screen
+    const modalRef = this.modalService.open(LeaderboardComponent);
   }
 
   openSettings() {
