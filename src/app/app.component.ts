@@ -12,6 +12,7 @@ import { EventBusService } from './services/eventbus.service';
 import { GameWorkflowService } from './services/gameworkflow.service';
 import { GameTrackerService } from './services/gametracker.service';
 import { LeaderboardComponent } from './account/leaderboard/leaderboard.component';
+import { StatsComponent } from './account/stats/stats.component';
 
 // Sends: applicationStart
 // Receives: showLogin
@@ -84,7 +85,8 @@ export class AppComponent {
   }
 
   openStats() {
-    // TODO
+    // Show the user stats
+    const modalRef = this.modalService.open(StatsComponent);
   }
 
   openLeaderboard() {

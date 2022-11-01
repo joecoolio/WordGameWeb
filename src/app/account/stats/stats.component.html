@@ -1,0 +1,47 @@
+<div class="modal-header">
+    <h4 class="modal-title">Your Stats!</h4>
+    <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="activeModal.dismiss('cancel')"
+    ></button>
+</div>
+<div class="modal-body">
+    <span class="headertext">These are your game stats!</span>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Letters</th>
+                <th>Hops</th>
+                <th>Games</th>
+                <th>Wins</th>
+                <!-- <th>Losses</th> -->
+                <th>Fastest</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let stat of stats; let i = index">
+                <td>{{ stat.letters }}</td>
+                <td>{{ stat.hops }}</td>
+                <td>{{ stat.totalGames }}</td>
+                <td>{{ stat.wins }}</td>
+                <!-- <td>{{ stat.losses }}</td> -->
+                <td>{{ formatTime(stat.fastestWin) }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <span class="notetext">** Guests and games with hints don't qualify!</span>
+</div>
+<div class="modal-footer">
+    <button
+        type="button"
+        class="btn btn-outline-dark btn-secondary"
+        (click)="activeModal.close()"
+    >
+        Close
+    </button>  
+</div>
+  

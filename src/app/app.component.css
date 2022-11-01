@@ -41,15 +41,6 @@ header {
   position: relative;
 }
 
-.diagnostic-message {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  font-style: italic;
-  font-size: 75%;
-  color: black;
-}
-
 .bottom-of-screen {
   display: flex;
   flex-direction: column;

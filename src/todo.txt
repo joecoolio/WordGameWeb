@@ -25,12 +25,15 @@ Test that login pops up when your refresh token expires
 -- Consider preloading audio files to avoid any delays
 -- Add "give up/terminate" option in game
 -- Add "are you sure" before new game or terminate
-Build user stats
+-- Build user stats
 -- Build leaderboard
 -- Modify header to adjust buttons
 -- Weird timing issue - 5 letter word pair only shows last 4 letters upon new login
 Popup "ready/set/go" for new games instead of just dumping you in
 -- Hide whole screen (including keyboard) before launching game instead of just the board
-Win % leaderboard isn't updating correctly
+-- Win % leaderboard isn't updating correctly
 Check icons @ https://jossef.github.io/material-design-icons-iconfont/ to see if they're better than fontawesome.
-Make sure hinted games don't count towards the leaderboard.
+-- Make sure hinted games don't count towards the leaderboard.
+-- Make sure there's an expiration date on games
+Allow user name change on Settings
+Allow user to wipe their records?  Not sure on that.

@@ -32,6 +32,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { TimingInterceptor } from './services/timing.interceptor';
+import { StatsComponent } from './account/stats/stats.component';
 
 // Bootstrap stuff
 // import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -63,7 +64,8 @@ import { TimingInterceptor } from './services/timing.interceptor';
     FooterComponent,
     SettingsComponent,
     LoginComponent,
-    LeaderboardComponent
+    LeaderboardComponent,
+    StatsComponent
   ],
   bootstrap: [AppComponent],
   providers: [

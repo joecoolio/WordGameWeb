@@ -1,1 +1,3 @@
-<footer>Footer</footer>
+<footer>
+    <div class="diagnostic-message">Diagnostics: {{ gameService.gameId }} Status: {{ gameService.gameStatus }} / Exec time (ms): {{ gameService.lastExecutionTime | number:'1.2-2' }} / {{ tokenService.lastAPIExecutionTime | number:'1.2-2' }}</div>
+</footer>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { firstValueFrom, timeout } from 'rxjs';
 
-const AUTH_API = 'https://wordgameapi.mikebillings.com/api/v2';
+const API_ROOT = 'https://wordgameapi.mikebillings.com/api/v2';
 
 export interface WordPair {
   startWord: string;
@@ -60,6 +60,15 @@ export interface Leader {
   score: number
 }
 
+export interface PlayerStats {
+  letters: number,
+  hops: number,
+  totalGames: number,
+  wins: number,
+  losses: number,
+  fastestWin: number
+}
+
 // Timeout for remote calls
 const HTTP_TIMEOUT: number = 5000;
 
@@ -73,7 +82,7 @@ export class DataService {
   async getSettings(): Promise<HttpResponse<SettingsResult>> {
     return await firstValueFrom(
       this.http.post<SettingsResult>(
-        AUTH_API + '/user/getSettings',
+        API_ROOT + '/user/getSettings',
         "",
         { observe: 'response' }
       ).pipe(
@@ -90,7 +99,7 @@ export class DataService {
     const body = { settings: settings };
     return await firstValueFrom(
       this.http.post<void>(
-        AUTH_API + '/user/saveSettings',
+        API_ROOT + '/user/saveSettings',
         body,
         { observe: 'response' }
       ).pipe(
@@ -108,7 +117,7 @@ export class DataService {
     const body = { letters: numLetters, hops: numHops };
     return await firstValueFrom(
       this.http.post<WordPair>(
-        AUTH_API + '/game/getWordPair',
+        API_ROOT + '/game/getWordPair',
         body
       ).pipe(
         // takeUntil(this.componentIsDestroyed$),
@@ -137,7 +146,7 @@ export class DataService {
     };
     return await firstValueFrom(
       this.http.post<TestedWord>(
-        AUTH_API + '/game/testWord',
+        API_ROOT + '/game/testWord',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -154,7 +163,7 @@ export class DataService {
     };
     return await firstValueFrom(
       this.http.post<ValidatedPuzzle>(
-        AUTH_API + '/game/validatePuzzle',
+        API_ROOT + '/game/validatePuzzle',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -170,7 +179,7 @@ export class DataService {
     console.log('Ask Hint: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<BasicHint>(
-        AUTH_API + '/game/getHint',
+        API_ROOT + '/game/getHint',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -186,7 +195,7 @@ export class DataService {
     console.log('Ask Hint: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<WholeWordHint>(
-        AUTH_API + '/game/getFullHint',
+        API_ROOT + '/game/getFullHint',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -201,7 +210,7 @@ export class DataService {
     console.log('Ask For Solutions: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<SolutionSet>(
-        AUTH_API + '/game/getAllSolutions',
+        API_ROOT + '/game/getAllSolutions',
         body
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -221,7 +230,7 @@ export class DataService {
     console.log('DataService: Record new game: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<void>(
-        AUTH_API + '/game/recordNewGame',
+        API_ROOT + '/game/recordNewGame',
         body,
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -244,7 +253,7 @@ export class DataService {
     console.log('DataService: Record game result: ' + apiPath + " = " + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<void>(
-        AUTH_API + '/game/' + apiPath,
+        API_ROOT + '/game/' + apiPath,
         body,
       ).pipe(
         timeout(HTTP_TIMEOUT)
@@ -265,12 +274,24 @@ export class DataService {
     console.log('DataService: Get leaderboard: ' + JSON.stringify(body));
     return await firstValueFrom(
       this.http.post<Leader[]>(
-        AUTH_API + '/game/leaderboard',
+        API_ROOT + '/game/leaderboard',
         body,
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
     );
-    
   }
+
+  async getStats(): Promise<PlayerStats[]> {
+    console.log('DataService: Get stats');
+    return await firstValueFrom(
+      this.http.post<PlayerStats[]>(
+        API_ROOT + '/game/stats',
+        ""
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
+    );
+  }
+
 }

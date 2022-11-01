@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { GameService } from '../services/game.service';
+import { TokenService } from '../services/token.service';
 
 @Component({
   selector: 'app-footer',
@@ -7,7 +9,10 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FooterComponent implements OnInit {
 
-  constructor() { }
+  constructor(
+    public gameService: GameService,
+    public tokenService: TokenService
+  ) { }
 
   ngOnInit() {
   }
