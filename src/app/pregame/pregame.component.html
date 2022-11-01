@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <h4 class="modal-title">Are You Ready?!</h4>
+    <button
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="activeModal.dismiss('cancel')"
+    ></button>
+</div>
+<div class="modal-body">
+    <div class="middlearea">
+        <span class="message">Press the button to start!</span>
+
+        <div class="button_timer">
+            <fa-icon class="gobutton" [icon]="iconToShow" (click)="startCountdown()"></fa-icon>
+        </div>
+    </div>
+</div>

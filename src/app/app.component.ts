@@ -13,6 +13,7 @@ import { GameWorkflowService } from './services/gameworkflow.service';
 import { GameTrackerService } from './services/gametracker.service';
 import { LeaderboardComponent } from './account/leaderboard/leaderboard.component';
 import { StatsComponent } from './account/stats/stats.component';
+import { PregameComponent } from './pregame/pregame.component';
 
 // Sends: applicationStart
 // Receives: showLogin
@@ -49,7 +50,13 @@ export class AppComponent {
       this.openLogin();
     }));
 
-    // Watch for showLogin events to be fired to open the login screen
+    // Watch for showPregame events and show the pregame screen
+    this._subscriptions.add(this.eventBusService.onCommand('showPregame', () => {
+      console.log("AppComponent: show pregame requested")
+      this.openPregame();
+    }));
+
+    // Watch for newGame and show the keyboard
     this._subscriptions.add(this.eventBusService.onCommand('newGame', () => {
       console.log("AppComponent: game start requested")
       this.showKeyboard();
@@ -97,6 +104,21 @@ export class AppComponent {
   openSettings() {
     const modalRef = this.modalService.open(SettingsComponent);
     modalRef.componentInstance.gameService = this.gameService;
+  }
+
+  openPregame() {
+    const modalRef = this.modalService.open(PregameComponent);
+
+    modalRef.result.then(
+      () => {
+        // When the pregame is closed, start a game
+        this.eventBusService.emitNotification('preGameComplete', null);
+      },
+      (err) => {
+        // When the pregame is dismissed, start a game
+        this.eventBusService.emitNotification('preGameComplete', null);
+      }
+    )
   }
 
   ngAfterViewInit() {

@@ -13,6 +13,7 @@ import { TokenService } from './token.service';
   settingsSaved:       User settings were saved to remote
   settingsChanged:     User settings were changed
   newGameRequested:    User requested a new game
+  preGameComplete:     Pregame is finished
   logout:              User logged out
   gameStarted:         Game started
   gameWon:             Game won
@@ -23,6 +24,7 @@ import { TokenService } from './token.service';
  Outgoing commands:
   getSettings:         Load user settings from remote
   saveSettings:        Save user settings
+  showPregame:         Open the pregame screen
   newGame:             Start a new game
   terminateGame:       Terminate the current game
   showLogin:           Show the login screen
@@ -86,8 +88,8 @@ export class GameWorkflowService {
         // User settings were loaded from remote
         this._subscriptions.add(this.eventBusService.onNotification(
             'settingsLoaded', () => {
-                // Start a game
-                this.eventBusService.emitCommand("newGame", null);
+                // Start pregame
+                this.eventBusService.emitCommand("showPregame", null);
             }
         ));
         
@@ -109,6 +111,14 @@ export class GameWorkflowService {
         // User requested a new game
         this._subscriptions.add(this.eventBusService.onNotification(
             'newGameRequested', () => {
+                // Show the pregame screen
+                this.eventBusService.emitCommand("showPregame", null);
+            }
+        ));
+
+        // User requested a new game
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'preGameComplete', () => {
                 // Start a game
                 this.eventBusService.emitCommand("newGame", null);
             }
