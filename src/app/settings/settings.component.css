@@ -35,3 +35,16 @@ body {
   font-size: 2em;
 }
 
+.namerow {
+  display: flex;
+  width: 80%;
+  align-self: center;
+}
+.nameinput {
+  display: flex;
+  flex: 1 0 auto;
+}
+.namebutton {
+  display: flex;
+  flex: 0 1 auto;
+}

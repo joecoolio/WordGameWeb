@@ -13,9 +13,18 @@ export class SettingsComponent implements OnInit {
     public activeModal: NgbActiveModal,
     public gameService: GameService,
     public playerService: PlayerService
-  ) { }
+  ) {
+    this.name = playerService.name;
+  }
 
   ngOnInit() { }
+
+  // Name in the input box
+  name: string;
+
+  changeName() {
+    this.playerService.name = this.name;
+  }
 
   //////
   // Difficulty is an enum

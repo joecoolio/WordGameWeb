@@ -10,6 +10,21 @@
 <div class="modal-body">
   <div class="bodycontainer">
   
+    <!-- Name -->
+    <div class="item">
+      <div class="headertext">Your name for leaderboards:</div>
+      <div class="namerow">
+        <input class="nameinput" matInput [ngModel]="name" (ngModelChange)="name = $event">
+        <button
+          type="button"
+          class="namebutton btn btn-outline-dark"
+          (click)="changeName()"
+          [disabled]="name == playerService.name"
+        >
+          Apply
+        </button>
+      </div>
+    </div>
   
     <!-- Number of letters -->
     <div class="item">

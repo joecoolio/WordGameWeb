@@ -35,5 +35,5 @@ Popup "ready/set/go" for new games instead of just dumping you in
 Check icons @ https://jossef.github.io/material-design-icons-iconfont/ to see if they're better than fontawesome.
 -- Make sure hinted games don't count towards the leaderboard.
 -- Make sure there's an expiration date on games
-Allow user name change on Settings
+-- Allow user name change on Settings
 Allow user to wipe their records?  Not sure on that.
