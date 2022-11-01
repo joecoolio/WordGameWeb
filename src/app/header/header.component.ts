@@ -25,6 +25,10 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {}
 
+  isGuest(): boolean {
+    return this.tokenService.isLoggedIn && this.tokenService.email.match('Guest-.+@guestuser\.com') != null;
+  }
+
   logout() {
     // A game is already running, get a confirmation before you wipe it out
     const modalRef = this.modalService.open(ConfirmationComponent);
@@ -39,7 +43,6 @@ export class HeaderComponent implements OnInit {
       },
       (err) => { /* ignore */ }
     );
-
   }
 
   openLogin() {

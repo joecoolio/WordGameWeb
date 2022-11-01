@@ -33,7 +33,7 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
     if (this.boardName === "fastestwin") {
       return (score / 1000.0) + " secs";
     } else if (this.boardName === "winpct") {
-      return (score * 100.0) + "%";
+      return Math.round(score * 10000.0) / 100 + "%";
     } else {
       return score.toLocaleString("en-US", { maximumFractionDigits: 0, minimumFractionDigits: 0 } );
     } 

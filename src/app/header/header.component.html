@@ -27,7 +27,7 @@
           >
         <li>
           <a *ngIf="!loggedIn" class="dropdown-item" (click)="openLogin()" href="#">Login</a>
-          <a *ngIf="loggedIn" class="dropdown-item" (click)="openStats()" href="#">Stats</a>
+          <a *ngIf="loggedIn && !isGuest()" class="dropdown-item" (click)="openStats()" href="#">Stats</a>
           <a *ngIf="loggedIn" class="dropdown-item" (click)="openLeaderboard()" href="#">Leaderboard</a>
           <a *ngIf="loggedIn" class="dropdown-item" (click)="openSettings()" href="#">Settings</a>
           <a *ngIf="loggedIn" class="dropdown-item" (click)="logout()" href="#">Logout</a>
