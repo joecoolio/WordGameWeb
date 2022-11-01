@@ -8,24 +8,32 @@
     ></button>
 </div>
 <div class="modal-body">
-    <mat-radio-group aria-label="Select an option">
-        <mat-radio-button value="1" checked (click)="getLeaderboard('winpct')">Win Percentage</mat-radio-button>
-        <mat-radio-button value="2" (click)="getLeaderboard('numwins')">Most Wins</mat-radio-button>
-        <mat-radio-button value="3" (click)="getLeaderboard('fastestwin')">Fastest Win</mat-radio-button>
+    <span class="headertext">Top players for games with  {{ letters }} letters & {{ hops }} hops!</span>
+
+    <mat-radio-group class="gridtable" aria-label="Select an option">
+        <mat-radio-button class="griditem" value="1" checked (click)="getLeaderboard('winpct')">Win Percentage</mat-radio-button>
+        <mat-radio-button class="griditem" value="2" (click)="getLeaderboard('numwins')">Most Wins</mat-radio-button>
+        <mat-radio-button class="griditem" value="3" (click)="getLeaderboard('fastestwin')">Fastest Win</mat-radio-button>
     </mat-radio-group>
 
-    <div class="table-container" role="table" aria-label="Leaderboard">
-        <div class="flex-table header" role="rowgroup">
-            <div class="flex-row first" role="columnheader">Rank</div>
-            <div class="flex-row" role="columnheader">Name</div>
-            <div class="flex-row" role="columnheader">Score</div>
-        </div>
-        <div class="flex-table row" role="rowgroup" *ngFor="let leader of leaders; let i = index">
-            <div class="flex-row first" role="cell">{{ leader.rank }}</div>
-            <div class="flex-row" role="cell">{{ leader.name }}</div>
-            <div class="flex-row" role="cell">{{ formatScore(leader.score) }}</div>
-        </div>
-    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Name</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let leader of leaders; let i = index">
+                <td>{{ leader.rank }}</td>
+                <td>{{ leader.name }}</td>
+                <td>{{ formatScore(leader.score) }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <span class="notetext">** Guests and games with hints don't qualify!</span>
 </div>
 <div class="modal-footer">
     <button

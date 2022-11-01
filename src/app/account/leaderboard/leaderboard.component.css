@@ -1,0 +1,92 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+.headertext {
+    font-size: 1.2rem;
+    display: flex;
+    width: 100%;
+    align-self: center;
+    margin-bottom: 20px;
+}
+
+.notetext {
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+.gridtable {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: stretch;
+    align-content: stretch;
+    margin-bottom: 30px;
+}
+
+.griditem {
+    display: block;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
+    align-self: auto;
+    order: 0;
+}
+
+table {
+    display: grid;
+    border-collapse: collapse;
+    min-width: 100%;
+    grid-template-columns:
+        minmax(100px, 1fr) minmax(200px, 1.67fr) minmax(100px, 1.67fr);
+    margin-bottom: 30px;
+}
+
+thead,
+tbody,
+tr {
+    display: contents;
+}
+
+th,
+td {
+    padding: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    background: #6c7ae0;
+    text-align: left;
+    font-weight: normal;
+    font-size: 1.1rem;
+    color: white;
+}
+
+th:last-child {
+    border: 0;
+}
+
+td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    color: #808080;
+}
+
+tr:nth-child(even) td {
+    background: #f8f6ff;
+}

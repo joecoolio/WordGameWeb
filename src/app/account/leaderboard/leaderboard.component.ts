@@ -16,8 +16,8 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
   ) {
   }
 
-  private letters: number;
-  private hops: number;
+  public letters: number;
+  public hops: number;
   private boardName: string;
   public leaders: Leader[];
 
