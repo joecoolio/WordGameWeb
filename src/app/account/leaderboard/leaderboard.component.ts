@@ -3,6 +3,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { DataService, Leader } from 'src/app/services/data.service';
 import { GameService } from 'src/app/services/game.service';
 
+
 @Component({
   selector: 'app-leaderboard',
   templateUrl: './leaderboard.component.html',

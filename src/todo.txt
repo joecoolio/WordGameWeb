@@ -32,3 +32,4 @@ Build user stats
 Popup "ready/set/go" for new games instead of just dumping you in
 -- Hide whole screen (including keyboard) before launching game instead of just the board
 Win % leaderboard isn't updating correctly
+Check icons @ https://jossef.github.io/material-design-icons-iconfont/ to see if they're better than fontawesome.
