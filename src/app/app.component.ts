@@ -47,6 +47,35 @@ export class AppComponent {
       console.log("AppComponent: open login requested")
       this.openLogin();
     }));
+
+    // Watch for showLogin events to be fired to open the login screen
+    this._subscriptions.add(this.eventBusService.onCommand('newGame', () => {
+      console.log("AppComponent: game start requested")
+      this.showKeyboard();
+    }));
+  }
+
+  showKeyboard() {
+    if (!this._keyboard) {
+      console.log("AppComponent: creating keyboard")
+      
+      // Setup the onscreen keyboard
+      this._keyboard = new Keyboard({
+        onChange: (input) => this.onChange(input),
+        onKeyPress: (button) => this.onKeyPress(button),
+        layout: {
+          default: [
+            'Q W E R T Y U I O P',
+            'A S D F G H J K L',
+            '{enter} Z X C V B N M {bksp}',
+          ],
+        },
+        display: {
+          '{bksp}': 'bksp',
+          '{enter}': 'enter',
+        },
+      });
+    }
   }
 
   openLogin() {
@@ -78,23 +107,6 @@ export class AppComponent {
       }
     );
     this._subscriptions.add(sub);
-
-    // Setup the onscreen keyboard
-    this._keyboard = new Keyboard({
-      onChange: (input) => this.onChange(input),
-      onKeyPress: (button) => this.onKeyPress(button),
-      layout: {
-        default: [
-          'Q W E R T Y U I O P',
-          'A S D F G H J K L',
-          '{enter} Z X C V B N M {bksp}',
-        ],
-      },
-      display: {
-        '{bksp}': 'bksp',
-        '{enter}': 'enter',
-      },
-    });
 
     // Force destroy to run
     // Might record abandoned games here?

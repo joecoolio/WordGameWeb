@@ -26,8 +26,9 @@ Test that login pops up when your refresh token expires
 -- Add "give up/terminate" option in game
 -- Add "are you sure" before new game or terminate
 Build user stats
-Build leaderboard
+-- Build leaderboard
 -- Modify header to adjust buttons
 -- Weird timing issue - 5 letter word pair only shows last 4 letters upon new login
 Popup "ready/set/go" for new games instead of just dumping you in
-Hide whole screen (including keyboard) before launching game instead of just the board
+-- Hide whole screen (including keyboard) before launching game instead of just the board
+Win % leaderboard isn't updating correctly
