@@ -44,7 +44,7 @@ tr {
 
 th,
 td {
-    padding: 15px;
+    padding: 5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

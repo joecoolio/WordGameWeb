@@ -42,6 +42,7 @@ body {
     flex-basis: auto;
     align-self: auto;
     order: 0;
+    font-size: 0.8rem;
 }
 
 table {
@@ -49,7 +50,7 @@ table {
     border-collapse: collapse;
     min-width: 100%;
     grid-template-columns:
-        minmax(100px, 1fr) minmax(200px, 1.67fr) minmax(100px, 1.67fr);
+        1fr 1fr 1fr;
     margin-bottom: 30px;
 }
 
@@ -61,7 +62,7 @@ tr {
 
 th,
 td {
-    padding: 15px;
+    padding: 5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -73,7 +74,7 @@ th {
     background: #6c7ae0;
     text-align: left;
     font-weight: normal;
-    font-size: 1.1rem;
+    font-size: 0.8rem;
     color: white;
 }
 

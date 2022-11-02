@@ -31,7 +31,7 @@ export class LeaderboardComponent implements OnInit, AfterViewInit {
 
   public formatScore(score: number) {
     if (this.boardName === "fastestwin") {
-      return (score / 1000.0) + " secs";
+      return (Math.round(score / 10.0) / 100) + "s";
     } else if (this.boardName === "winpct") {
       return Math.round(score * 10000.0) / 100 + "%";
     } else {

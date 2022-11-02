@@ -21,7 +21,7 @@ export class StatsComponent implements OnInit, AfterViewInit {
   stats: PlayerStats[];
 
   public formatTime(timeMs: number) {
-    return (timeMs / 1000.0) + " secs";
+    return (Math.round(timeMs / 10.0) / 100) + "s";
   }
 
   ngOnInit() {

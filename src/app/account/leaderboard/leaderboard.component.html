@@ -9,9 +9,9 @@
 </div>
 <div class="modal-body">
     <span class="headertext">Top players for games with  {{ letters }} letters & {{ hops }} hops!</span>
-
+    
     <mat-radio-group class="gridtable" aria-label="Select an option">
-        <mat-radio-button class="griditem" value="1" checked (click)="getLeaderboard('winpct')">Win Percentage</mat-radio-button>
+        <mat-radio-button class="griditem" value="1" checked (click)="getLeaderboard('winpct')">Win %</mat-radio-button>
         <mat-radio-button class="griditem" value="2" (click)="getLeaderboard('numwins')">Most Wins</mat-radio-button>
         <mat-radio-button class="griditem" value="3" (click)="getLeaderboard('fastestwin')">Fastest Win</mat-radio-button>
     </mat-radio-group>
