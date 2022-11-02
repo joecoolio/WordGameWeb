@@ -74,6 +74,13 @@
   color: yellow;
 }
 
+.letter-box.gametimer {
+  text-transform: none;
+  justify-content: right;
+  font-style: italic;
+  font-size: 0.7rem;
+}
+
 
 .letter-box.icon {
   /* border: 2px solid yellow; */

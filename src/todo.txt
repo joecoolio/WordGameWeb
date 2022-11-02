@@ -37,5 +37,6 @@ Check icons @ https://jossef.github.io/material-design-icons-iconfont/ to see if
 -- Make sure there's an expiration date on games
 -- Allow user name change on Settings
 Allow user to wipe their records?  Not sure on that.
-Put a timer on the game board to show how long the current game has run.
+-- Put a timer on the game board to show how long the current game has run.
 Add option to remove on-screen keyboard.
+Draw entire state flow of game workflow

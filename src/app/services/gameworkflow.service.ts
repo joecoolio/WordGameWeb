@@ -30,7 +30,7 @@ import { TokenService } from './token.service';
   showLogin:           Show the login screen
   doLogout:            Do whatever logout processes are needed
   recordGameStart:     Record that a game started
-  recordGameWin:       Record that a game was won
+  recordGameWon:       Record that a game was won
   recordGameLoss:      Record that a game was lost
   recordGameAbandon:   Record that a game was terminated (give up)
 

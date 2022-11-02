@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { fromEvent, last, Observable, Subscription } from "rxjs";
+import { fromEvent, last, Observable, Subscription, timer } from "rxjs";
 import { GameService, GameStatus } from '../services//game.service';
 
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
@@ -19,6 +19,9 @@ import { DifficultyLevel, GameMode } from '../services/player.service';
 import { Letter, WordStatus } from '../model/board';
 import { EventBusService } from '../services/eventbus.service';
 import { ConfirmationComponent } from '../confirmation/confirmation.component';
+
+// How often to get timer ticks (in ms)
+const TICK_TIME = 100;
 
 @Component({
   selector: 'game',
@@ -56,6 +59,12 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Subscription Stuff
   private subscriptions: Subscription;
 
+  // Game timer value
+  gameTimeElapsed: number;
+
+  // Subject for timer
+  private _timerSubscription: Subscription;
+
   // Stuff for catching and dealing with window resizes (to adjust the board's size)
   resizeObservable$: Observable<Event>
  
@@ -78,6 +87,20 @@ export class GameComponent implements OnInit, AfterViewInit {
         })
       );
 
+      // Watch for game end to be fired and stop the timer
+      let stopTimerFunction = () => {
+        console.log("GameComponent: game over (win|lose|abandon)");
+        this.stopTimer();
+      };
+      this.subscriptions.add(this.eventBusService.onCommand('recordGameWon', stopTimerFunction));
+      this.subscriptions.add(this.eventBusService.onCommand('recordGameLoss', stopTimerFunction));
+      this.subscriptions.add(this.eventBusService.onCommand('recordGameAbandon', stopTimerFunction));
+  
+      this.gameTimeElapsed = 0.0;
+  }
+
+  formatElapsedTime(time: number): string {
+    return '' + (Math.round(time / 10) / 100).toFixed(2);
   }
 
   ngOnInit() {
@@ -180,6 +203,9 @@ export class GameComponent implements OnInit, AfterViewInit {
         (result: string) => {
           if (result == "yes") {
             console.log("GameComponent: New Game Requested");
+            // Quit the current game 
+            this.eventBusService.emitNotification('gameQuit', null);
+            // Request a new game
             this.eventBusService.emitNotification('newGameRequested', null);
           }
         },
@@ -207,6 +233,8 @@ export class GameComponent implements OnInit, AfterViewInit {
       ()=>{
         console.log("Game initialized correctly");
         console.log("Board: " + this.gameService.board.stringify());
+
+        this.startGameTimer();
       },
       (error)=>{
         console.log("Game didn't initialize correctly", error);
@@ -228,7 +256,38 @@ export class GameComponent implements OnInit, AfterViewInit {
         this.cdRef.reattach();
       }
     );
-}
+  }
+
+  // Run a timer for the game
+  startGameTimer() {
+    // No need for the timer in a timed game (there's already a countdown)
+    if (this.gameService.gameMode != GameMode.Timed) {
+      // In case anyone is click happy
+      if (this._timerSubscription != undefined) {
+        return;
+      }
+
+      console.log("GameComponent: Starting game timer");
+      let startTime: number = performance.now();
+      this.gameTimeElapsed = 0.0;
+
+      this._timerSubscription = timer(0, TICK_TIME).subscribe(
+        event => {
+            this.gameTimeElapsed = performance.now() - startTime;
+        }
+      );
+
+      this.subscriptions.add(this._timerSubscription);
+    }
+  }
+
+  // Turn off the timer
+  stopTimer() {
+    if (this._timerSubscription != undefined) {
+      this._timerSubscription.unsubscribe();
+      this._timerSubscription = undefined;
+    }
+  }
 
   // Get a hint for this word
   hint() {
