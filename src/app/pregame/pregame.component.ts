@@ -14,6 +14,7 @@ const TICK_TIME = 100;
 export class PregameComponent implements OnInit, OnDestroy {
   constructor(public activeModal: NgbActiveModal) {
     this.countdownMs = 3000;
+    this.message = "Press the button to start!";
   }
   ngOnInit() {
     this.iconToShow = faCirclePlay;
@@ -26,6 +27,9 @@ export class PregameComponent implements OnInit, OnDestroy {
 
   // Subject for timer
   private _timerSubscription: Subscription;
+
+  // Message to show on the screen
+  message: string;
 
   // Icon to show is one of the above
   iconToShow: IconDefinition;
@@ -42,6 +46,8 @@ export class PregameComponent implements OnInit, OnDestroy {
     console.log("PregameComponent: Starting countdown timer at " + this.countdownMs);
     let endTime = performance.now() + this.countdownMs;
     let remainingTime = -1;
+
+    this.message = "Here we go!";
 
     this._timerSubscription = timer(0, TICK_TIME).subscribe(
       event => {
