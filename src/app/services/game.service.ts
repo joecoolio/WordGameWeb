@@ -261,16 +261,21 @@ export class GameService {
         // When you change a letter, the previous message goes away
         this._message = '';
 
-        // Remove the letter from the current cell
-        this._board.words[this._selectedWord].letters[this._selectedLetter].character = null;
-
-        // Backspace moves the current cell where delete doesn't
-        if (letter === 'Backspace' || letter === '{bksp}') {
-          // Back up to the previous cell
-          if (this._selectedLetter > 0) {
-            // Same word, 1 char backwards
-            this._selectedLetter--;
+        // If the cell is blank, back up to the previous cell.
+        if (this._board.words[this._selectedWord].letters[this._selectedLetter].character == null) {
+          // Backup only for backspace, not delete key
+          if (letter === 'Backspace' || letter === '{bksp}') {
+            // Back up to the previous cell
+            if (this._selectedLetter > 0) {
+              // Same word, 1 char backwards
+              this._selectedLetter--;
+            }
           }
+        }
+
+        // If a letter is in the cell, delete it.
+        if (this._board.words[this._selectedWord].letters[this._selectedLetter].character != null) {
+          this._board.words[this._selectedWord].letters[this._selectedLetter].character = null;
         }
 
         return;
