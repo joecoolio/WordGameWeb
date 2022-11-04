@@ -23,6 +23,8 @@ import { ConfirmationComponent } from '../confirmation/confirmation.component';
 // How often to get timer ticks (in ms)
 const TICK_TIME = 100;
 
+// Sends: newGameRequested
+// Receives: newGame, recordGameWon, recordGameLoss, recordGameAbandon
 @Component({
   selector: 'game',
   templateUrl: './game.component.html',
@@ -68,8 +70,6 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Stuff for catching and dealing with window resizes (to adjust the board's size)
   resizeObservable$: Observable<Event>
  
-  // Sends: newGameRequested
-  // Receives:
   constructor(
     // private dialog: MatDialog,
     public gameService: GameService,

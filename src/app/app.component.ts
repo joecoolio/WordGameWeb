@@ -16,7 +16,7 @@ import { StatsComponent } from './account/stats/stats.component';
 import { PregameComponent } from './pregame/pregame.component';
 
 // Sends: applicationStart
-// Receives: showLogin
+// Receives: showLogin, showPregame, newGame
 @Component({
   selector: 'wordgame-app',
   templateUrl: './app.component.html',
