@@ -52,6 +52,9 @@ export class GameService {
   // Message back from the validation routines
   private _message: string = '';
 
+  // Message showing how many solutions there are
+  private _solutionMessage: string = '';
+
   // Execution time of the last api call
   private _lastExecutionTime: number = 0; // Round trip execution
 
@@ -118,6 +121,7 @@ export class GameService {
       this._difficultyLevel = this._playerService.difficultyLevel;
       this._hintType = this._playerService.hintType;
       this._numHintsGiven = 0;
+      this._solutionMessage = '';
 
       console.log(
         'Initialize new game: letters = ' + this._numLetters + ' / hops = ' + this._numHops +
@@ -577,6 +581,9 @@ export class GameService {
             this._board.addSolution(solution);
           }
 
+          // Show the number of solutions
+          this._solutionMessage = "Number of Solutions: " + solutionSet.numSolutions;
+
           // Tell the board to cycle through solutions
           let cycleSubscription: Subscription = this._board.cycleThroughSolutions();
 
@@ -850,4 +857,7 @@ export class GameService {
       return "not yet";
   }
 
+  public get solutionMessage(): string {
+    return this._solutionMessage;
+  }
 }

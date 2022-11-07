@@ -40,6 +40,7 @@ export interface WholeWordHint {
 
 export interface SolutionSet {
   solutions: string[][],
+  numSolutions: number,
   valid: boolean;
   error: string;
 }
@@ -207,6 +208,7 @@ export class DataService {
   async getAllSolutions(wordArray: string[]): Promise<SolutionSet> {
     const body = {
       puzzle: wordArray,
+      countOnly: false
     };
     console.log('Ask For Solutions: ' + JSON.stringify(body));
     return await firstValueFrom(

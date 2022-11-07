@@ -74,12 +74,24 @@
   color: yellow;
 }
 
-.letter-box.gametimer {
+.bottom-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   text-transform: none;
-  justify-content: right;
   font-style: italic;
   font-size: 0.7rem;
   font-weight: normal;
+}
+.gamestats.left {
+  display: block;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+.gamestats.right {
+  display: block;
+  flex-grow: 0;
+  flex-shrink: 1;
 }
 
 

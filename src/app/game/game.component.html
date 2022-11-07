@@ -149,7 +149,10 @@
       <div class="word-row">
         <div class="letter-box" [style.width.px]="letterBoxSize * .85"></div>
       
-        <div class="letter-box gametimer" [style.width.px]="letterBoxSize * gameService.board.numLetters + (2 * (gameService.board.numLetters))">Game Time: {{ formatElapsedTime(gameTimeElapsed) }} secs</div>
+        <div class="bottom-row" [style.width.px]="letterBoxSize * gameService.board.numLetters + (2 * (gameService.board.numLetters))">
+          <div class="gamestats left">{{ gameService.solutionMessage }}</div>
+          <div class="gamestats right">Game Time: {{ formatElapsedTime(gameTimeElapsed) }} secs</div>
+        </div>
 
         <div class="letter-box" [style.width.px]="letterBoxSize * .85"></div>
       </div>

@@ -35,9 +35,6 @@ import { TimingInterceptor } from './services/timing.interceptor';
 import { StatsComponent } from './account/stats/stats.component';
 import { PregameComponent } from './pregame/pregame.component';
 
-// Bootstrap stuff
-// import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-
 @NgModule({
   imports: [
     BrowserModule,
@@ -55,7 +52,6 @@ import { PregameComponent } from './pregame/pregame.component';
     MatCardModule,
     MatTooltipModule,
     MatRadioModule,
-    // NgbModule,
   ],
 
   declarations: [
