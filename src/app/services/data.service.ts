@@ -51,7 +51,8 @@ export interface SettingsResult {
   gameMode: number,
   difficultyLevel: number,
   hintType: number,
-  enableSounds: boolean
+  enableSounds: boolean,
+  showKeyboard: boolean
 }
 
 export interface Leader {

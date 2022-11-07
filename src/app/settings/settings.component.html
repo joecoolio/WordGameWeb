@@ -71,13 +71,20 @@
       Timed Game?
     </mat-slide-toggle>
 
-      <!-- Enable Sounds -->
-      <mat-slide-toggle
+    <!-- Enable Sounds -->
+    <mat-slide-toggle
       [ngModel]="playerService.enableSounds" (ngModelChange)="playerService.enableSounds = $event"
     >
       Enable Sounds?
     </mat-slide-toggle>
-  
+
+    <!-- Show Keyboard -->
+    <mat-slide-toggle
+      [ngModel]="playerService.showKeyboard" (ngModelChange)="playerService.showKeyboard = $event"
+    >
+      Show Onscreen Keyboard?
+    </mat-slide-toggle>
+
 </div>
 <div class="modal-footer">
   <button

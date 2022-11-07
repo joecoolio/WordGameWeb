@@ -38,10 +38,11 @@ Check icons @ https://jossef.github.io/material-design-icons-iconfont/ to see if
 -- Allow user name change on Settings
 Allow user to wipe their records?  Not sure on that.
 -- Put a timer on the game board to show how long the current game has run.
-Add option to remove on-screen keyboard.
+-- Add option to remove on-screen keyboard.
 Draw entire state flow of game workflow
-Settings/name is too wide on phone
+-- Settings/name is too wide on phone
 Add 6-hop words?
 Add 6-letter words?
 Weird bug on phone when left cell is highlighted.
 -- Left side disappears on advanced mode
+Highlight stats for current settings.

@@ -15,7 +15,7 @@ import { faSadTear } from '@fortawesome/free-solid-svg-icons';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { DifficultyLevel, GameMode } from '../services/player.service';
+import { DifficultyLevel, GameMode, PlayerService } from '../services/player.service';
 import { Letter, WordStatus } from '../model/board';
 import { EventBusService } from '../services/eventbus.service';
 import { ConfirmationComponent } from '../confirmation/confirmation.component';
@@ -70,16 +70,20 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Stuff for catching and dealing with window resizes (to adjust the board's size)
   resizeObservable$: Observable<Event>
  
+  // Set to true to do a resize after the next content check
+  private _doResize: boolean;
+
   constructor(
     // private dialog: MatDialog,
     public gameService: GameService,
+    private playerService: PlayerService,
     private modalService: NgbModal,
     private eventBusService: EventBusService,
     private cdRef: ChangeDetectorRef
   ) {
       this.subscriptions = new Subscription();
 
-        // Watch for logout events to be fired and show the login screen
+      // Watch for logout events to be fired and show the login screen
       this.subscriptions.add(
         this.eventBusService.onCommand('newGame', () => {
           console.log("GameComponent: requested to start new game");
@@ -87,6 +91,12 @@ export class GameComponent implements OnInit, AfterViewInit {
         })
       );
 
+      // Watch for the "show keyboard" setting to change.  When it does, resize the screen.
+      this.subscriptions.add(
+        playerService.onSettingChange('showKeyboard', (newValue: boolean) => {
+          this._doResize = true;
+        }
+      ));
       // Watch for game end to be fired and stop the timer
       let stopTimerFunction = () => {
         console.log("GameComponent: game over (win|lose|abandon)");
@@ -97,6 +107,17 @@ export class GameComponent implements OnInit, AfterViewInit {
       this.subscriptions.add(this.eventBusService.onCommand('recordGameAbandon', stopTimerFunction));
   
       this.gameTimeElapsed = 0.0;
+
+      this._doResize = false;
+  }
+
+  // Resize the screen if the keyboard was enabled/disabled
+  ngAfterContentChecked() {
+    if (this._doResize) {
+      this.handleScreenResize();
+      this._doResize = false;
+      console.log('Game component: resize due to keyboard visibility change');
+    }
   }
 
   formatElapsedTime(time: number): string {

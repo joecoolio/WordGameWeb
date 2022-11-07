@@ -36,7 +36,7 @@ export class AppComponent {
     public dataService: DataService,
     public gameService: GameService,
     private modalService: NgbModal,
-    private playerService: PlayerService,
+    public playerService: PlayerService,
     private eventBusService: EventBusService,
     // These have to be referenced to get them running
     private gameWorkflowService: GameWorkflowService,

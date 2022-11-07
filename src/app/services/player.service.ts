@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from, Observable, of, skip, Subscription, takeWhile, tap } from 'rxjs';
+import { filter, map, Subject, Subscription } from 'rxjs';
 import { DataService, SettingsResult } from './data.service';
 import { HttpResponse } from '@angular/common/http';
 import { AuthService, LoginResult } from './auth.service';
@@ -32,6 +32,7 @@ const DEFAULT_NUM_HOPS: number = 5;
 const DEFAULT_GAMEMODE: GameMode = GameMode.Normal;
 const DEFAULT_DIFFICULTYLEVEL: DifficultyLevel = DifficultyLevel.Normal;
 const DEFAULT_ENABLESOUNDS: boolean = true;
+const DEFAULT_SHOWKEYBOARD: boolean = true;
 const DEFAULT_HINTTYPE: HintType = HintType.Basic;
 const DEFAULT_NAME: string = "Guest";
 const DEFAULT_EMAIL: string = "guest@guest.com";
@@ -51,7 +52,8 @@ export interface PlayerSettings {
     gameMode: GameMode,
     difficultyLevel: DifficultyLevel,
     hintType: HintType,
-    enableSounds: boolean
+    enableSounds: boolean,
+    showKeyboard: boolean
 }
 
 // Set of all player info
@@ -59,6 +61,16 @@ export interface PlayerInfo {
     email: string,
     status: PlayerStatus,
     settings: PlayerSettings
+}
+
+class EventData {
+    name: string;
+    value: any;
+
+    constructor(name: string, value: any) {
+        this.name = name;
+        this.value = value;
+    }
 }
 
 // Sends: login, loginFailed, register, registerFailed, settingsLoaded, settingsLoadFailed,
@@ -69,12 +81,17 @@ export class PlayerService {
     // Current player settings
     private _playerInfo : PlayerInfo;
 
+    // Notifications of settings changing get sent here.
+    private _settingChangedSubject: Subject<EventData>;
+
     constructor(
         private dataService: DataService,
         private authService: AuthService,
         private tokenService: TokenService,
         private eventBusService: EventBusService
     ) {
+        this._settingChangedSubject = new Subject<EventData>();
+
         this._playerInfo = {
             email: null,
             status: PlayerStatus.NOT_INITIALIZED,
@@ -85,7 +102,8 @@ export class PlayerService {
                 gameMode: DEFAULT_GAMEMODE,
                 difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
                 hintType: DEFAULT_HINTTYPE,
-                enableSounds: DEFAULT_ENABLESOUNDS
+                enableSounds: DEFAULT_ENABLESOUNDS,
+                showKeyboard: DEFAULT_SHOWKEYBOARD
             }
         }
 
@@ -101,6 +119,13 @@ export class PlayerService {
             this.saveSettings(this._playerInfo, ()=>{}, (error: string)=>{});
         });
   
+    }
+
+    // Register here to be notified immediately when settings are changed.
+    onSettingChange(settingName: string, newValue: any): Subscription {
+        return this._settingChangedSubject.pipe(
+            filter((e: EventData) => e.name === settingName),
+            map((e: EventData) => e["value"])).subscribe(newValue);
     }
 
     register(
@@ -225,6 +250,7 @@ export class PlayerService {
                     this._playerInfo.settings.name = settingsResult && settingsResult.name ? settingsResult.name : DEFAULT_NAME;
                     this._playerInfo.settings.numHops = settingsResult && settingsResult.numHops ? settingsResult.numHops : DEFAULT_NUM_HOPS;
                     this._playerInfo.settings.numLetters = settingsResult && settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
+                    this._playerInfo.settings.showKeyboard = settingsResult && settingsResult.showKeyboard ? settingsResult.showKeyboard : DEFAULT_SHOWKEYBOARD;
 
                     this._playerInfo.status = PlayerStatus.OK;
 
@@ -300,6 +326,7 @@ export class PlayerService {
         let oldval = this._playerInfo.email;
         this._playerInfo.email = s;
         if (oldval != s) {
+            this._settingChangedSubject.next(new EventData('email', s));
             this.eventBusService.emitNotification('settingsChanged', null);
         }
     }
@@ -311,6 +338,7 @@ export class PlayerService {
         let oldval = this._playerInfo.status;
         this._playerInfo.status = s;
         if (oldval != s) {
+            this._settingChangedSubject.next(new EventData('status', s));
             this.eventBusService.emitNotification('settingsChanged', null);
         }
     }
@@ -322,19 +350,19 @@ export class PlayerService {
         let oldval = this._playerInfo.settings.name;
         this._playerInfo.settings.name = s;
         if (oldval != s) {
+            this._settingChangedSubject.next(new EventData('name', s));
             this.eventBusService.emitNotification('settingsChanged', null);
         }
     }
 
-
-
     get numLetters() : number {
         return this._playerInfo.settings.numLetters;
     }
-    set numLetters(n: number) {
+    set numLetters(value: number) {
         let oldval = this._playerInfo.settings.numLetters;
-        this._playerInfo.settings.numLetters = n;
-        if (oldval != n) {
+        this._playerInfo.settings.numLetters = value;
+        if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('numLetters', value));
             this.eventBusService.emitNotification('settingsChanged', null);
         }
     }
@@ -346,6 +374,7 @@ export class PlayerService {
         let oldval = this._playerInfo.settings.numHops;
         this._playerInfo.settings.numHops = value;
         if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('numHops', value));
             this.eventBusService.emitNotification('settingsChanged', null);
         }
     }
@@ -357,6 +386,7 @@ export class PlayerService {
         let oldval = this._playerInfo.settings.gameMode;
         this._playerInfo.settings.gameMode = value;
         if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('gameMode', value));
             this.eventBusService.emitNotification('settingsChanged', null);
         }
     }
@@ -368,6 +398,7 @@ export class PlayerService {
         let oldval = this._playerInfo.settings.difficultyLevel;
         this._playerInfo.settings.difficultyLevel = value;
         if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('difficultyLevel', value));
             this.eventBusService.emitNotification('settingsChanged', null);
         }
     }
@@ -379,6 +410,7 @@ export class PlayerService {
         let oldval = this._playerInfo.settings.hintType;
         this._playerInfo.settings.hintType = value;
         if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('hintType', value));
             this.eventBusService.emitNotification('settingsChanged', null);
         }
     }
@@ -390,8 +422,20 @@ export class PlayerService {
         let oldval = this._playerInfo.settings.enableSounds;
         this._playerInfo.settings.enableSounds = value;
         if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('enableSounds', value));
             this.eventBusService.emitNotification('settingsChanged', null);
         }
    }
 
+    public get showKeyboard(): boolean {
+        return this._playerInfo.settings.showKeyboard;
+    }
+    public set showKeyboard(value: boolean) {
+        let oldval = this._playerInfo.settings.showKeyboard;
+        this._playerInfo.settings.showKeyboard = value;
+        if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('showKeyboard', value));
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
+    }
 }

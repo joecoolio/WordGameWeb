@@ -14,8 +14,8 @@
   </div>
 
   <div class="bottom-of-screen">
-    <label class="errormessage">{{ gameService.message}}</label>
-    <div class="simple-keyboard"></div>
+    <label class="errormessage">{{ gameService.message }}</label>
+    <div class="simple-keyboard" [ngClass]="!playerService.showKeyboard ? 'hide-keyboard' : ''"></div>
   </div>
 
   <app-footer></app-footer>
