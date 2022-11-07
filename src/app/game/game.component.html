@@ -5,11 +5,10 @@
       
       <!-- Left side holds the hint button -->
       <!-- On the first row, put the give up button -->
-      <div class="letter-box" [style.width.px]="letterBoxSize * .85" [style.height.px]="letterBoxSize * .85" [style.font-size.px]="iconFontSize"
-      *ngIf="hintsEnabled()">
+      <div class="letter-box" [style.width.px]="letterBoxSize * .85" [style.height.px]="letterBoxSize * .85" [style.font-size.px]="iconFontSize">
         <fa-icon class="icon unverified" *ngIf="word.pairWord && i === 0 && gameService.gameStatus == enumGameStatus.Run"
           (click)="giveUp()" [icon]="faSadTear" matTooltip="Give up and take the L?"></fa-icon>
-        <fa-icon *ngIf="gameService.selectedWord === i && word.status != enumWordStatus.Solved && gameService.gameStatus == enumGameStatus.Run"
+        <fa-icon *ngIf="gameService.selectedWord === i && hintsEnabled() && word.status != enumWordStatus.Solved && gameService.gameStatus == enumGameStatus.Run"
           class="icon hint" [icon]="faLightbulb" (click)="hint()" matTooltip="Get a hint?"></fa-icon>
       </div>
 

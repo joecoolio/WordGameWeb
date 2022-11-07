@@ -44,4 +44,4 @@ Settings/name is too wide on phone
 Add 6-hop words?
 Add 6-letter words?
 Weird bug on phone when left cell is highlighted.
-Left side disappears on advanced mode
+-- Left side disappears on advanced mode
