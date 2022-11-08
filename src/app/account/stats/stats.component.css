@@ -73,3 +73,16 @@ td {
 tr:nth-child(even) td {
     background: #f8f6ff;
 }
+
+.highlighted td {
+    border-top: thin solid; 
+    border-bottom: thin solid;
+}
+
+.highlighted td:first-child {
+    border-left: thin solid;
+}
+
+.highlighted td:last-child {
+    border-right: thin solid;
+}

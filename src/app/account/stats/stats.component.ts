@@ -13,7 +13,7 @@ export class StatsComponent implements OnInit, AfterViewInit {
   constructor(
     public activeModal: NgbActiveModal,
     private dataService: DataService,
-    private gameService: GameService
+    public gameService: GameService
   ) {
     this.getStats();
   }

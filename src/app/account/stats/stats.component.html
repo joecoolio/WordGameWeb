@@ -22,7 +22,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let stat of stats; let i = index">
+            <tr *ngFor="let stat of stats; let i = index" [ngClass]="{ highlighted: gameService.numLetters == stat.letters && gameService.numHops == stat.hops }">
                 <td>{{ stat.letters }}</td>
                 <td>{{ stat.hops }}</td>
                 <td>{{ stat.totalGames }}</td>
