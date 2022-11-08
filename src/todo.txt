@@ -46,4 +46,4 @@ Add 6-letter words?
 Weird bug on phone when left cell is highlighted.
 -- Left side disappears on advanced mode
 Highlight stats for current settings.
-Show total number of solutions all the time (already shows when you give up).
+-- Show total number of solutions all the time (already shows when you give up).

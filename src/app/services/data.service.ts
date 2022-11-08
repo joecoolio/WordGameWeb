@@ -221,6 +221,22 @@ export class DataService {
     );
   }
 
+  async getSolutionCount(wordArray: string[]): Promise<SolutionSet> {
+    const body = {
+      puzzle: wordArray,
+      countOnly: true
+    };
+    console.log('Ask For Solutions: ' + JSON.stringify(body));
+    return await firstValueFrom(
+      this.http.post<SolutionSet>(
+        API_ROOT + '/game/getAllSolutions',
+        body
+      ).pipe(
+        timeout(HTTP_TIMEOUT)
+      )
+    );
+  }
+
   async recordNewGame(gameId: string, pair: string, letters: number, hops: number, gameMode: number, difficultyLevel: number): Promise<void> {
     const body = {
       gameId: gameId,
