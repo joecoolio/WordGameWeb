@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSet, ValidatedPuzzle } from './data.service';
 import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel} from './player.service';
-import { skip, Subscription } from 'rxjs';
+import { BehaviorSubject, skip, Subject, Subscription, timer } from 'rxjs';
 import { TimerService } from './timer.service';
 import { Board, WordStatus } from '../model/board';
 import { EventBusService } from './eventbus.service';
@@ -62,6 +62,11 @@ export class GameService {
   private _timeRemaining: number;
   private _timeExpired: boolean = false;
 
+  // Subjects for idle timer
+  private _idleResetSubject: Subject<void>; // pings when the idle time counter should reset at 0
+  private _idleTimeExpiredSubject: Subject<void>; // pings when the idle time exceeds 3s
+  private _idleTimerSubscription: Subscription; // handles the idle timer itself
+
   // All service level subscriptions
   private _subscriptions: Subscription;
 
@@ -92,6 +97,10 @@ export class GameService {
     
     // Setup the per game subscriptions
     this._perGameSubscriptions = new Subscription();
+
+    // Idle timer stuff
+    this._idleResetSubject = new BehaviorSubject<void>(null);
+    this._idleTimeExpiredSubject = new BehaviorSubject<void>(null);
   }
 
   // Runs when a logout occurs
@@ -157,6 +166,14 @@ export class GameService {
             // The game is ready, start the timer if needed
             this.startTimer();
 
+            // Start monitoring the idle timer and handle the internal timer
+            this.monitorIdleTimer();
+
+            // Watch for idle expiration and ask for number of solutions
+            this._perGameSubscriptions.add(
+              this._idleTimeExpiredSubject.pipe(skip(1)).subscribe(() => this.idleTimeExpired())
+            );
+
             // The game is now running
             this._gameStatus = GameStatus.Run;
 
@@ -188,6 +205,7 @@ export class GameService {
     });
   }
 
+  // Start the timer for a timed game
   private startTimer() {
     // If it's a timed game, start the counter
     if (this._gameMode == GameMode.Timed) {
@@ -249,6 +267,39 @@ export class GameService {
     }
   }
 
+  // Setup the idle timer
+  private monitorIdleTimer() {
+    // Every time this pings, reset the internal timer
+    this._idleResetSubject.subscribe(() => {
+
+      // Discard the previous incantation of the timer
+      if (this._idleTimerSubscription != undefined) {
+        this._idleTimerSubscription.unsubscribe();
+        this._idleTimerSubscription = undefined;
+      }
+
+      // Start a timer to fire in 3s
+      this._idleTimerSubscription = timer(3000).subscribe(
+        event => {
+          this._idleTimeExpiredSubject.next();
+
+          // Done with this timer
+          this._idleTimerSubscription.unsubscribe();
+          this._idleTimerSubscription = undefined;
+        }
+      );
+
+      this._perGameSubscriptions.add(this._idleTimerSubscription);
+    });
+
+  }
+
+  // Idle timer expired callback after 3s of no activity
+  // This is where the system will ask for number of solutions in the background
+  private idleTimeExpired() {
+    this.getSolutionCount();
+  }
+
   // Keyboard entry occurred
   letterEntered(letter: string) {
     // Only accept entry on unlocked cells and if the game is not timed out and not won
@@ -280,6 +331,9 @@ export class GameService {
         // If a letter is in the cell, delete it.
         if (this._board.words[this._selectedWord].letters[this._selectedLetter].character != null) {
           this._board.words[this._selectedWord].letters[this._selectedLetter].character = null;
+          
+          // Reset the idle timer
+          this._idleResetSubject.next();
         }
 
         return;
@@ -323,6 +377,9 @@ export class GameService {
       if (found) {
         // Valid letter, put it in the appropriate cell
         this._board.words[this._selectedWord].letters[this._selectedLetter].character = letter.toUpperCase();
+
+        // Reset the idle timer
+        this._idleResetSubject.next();
 
         // When you change a letter, the previous message goes away
         this._message = '';
@@ -522,6 +579,36 @@ export class GameService {
       );
     }
   }
+
+  // Async call to get the solution count
+  private getSolutionCount() {
+    // Inputs to remote call
+    let wordArray = [];
+    for (let i = 0; i < this._board.words.length; i++) {
+      // WordArray includes everything on the board
+      wordArray.push(this._board.words[i].stringify());
+    }
+
+    var execStartTime = performance.now();
+
+    // Make the remote call
+    this._dataService.getSolutionCount(wordArray)
+    .then(
+      // Success
+      (solutionSet: SolutionSet) => {
+        // Got an answer
+        this._lastExecutionTime = performance.now() - execStartTime;
+
+        this._solutionMessage = "Number of Solutions: " + (solutionSet.valid == true ? solutionSet.numSolutions : 0);
+      },
+      // Failure
+      (err) => {
+        // An error happened trying to get solutions
+        console.log('Error getting solution count: ' + JSON.stringify(err));
+      }
+    );
+
+  }
   
   // TODO: use this to report a completion
   private win() {
@@ -540,6 +627,11 @@ export class GameService {
       this._timerService.stopTimer();
     }
 
+    // Reset anything required from the current game (including the timer)
+    console.log("Unsubscribing from per-game subscriptions");
+    this._perGameSubscriptions.unsubscribe();
+    this._perGameSubscriptions = new Subscription();    
+    
     // Tell the game service
     this._eventBusService.emitNotification('gameWon', null);
   }
