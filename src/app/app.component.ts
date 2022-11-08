@@ -14,6 +14,7 @@ import { GameTrackerService } from './services/gametracker.service';
 import { LeaderboardComponent } from './account/leaderboard/leaderboard.component';
 import { StatsComponent } from './account/stats/stats.component';
 import { PregameComponent } from './pregame/pregame.component';
+import { WinLoseComponent } from './winlosedialog/winlose.component';
 
 // Sends: applicationStart
 // Receives: showLogin, showPregame, newGame
@@ -60,6 +61,12 @@ export class AppComponent {
     this._subscriptions.add(this.eventBusService.onCommand('newGame', () => {
       console.log("AppComponent: game start requested")
       this.showKeyboard();
+    }));
+
+    // Watch for win & lose and show overlay
+    this._subscriptions.add(this.eventBusService.onCommand('recordGameWon', () => {
+      console.log("AppComponent: game won notification")
+      this.openWinLoseDialog();
     }));
   }
 
@@ -119,6 +126,13 @@ export class AppComponent {
         this.eventBusService.emitNotification('preGameComplete', null);
       }
     )
+  }
+
+  openWinLoseDialog(showWin: boolean = true) {
+    const modalRef = this.modalService.open(WinLoseComponent, {
+      ariaLabelledBy: 'modal-basic-title',
+      windowClass: 'transparent-modal-content'
+    });
   }
 
   ngAfterViewInit() {

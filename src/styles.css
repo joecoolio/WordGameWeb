@@ -8,3 +8,15 @@ html, body {
 }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* This draws modals without a background */
+.transparent-modal-content .modal-content {
+  background: transparent !important;
+  border: 0 !important;
+}
+
+.transparent-modal-content .modal-header,
+.transparent-modal-content .modal-body,
+.transparent-modal-content .modal-footer {
+  border: 0 !important;
+}
