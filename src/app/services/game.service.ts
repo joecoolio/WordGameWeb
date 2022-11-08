@@ -291,13 +291,15 @@ export class GameService {
 
       this._perGameSubscriptions.add(this._idleTimerSubscription);
     });
-
   }
 
   // Idle timer expired callback after 3s of no activity
   // This is where the system will ask for number of solutions in the background
   private idleTimeExpired() {
-    this.getSolutionCount();
+    // Only do this if level is normal or advanced
+    if (this._difficultyLevel < DifficultyLevel.Expert) {
+      this.getSolutionCount();
+    }
   }
 
   // Keyboard entry occurred
