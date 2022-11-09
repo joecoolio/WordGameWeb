@@ -24,6 +24,8 @@ const IMGURL_ROOT = "../../assets/images/";
       this.winImages.push("thumbs-up-png-32219.png");
       this.winImages.push("pngfind.com-and-the-winner-is-5184659.png");
       this.winImages.push("Gold-Trophy-Transparent.png");
+      this.winImages.push("referee_clipart3433511.png");
+      this.winImages.push("koolaid_clipart2479463.png");
     }
 
     ngOnInit(): void {
