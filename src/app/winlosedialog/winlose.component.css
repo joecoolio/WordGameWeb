@@ -10,3 +10,34 @@ img {
     max-width: 100%;
     max-height: 100%;
 }
+
+/* Bounce size up and down */
+
+.bounceSize {
+    animation-name: bounceSize;
+    animation-duration: 3000ms;
+  }
+  
+  @keyframes bounceSize {
+    10%,
+    90% {
+      transform: scale(95%);
+    }
+  
+    20%,
+    80% {
+      transform: scale(105%);
+    }
+  
+    30%,
+    50%,
+    70% {
+      transform: scale(90%);
+    }
+  
+    40%,
+    60% {
+      transform: scale(110%);
+    }
+  }
+  
