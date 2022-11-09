@@ -601,7 +601,7 @@ export class GameService {
         // Got an answer
         this._lastExecutionTime = performance.now() - execStartTime;
 
-        this._solutionMessage = "Number of Solutions: " + (solutionSet.valid == true ? solutionSet.numSolutions : 0);
+        this._solutionMessage = "Solutions: " + (solutionSet.valid == true ? solutionSet.numSolutions : 0);
       },
       // Failure
       (err) => {
@@ -676,7 +676,7 @@ export class GameService {
           }
 
           // Show the number of solutions
-          this._solutionMessage = "Number of Solutions: " + solutionSet.numSolutions;
+          this._solutionMessage = "Solutions: " + solutionSet.numSolutions;
 
           // Tell the board to cycle through solutions
           let cycleSubscription: Subscription = this._board.cycleThroughSolutions();

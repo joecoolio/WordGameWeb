@@ -151,7 +151,7 @@
       
         <div class="bottom-row" [style.width.px]="letterBoxSize * gameService.board.numLetters + (2 * (gameService.board.numLetters))">
           <div class="gamestats left">{{ gameService.solutionMessage }}</div>
-          <div class="gamestats right">Game Time: {{ formatElapsedTime(gameTimeElapsed) }} secs</div>
+          <div class="gamestats right">Elapsed: {{ formatElapsedTime(gameTimeElapsed) }}s</div>
         </div>
 
         <div class="letter-box" [style.width.px]="letterBoxSize * .85"></div>
