@@ -22,13 +22,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSliderModule } from '@angular/material/slider';
-// import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRadioModule } from '@angular/material/radio';
 
-// import { FontAwesomeModule, FaIconLibrary } from '@fontawesome/angular-fontawesome';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthInterceptor } from './services/auth.interceptor';
 import { TimingInterceptor } from './services/timing.interceptor';
