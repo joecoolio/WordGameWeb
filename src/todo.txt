@@ -12,7 +12,7 @@ Figure out insane mode hiding letters, input, and display of win
 In API, auto-uppercase everything via the test framework
 In API, convert spaces to null should be a middleware in slim
 -- Save games
-Move pairs from mysql to dynamo
+-- Move pairs from mysql to dynamo
 Move api to AWS
 -- Store refresh tokens in the db
 -- Show login screen at startup if not logged in
@@ -41,7 +41,7 @@ Allow user to wipe their records?  Not sure on that.
 -- Add option to remove on-screen keyboard.
 Draw entire state flow of game workflow
 -- Settings/name is too wide on phone
-Add 6-hop words?
+-- Add 6-hop words?
 --Add 6-letter words?
 Weird bug on phone when left cell is highlighted.
 -- Left side disappears on advanced mode
