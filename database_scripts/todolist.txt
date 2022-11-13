@@ -1,0 +1,22 @@
+Tasks:
+--Done:  extract 4 pairs on neo
+--Running:  extract 4 paths on neo
+load 4 paths to pair4 db
+copy 4 routine from 3letterwords.sql
+load 4/6 to wordpairs
+load 4/6 to wordgame_pairs
+
+--Next:  extract 5 pairs on neo
+extract 5 paths on neo
+load 5 paths to pair4 db
+copy 5 routine from 3letterwords.sql
+load 5/6 to wordpairs
+load 5/6 to wordgame_pairs
+
+--Done:  load 6/6 to wordpairs
+--Done:  load 3/6 to wordpairs
+
+--Done:  load 6/6 to wordgame_pairs
+--Done:  load 3/6 to wordgame_pairs
+
+-- Remember to set capacity on the tables before inserts --

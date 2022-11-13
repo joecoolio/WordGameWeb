@@ -22,9 +22,9 @@ export enum GameStatus {
 export class GameService {
   // Min & max number of letters & hops
   readonly MIN_LETTERS: number = 3;
-  readonly MAX_LETTERS: number = 5;
+  readonly MAX_LETTERS: number = 6;
   readonly MIN_HOPS: number = 2;
-  readonly MAX_HOPS: number = 5;
+  readonly MAX_HOPS: number = 6;
 
   // The game board
   private _board: Board;
