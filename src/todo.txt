@@ -1,50 +1,12 @@
-Big animated thumbs up when you win
 Instructions
--- Settings
--- Authentication
--- Sounds - type, wrong, right, win 
--- Settings - is the game service done right?
--- Clean up imports in app.module.thumbs
--- Check subscription unsubscribe
--- Game service and game componenent have 2 promises that don't correctly handle rejects
--- Somehow flag letters in the solution in timed mode that the user didn't enter.  Show them with some different format?
 Figure out insane mode hiding letters, input, and display of win
 In API, auto-uppercase everything via the test framework
 In API, convert spaces to null should be a middleware in slim
--- Save games
--- Move pairs from mysql to dynamo
 Move api to AWS
--- Store refresh tokens in the db
--- Show login screen at startup if not logged in
 Test that login pops up when your refresh token expires
--- Add "play as guest" functionality
--- Auto-delete guest IDs from database when they aren't used
--- When refreshing tokens for guest users, reset the expiration date of the user
--- Redo the newgame() routine and other stuff to be event driven.
--- Build out gametracker to record game results
--- Consider preloading audio files to avoid any delays
--- Add "give up/terminate" option in game
--- Add "are you sure" before new game or terminate
--- Build user stats
--- Build leaderboard
--- Modify header to adjust buttons
--- Weird timing issue - 5 letter word pair only shows last 4 letters upon new login
--- Popup "ready/set/go" for new games instead of just dumping you in
--- Hide whole screen (including keyboard) before launching game instead of just the board
--- Win % leaderboard isn't updating correctly
-Check icons @ https://jossef.github.io/material-design-icons-iconfont/ to see if they're better than fontawesome.
--- Make sure hinted games don't count towards the leaderboard.
--- Make sure there's an expiration date on games
--- Allow user name change on Settings
 Allow user to wipe their records?  Not sure on that.
--- Put a timer on the game board to show how long the current game has run.
--- Add option to remove on-screen keyboard.
 Draw entire state flow of game workflow
--- Settings/name is too wide on phone
 -- Add 6-hop words?
---Add 6-letter words?
+-- Add 6-letter words?
 Weird bug on phone when left cell is highlighted.
--- Left side disappears on advanced mode
--- Highlight stats for current settings.
--- Show total number of solutions all the time (already shows when you give up).
--- Don't show number of solutions based on difficulty level.
+Review the event bus to see if there's a more standard way

@@ -15,9 +15,10 @@ import { LeaderboardComponent } from './account/leaderboard/leaderboard.componen
 import { StatsComponent } from './account/stats/stats.component';
 import { PregameComponent } from './pregame/pregame.component';
 import { WinLoseComponent } from './winlosedialog/winlose.component';
+import { PauseComponent } from './pausedialog/pause.component';
 
-// Sends: applicationStart
-// Receives: showLogin, showPregame, newGame
+// Sends: applicationStart, gameResumed
+// Receives: showLogin, showPregame, newGame, recordGameWon, pauseGame
 @Component({
   selector: 'wordgame-app',
   templateUrl: './app.component.html',
@@ -67,6 +68,12 @@ export class AppComponent {
     this._subscriptions.add(this.eventBusService.onCommand('recordGameWon', () => {
       console.log("AppComponent: game won notification")
       this.openWinLoseDialog();
+    }));
+
+    // Watch for pause show overlay
+    this._subscriptions.add(this.eventBusService.onCommand('pauseGame', () => {
+      console.log("AppComponent: pause")
+      this.openPauseDialog();
     }));
   }
 
@@ -124,6 +131,24 @@ export class AppComponent {
       (err) => {
         // When the pregame is dismissed, start a game
         this.eventBusService.emitNotification('preGameComplete', null);
+      }
+    )
+  }
+
+  openPauseDialog() {
+    const modalRef = this.modalService.open(PauseComponent, {
+      ariaLabelledBy: 'modal-basic-title',
+      windowClass: 'transparent-modal-content'
+    });
+
+    modalRef.result.then(
+      () => {
+        // When the window closes, send a resume request
+        this.eventBusService.emitNotification('gameResumed', null);
+      },
+      (err) => {
+        // When the window closes, send a resume request
+        this.eventBusService.emitNotification('gameResumed', null);
       }
     )
   }

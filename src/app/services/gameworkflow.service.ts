@@ -20,6 +20,8 @@ import { TokenService } from './token.service';
   gameLost:            Game lost
   gameQuit:            Game quit (give up) [[user request to quit]]
   gameTerminated:      Game was terminated [[system reporting that the game is killed]]
+  gamePaused:          Game was paused by user
+  gameResumed:         Game was resumed by user
 
  Outgoing commands:
   getSettings:         Load user settings from remote
@@ -33,6 +35,9 @@ import { TokenService } from './token.service';
   recordGameWon:       Record that a game was won
   recordGameLoss:      Record that a game was lost
   recordGameAbandon:   Record that a game was terminated (give up)
+  pauseGame:           Do stuff needed for a game pause
+  resumeGame:          Do stuff needed for a game resume
+
 
 */
 @Injectable({ providedIn: 'root' })
@@ -169,6 +174,20 @@ export class GameWorkflowService {
         this._subscriptions.add(this.eventBusService.onNotification(
             'gameTerminated', () => {
                 this.eventBusService.emitCommand("recordGameAbandon", null);
+            }
+        ));
+
+        // Game paused
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'gamePaused', () => {
+                this.eventBusService.emitCommand("pauseGame", null);
+            }
+        ));
+        
+        // Game resumed
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'gameResumed', () => {
+                this.eventBusService.emitCommand("resumeGame", null);
             }
         ));
         
