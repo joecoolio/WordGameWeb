@@ -17,6 +17,7 @@ load 5/6 to wordgame_pairs
 --Done:  load 3/6 to wordpairs
 
 --Done:  load 6/6 to wordgame_pairs
+--Running:  load 6/1-5 to wordgame_pairs
 --Done:  load 3/6 to wordgame_pairs
 
 -- Remember to set capacity on the tables before inserts --
