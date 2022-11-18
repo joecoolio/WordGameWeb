@@ -10,3 +10,4 @@ Draw entire state flow of game workflow
 -- Add 6-letter words?
 Weird bug on phone when left cell is highlighted.
 Review the event bus to see if there's a more standard way
+Change API to throw exceptions when needed
