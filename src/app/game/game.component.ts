@@ -12,6 +12,8 @@ import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { faSadTear } from '@fortawesome/free-solid-svg-icons';
+import { faClock } from '@fortawesome/free-solid-svg-icons';
+import { faPause } from '@fortawesome/free-solid-svg-icons';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -19,12 +21,13 @@ import { DifficultyLevel, GameMode, PlayerService } from '../services/player.ser
 import { Letter, WordStatus } from '../model/board';
 import { EventBusService } from '../services/eventbus.service';
 import { ConfirmationComponent } from '../confirmation/confirmation.component';
+import { Stopwatch } from '../helper/stopwatch';
 
 // How often to get timer ticks (in ms)
 const TICK_TIME = 100;
 
-// Sends: newGameRequested
-// Receives: newGame, recordGameWon, recordGameLoss, recordGameAbandon
+// Sends: newGameRequested, pauseGame
+// Receives: newGame, recordGameWon, recordGameLoss, recordGameAbandon, resumeGame
 @Component({
   selector: 'game',
   templateUrl: './game.component.html',
@@ -41,6 +44,8 @@ export class GameComponent implements OnInit, AfterViewInit {
   faLightbulb = faLightbulb;
   faEyeSlash = faEyeSlash;
   faSadTear = faSadTear;
+  faClock = faClock;
+  faPause = faPause;
 
   public enumGameStatus = GameStatus;
   public enumGameMode = GameMode;
@@ -64,8 +69,11 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Game timer value
   gameTimeElapsed: number;
 
-  // Subject for timer
-  private _timerSubscription: Subscription;
+  // True/false showing if the game is paused right now
+  paused: boolean;
+
+  // Game timer helper class
+  private _stopWatch: Stopwatch;
 
   // Stuff for catching and dealing with window resizes (to adjust the board's size)
   resizeObservable$: Observable<Event>
@@ -97,16 +105,34 @@ export class GameComponent implements OnInit, AfterViewInit {
           this._doResize = true;
         }
       ));
+
       // Watch for game end to be fired and stop the timer
       let stopTimerFunction = () => {
         console.log("GameComponent: game over (win|lose|abandon)");
-        this.stopTimer();
+        this._stopWatch.stop();
       };
+
+      // Watch for the game to become un-paused
+      this.subscriptions.add(
+        this.eventBusService.onCommand('resumeGame', () => {
+          console.log("GameComponent: game resumed");
+          this.resume();
+        })
+      )
+
       this.subscriptions.add(this.eventBusService.onCommand('recordGameWon', stopTimerFunction));
       this.subscriptions.add(this.eventBusService.onCommand('recordGameLoss', stopTimerFunction));
       this.subscriptions.add(this.eventBusService.onCommand('recordGameAbandon', stopTimerFunction));
   
+      // Setup the stop watch
+      this._stopWatch = new Stopwatch(100);
+      this.subscriptions.add(
+        this._stopWatch.tick.subscribe(timeElapsed => {
+          this.gameTimeElapsed = timeElapsed;
+        })
+      );
       this.gameTimeElapsed = 0.0;
+      this.paused = false;
 
       this._doResize = false;
   }
@@ -121,7 +147,7 @@ export class GameComponent implements OnInit, AfterViewInit {
   }
 
   formatElapsedTime(time: number): string {
-    return '' + (Math.round(time / 10) / 100).toFixed(2);
+    return '' + (Math.round(time / 10) / 100).toFixed(1);
   }
 
   ngOnInit() {
@@ -201,6 +227,8 @@ export class GameComponent implements OnInit, AfterViewInit {
         (result: string) => {
           if (result == "yes") {
             console.log("GameComponent: Terminate game requested");
+            // Stop the stopwatch if it's running
+            this._stopWatch.stop();
             this.eventBusService.emitNotification('gameQuit', null);
           }
         },
@@ -224,6 +252,10 @@ export class GameComponent implements OnInit, AfterViewInit {
         (result: string) => {
           if (result == "yes") {
             console.log("GameComponent: New Game Requested");
+
+            // Stop the stopwatch if it's running
+            this._stopWatch.stop();
+
             // Quit the current game 
             this.eventBusService.emitNotification('gameQuit', null);
             // Request a new game
@@ -255,7 +287,9 @@ export class GameComponent implements OnInit, AfterViewInit {
         console.log("Game initialized correctly");
         console.log("Board: " + this.gameService.board.stringify());
 
-        this.startGameTimer();
+        // Start the stopwatch
+        this._stopWatch.reset();
+        this._stopWatch.start();
       },
       (error)=>{
         console.log("Game didn't initialize correctly", error);
@@ -279,34 +313,21 @@ export class GameComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // Run a timer for the game
-  startGameTimer() {
-    // No need for the timer in a timed game (there's already a countdown)
-    if (this.gameService.gameMode != GameMode.Timed) {
-      // In case anyone is click happy
-      if (this._timerSubscription != undefined) {
-        return;
-      }
+  // Pause the current game
+  pause() {
+    if (!this.paused) {
+      this.paused = true;
+      this._stopWatch.pause();
 
-      console.log("GameComponent: Starting game timer");
-      let startTime: number = performance.now();
-      this.gameTimeElapsed = 0.0;
-
-      this._timerSubscription = timer(0, TICK_TIME).subscribe(
-        event => {
-            this.gameTimeElapsed = performance.now() - startTime;
-        }
-      );
-
-      this.subscriptions.add(this._timerSubscription);
+      this.eventBusService.emitNotification('gamePaused', null);
     }
   }
 
-  // Turn off the timer
-  stopTimer() {
-    if (this._timerSubscription != undefined) {
-      this._timerSubscription.unsubscribe();
-      this._timerSubscription = undefined;
+  // Resume the current game
+  resume() {
+    if (this.paused) {
+      this.paused = false;
+      this._stopWatch.pause();
     }
   }
 

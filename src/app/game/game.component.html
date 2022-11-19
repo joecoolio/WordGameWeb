@@ -33,7 +33,7 @@
         <ng-container *ngIf=
           "i == 0 || i == gameService.numHops
           || gameService.difficultyLevel != enumDifficultyLevel.Insane || isLetterOnPath(letter, i, j)"
-        >{{ letter.character }}</ng-container>
+        >{{ !paused ? letter.character : null }}</ng-container>
 
         <!-- In insane mode on middle rows with a non-matching letter, show an icon -->
         <ng-container *ngIf=
@@ -150,8 +150,12 @@
         <div class="letter-box" [style.width.px]="letterBoxSize * .85"></div>
       
         <div class="bottom-row" [style.width.px]="letterBoxSize * gameService.board.numLetters + (2 * (gameService.board.numLetters))">
-          <div class="gamestats left">{{ gameService.solutionMessage }}</div>
-          <div class="gamestats right">Elapsed: {{ formatElapsedTime(gameTimeElapsed) }}s</div>
+          <div class="gamestats left"><ng-container *ngIf="gameService.gameStatus == enumGameStatus.Run">{{ gameService.solutionMessage }}</ng-container></div>
+          <div class="gamestats right">
+            <fa-icon *ngIf="gameService.gameStatus == enumGameStatus.Run && !paused" class="icon" [icon]="faPause" (click)="pause()"></fa-icon>
+            &nbsp;&nbsp;
+            <fa-icon class="icon" [ngClass]="{'fa-beat-fade': gameService.gameStatus == enumGameStatus.Run && !paused}" [icon]="faClock"></fa-icon> {{ formatElapsedTime(gameTimeElapsed) }}s
+          </div>
         </div>
 
         <div class="letter-box" [style.width.px]="letterBoxSize * .85"></div>

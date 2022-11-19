@@ -185,6 +185,7 @@ export class GameService {
           // Failure
           (err) => {
             // An error happened trying to get words
+            console.log("error", err);
 
             // The game is broken
             this._gameStatus = GameStatus.Broken;
@@ -193,8 +194,12 @@ export class GameService {
             this._board.setPairWordStatus(WordStatus.Broken);
 
             // Show a message
-            this._message =
-              'Failed to communicate with the server, please try again later.';
+            if (err.error) {
+              this._message = err.error;
+            } else {
+              this._message =
+                'Failed to communicate with the server, please try again later.';
+            }
 
             console.log('Error getting words: ' + JSON.stringify(err));
 

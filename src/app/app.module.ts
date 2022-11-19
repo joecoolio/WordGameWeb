@@ -32,6 +32,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
 import { TimingInterceptor } from './services/timing.interceptor';
 import { StatsComponent } from './account/stats/stats.component';
 import { PregameComponent } from './pregame/pregame.component';
+import { PauseComponent } from './pausedialog/pause.component';
 
 @NgModule({
   imports: [
@@ -61,7 +62,8 @@ import { PregameComponent } from './pregame/pregame.component';
     LoginComponent,
     LeaderboardComponent,
     StatsComponent,
-    PregameComponent
+    PregameComponent,
+    PauseComponent
   ],
   bootstrap: [AppComponent],
   providers: [
