@@ -159,7 +159,7 @@ export class GameWorkflowService {
         // Game lost
         this._subscriptions.add(this.eventBusService.onNotification(
             'gameLost', () => {
-                this.eventBusService.emitCommand("recordGameLost", null);
+                this.eventBusService.emitCommand("recordGameLoss", null);
             }
         ));
 

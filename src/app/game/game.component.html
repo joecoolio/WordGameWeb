@@ -145,7 +145,7 @@
     </div>
     <!-- One more row to put the timer on the screen for untimed games -->
     <!-- Careful to align the words under the letter boxes -->
-    <ng-container *ngIf="gameService.board && gameService.gameMode != enumGameMode.Timed">
+    <ng-container *ngIf="gameService.board">
       <div class="word-row">
         <div class="letter-box" [style.width.px]="letterBoxSize * .85"></div>
       

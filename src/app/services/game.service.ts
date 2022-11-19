@@ -3,10 +3,10 @@ import { DataService, WordPair, TestedWord, BasicHint, WholeWordHint, SolutionSe
 import { AudioService } from './audio.service';
 import { PlayerService, GameMode, HintType, DifficultyLevel} from './player.service';
 import { BehaviorSubject, skip, Subject, Subscription, timer } from 'rxjs';
-import { TimerService } from './timer.service';
 import { Board, WordStatus } from '../model/board';
 import { EventBusService } from './eventbus.service';
 import { Stopwatch } from '../helper/stopwatch';
+import { CountdownTimer } from '../helper/countdowntimer';
 
 export enum GameStatus {
   Initialize,  // The game isn't setup yet
@@ -45,6 +45,9 @@ export class GameService {
   // To calculate game duration
   private _stopwatch: Stopwatch;
 
+  // Countdown for timed game
+  private _countdowntimer: CountdownTimer;
+
   // Selected row/cell indexes
   private _selectedWord: number = 1;
   private _selectedLetter: number = 0;
@@ -80,7 +83,6 @@ export class GameService {
     private _dataService: DataService,
     private _audioService: AudioService,
     private _playerService: PlayerService,
-    private _timerService: TimerService,
     private _eventBusService: EventBusService)
   {
     this._subscriptions = new Subscription();
@@ -110,6 +112,9 @@ export class GameService {
       this._eventBusService.onCommand('pauseGame', () => {
         console.log("GameService: game paused");
         this._stopwatch.pause();
+        if (this._countdowntimer) {
+          this._countdowntimer.pause();
+        }
       })
     );
     
@@ -118,6 +123,9 @@ export class GameService {
       this._eventBusService.onCommand('resumeGame', () => {
         console.log("GameService: game resumed");
         this._stopwatch.pause();
+        if (this._countdowntimer) {
+          this._countdowntimer.pause();
+        }
       })
     );
   }
@@ -237,12 +245,20 @@ export class GameService {
     if (this._gameMode == GameMode.Timed) {
       this._timeExpired = false;
 
+      // Allocate 10 seconds per word to fill in
+      let timeS = 10 * (this._numHops - 1);
+
       // Stop the timer if it's already running
-      this._timerService.stopTimer();
+      if (this._countdowntimer) {
+        this._countdowntimer.stop();
+      }
+
+      // Create the countdown timer for the game
+      this._countdowntimer = new CountdownTimer(timeS * 1000, 100);
 
       // Register subscriptions for the timer
       this._perGameSubscriptions.add(
-        this._timerService.tick().pipe(skip(1)).subscribe({
+        this._countdowntimer.tick.subscribe({
           next: (msRemaining) => {
             // console.log("Tick: " + msRemaining);
             this._timeRemaining = msRemaining;
@@ -270,12 +286,15 @@ export class GameService {
       );
 
       this._perGameSubscriptions.add(
-        this._timerService.finished().pipe(skip(1)).subscribe({
+        this._countdowntimer.finished.subscribe({
           next: () => {
-            console.log("Timer ran out!");
+            console.log("Timer expired!");
             this._timeRemaining = 0;
             this._timeExpired = true;
-    
+
+            // Destroy the countdown timer
+            this._countdowntimer = null;
+
             // Move the game to timeout status if it's still running
             this._gameStatus = GameStatus.Lose;
 
@@ -285,11 +304,8 @@ export class GameService {
         })
       );
 
-      // Allocate 10 seconds per word to fill in
-      let timeS = 10 * (this._numHops - 1);
-
-      // Start the timer
-      this._timerService.startTimer(timeS * 1000);
+      // Start the countdown
+      this._countdowntimer.start();
     }
   }
 
@@ -652,7 +668,10 @@ export class GameService {
 
     // Clean up timing stuff
     if (this._gameMode == GameMode.Timed) {
-      this._timerService.stopTimer();
+      if (this._countdowntimer) {
+        this._countdowntimer.stop();
+        this._countdowntimer = null;
+      }
     }
 
     // Reset anything required from the current game (including the timer)
@@ -666,8 +685,15 @@ export class GameService {
 
   // Stop the current game prematurely
   private __loseOrTerminate() {
+    // Stop the timer
     this._stopwatch.stop();
 
+    // Stop the countdown
+    if (this._countdowntimer) {
+      this._countdowntimer.stop();
+      this._countdowntimer = null;
+    }
+    
     this._message = "Game over! You lose!";
     this._audioService.puzzleLost();
     this._gameStatus = GameStatus.Lose;

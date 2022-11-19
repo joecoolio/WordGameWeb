@@ -107,6 +107,7 @@ export class GameComponent implements OnInit, AfterViewInit {
       let stopTimerFunction = () => {
         console.log("GameComponent: game over (win|lose|abandon)");
         this._stopWatch.stop();
+        this._stopWatch.reset();
       };
 
       // Watch for the game to become un-paused
