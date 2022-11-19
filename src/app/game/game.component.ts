@@ -66,9 +66,6 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Subscription Stuff
   private subscriptions: Subscription;
 
-  // Game timer value
-  gameTimeElapsed: number;
-
   // True/false showing if the game is paused right now
   paused: boolean;
 
@@ -126,12 +123,6 @@ export class GameComponent implements OnInit, AfterViewInit {
   
       // Setup the stop watch
       this._stopWatch = new Stopwatch(100);
-      this.subscriptions.add(
-        this._stopWatch.tick.subscribe(timeElapsed => {
-          this.gameTimeElapsed = timeElapsed;
-        })
-      );
-      this.gameTimeElapsed = 0.0;
       this.paused = false;
 
       this._doResize = false;
@@ -334,6 +325,10 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Get a hint for this word
   hint() {
     this.gameService.getHint();
+  }
+
+  public get gameTimeElapsed(): number {
+    return this._stopWatch.timeElapsed;
   }
 
   // Change the highlighted/current cell

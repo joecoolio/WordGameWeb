@@ -6,6 +6,7 @@ import { BehaviorSubject, skip, Subject, Subscription, timer } from 'rxjs';
 import { TimerService } from './timer.service';
 import { Board, WordStatus } from '../model/board';
 import { EventBusService } from './eventbus.service';
+import { Stopwatch } from '../helper/stopwatch';
 
 export enum GameStatus {
   Initialize,  // The game isn't setup yet
@@ -42,8 +43,7 @@ export class GameService {
   private _numHintsGiven: number;
   
   // To calculate game duration
-  private _gameStartMs: number;
-  private _gameEndMs: number;
+  private _stopwatch: Stopwatch;
 
   // Selected row/cell indexes
   private _selectedWord: number = 1;
@@ -101,6 +101,25 @@ export class GameService {
     // Idle timer stuff
     this._idleResetSubject = new BehaviorSubject<void>(null);
     this._idleTimeExpiredSubject = new BehaviorSubject<void>(null);
+
+    // Create a stopwatch
+    this._stopwatch = new Stopwatch(10);
+
+    // Watch for the game to become paused
+    this._subscriptions.add(
+      this._eventBusService.onCommand('pauseGame', () => {
+        console.log("GameService: game paused");
+        this._stopwatch.pause();
+      })
+    );
+    
+    // Watch for the game to become un-paused
+    this._subscriptions.add(
+      this._eventBusService.onCommand('resumeGame', () => {
+        console.log("GameService: game resumed");
+        this._stopwatch.pause();
+      })
+    );
   }
 
   // Runs when a logout occurs
@@ -117,8 +136,6 @@ export class GameService {
     this._perGameSubscriptions = new Subscription();    
 
     this._gameStatus = GameStatus.Initialize;
-    this._gameStartMs = Date.now();
-    this._gameEndMs = 0;
 
     // Once you have player settings, you can create a game
     return new Promise((resolve, reject) => {
@@ -174,6 +191,10 @@ export class GameService {
               this._idleTimeExpiredSubject.pipe(skip(1)).subscribe(() => this.idleTimeExpired())
             );
 
+            // Reset/start the stopwatch
+            this._stopwatch.reset();
+            this._stopwatch.start();
+            
             // The game is now running
             this._gameStatus = GameStatus.Run;
 
@@ -619,7 +640,7 @@ export class GameService {
   
   // TODO: use this to report a completion
   private win() {
-    this._gameEndMs = Date.now();
+    this._stopwatch.stop();
 
     // Make all words solved
     // All words are solved
@@ -645,7 +666,7 @@ export class GameService {
 
   // Stop the current game prematurely
   private __loseOrTerminate() {
-    this._gameEndMs = Date.now();
+    this._stopwatch.stop();
 
     this._message = "Game over! You lose!";
     this._audioService.puzzleLost();
@@ -946,7 +967,7 @@ export class GameService {
   }
   // Game execution time (assuming it's finished)
   public get gameExecutionMs(): number {
-    return this._gameEndMs - this._gameStartMs;
+    return this._stopwatch.timeElapsed;
   }
 
   public get board_stringified(): string {
