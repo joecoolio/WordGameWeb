@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { fromEvent, last, Observable, Subscription, timer } from "rxjs";
+import { fromEvent, Observable, Subscription } from "rxjs";
 import { GameService, GameStatus } from '../services//game.service';
 
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
@@ -103,13 +103,6 @@ export class GameComponent implements OnInit, AfterViewInit {
         }
       ));
 
-      // Watch for game end to be fired and stop the timer
-      let stopTimerFunction = () => {
-        console.log("GameComponent: game over (win|lose|abandon)");
-        this._stopWatch.stop();
-        this._stopWatch.reset();
-      };
-
       // Watch for the game to become un-paused
       this.subscriptions.add(
         this.eventBusService.onCommand('resumeGame', () => {
@@ -118,9 +111,19 @@ export class GameComponent implements OnInit, AfterViewInit {
         })
       )
 
-      this.subscriptions.add(this.eventBusService.onCommand('recordGameWon', stopTimerFunction));
-      this.subscriptions.add(this.eventBusService.onCommand('recordGameLoss', stopTimerFunction));
-      this.subscriptions.add(this.eventBusService.onCommand('recordGameAbandon', stopTimerFunction));
+      this.subscriptions.add(this.eventBusService.onCommand('recordGameWon', () => {
+        console.log("GameComponent: game over (win)");
+        this._stopWatch.stop();
+      }));
+      this.subscriptions.add(this.eventBusService.onCommand('recordGameLoss', () => {
+        console.log("GameComponent: game over (lose)");
+        this._stopWatch.stop();
+        this._stopWatch.reset();
+      }));
+      this.subscriptions.add(this.eventBusService.onCommand('recordGameAbandon', () => {
+        console.log("GameComponent: game over (abandon)");
+        this._stopWatch.stop();
+      }));
   
       // Setup the stop watch
       this._stopWatch = new Stopwatch(100);
