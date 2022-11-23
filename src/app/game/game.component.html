@@ -154,7 +154,7 @@
           <div class="gamestats right">
             <fa-icon *ngIf="gameService.gameStatus == enumGameStatus.Run && !paused" class="icon" [icon]="faPause" (click)="pause()"></fa-icon>
             &nbsp;&nbsp;
-            <fa-icon class="icon" [ngClass]="{'fa-beat-fade': (gameService.gameStatus == enumGameStatus.Run || gameService.gameStatus == enumGameStatus.Win) && !paused}" [icon]="faClock"></fa-icon> {{ formatElapsedTime(gameTimeElapsed) }}s
+            <fa-icon class="icon" [ngClass]="{'fa-beat-fade': (gameService.gameStatus == enumGameStatus.Run) && !paused}" [icon]="faClock"></fa-icon> {{ formatElapsedTime(gameTimeElapsed) }}s
           </div>
         </div>
 
