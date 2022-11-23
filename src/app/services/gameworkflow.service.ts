@@ -22,6 +22,7 @@ import { TokenService } from './token.service';
   gameTerminated:      Game was terminated [[system reporting that the game is killed]]
   gamePaused:          Game was paused by user
   gameResumed:         Game was resumed by user
+  authTokenExpired:    User's auth refresh token is expired (need to relogin)
 
  Outgoing commands:
   getSettings:         Load user settings from remote
@@ -37,7 +38,7 @@ import { TokenService } from './token.service';
   recordGameAbandon:   Record that a game was terminated (give up)
   pauseGame:           Do stuff needed for a game pause
   resumeGame:          Do stuff needed for a game resume
-
+  forgetAuthTokens:    Discard all authentication tokens
 
 */
 @Injectable({ providedIn: 'root' })
@@ -188,6 +189,14 @@ export class GameWorkflowService {
         this._subscriptions.add(this.eventBusService.onNotification(
             'gameResumed', () => {
                 this.eventBusService.emitCommand("resumeGame", null);
+            }
+        ));
+
+        // Auth token expired, need to re-login
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'authTokenExpired', () => {
+                this.eventBusService.emitCommand("forgetAuthTokens", null);
+                this.eventBusService.emitCommand("showLogin", null);
             }
         ));
         

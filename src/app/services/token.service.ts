@@ -6,7 +6,7 @@ const REFRESHTOKEN_KEY = 'auth-refreshtoken';
 const USER_KEY = 'auth-user';
 
 // Sends: 
-// Receives: doLogout
+// Receives: doLogout, forgetAuthTokens
 @Injectable({
   providedIn: 'root'
 })
@@ -20,6 +20,12 @@ export class TokenService {
             localStorage.removeItem(REFRESHTOKEN_KEY);
         });
 
+        // Watch for logout events and wipe the stored tokens
+        this.eventBusService.onCommand('forgetAuthTokens', () => {
+            console.log("TokenService: forget tokens requested");
+            localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem(REFRESHTOKEN_KEY);
+        });
     }
 
     private _lastAPIExecutionTime: number;

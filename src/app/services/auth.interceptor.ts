@@ -61,7 +61,8 @@ export class AuthInterceptor implements HttpInterceptor {
                         this.isRefreshing = false;
 
                         // If you get here, the refresh token is no good and you need to re-login
-                        this.eventbusService.emitNotification('logout', null);
+                        console.log("AuthInterceptor: refresh token is expired");
+                        this.eventbusService.emitNotification('authTokenExpired', null);
 
                         return throwError(() => err);
                     })

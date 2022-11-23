@@ -3,7 +3,6 @@ Figure out insane mode hiding letters, input, and display of win
 In API, auto-uppercase everything via the test framework
 In API, convert spaces to null should be a middleware in slim
 Move api to AWS
-Test that login pops up when your refresh token expires
 Allow user to wipe their records?  Not sure on that.
 Draw entire state flow of game workflow
 -- Add 6-hop words?
