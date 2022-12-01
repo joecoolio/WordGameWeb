@@ -26,8 +26,8 @@ import { Stopwatch } from '../helper/stopwatch';
 // How often to get timer ticks (in ms)
 const TICK_TIME = 100;
 
-// Sends: newGameRequested, pauseGame
-// Receives: newGame, recordGameWon, recordGameLoss, recordGameAbandon, resumeGame
+// Sends: newGameRequested, gamePaused
+// Receives: newGame, recordGameWon, recordGameLoss, recordGameAbandon, pauseGame, resumeGame
 @Component({
   selector: 'game',
   templateUrl: './game.component.html',
@@ -103,6 +103,14 @@ export class GameComponent implements OnInit, AfterViewInit {
         }
       ));
 
+      // Watch for the game to become paused
+      this.subscriptions.add(
+        this.eventBusService.onCommand('pauseGame', () => {
+          console.log("GameComponent: game paused");
+          this.pause();
+        })
+      )
+      
       // Watch for the game to become un-paused
       this.subscriptions.add(
         this.eventBusService.onCommand('resumeGame', () => {
@@ -308,18 +316,24 @@ export class GameComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // Pause the current game
-  pause() {
+  pauseButtonPushed() {
     if (!this.paused) {
-      this.paused = true;
-      this._stopWatch.pause();
-
+      // Report that pause was requeted by the user
+      console.log("GameComponent: pause requested");
       this.eventBusService.emitNotification('gamePaused', null);
     }
   }
 
+  // Pause the current game
+  private pause() {
+    if (!this.paused) {
+      this.paused = true;
+      this._stopWatch.pause();
+    }
+  }
+
   // Resume the current game
-  resume() {
+  private resume() {
     if (this.paused) {
       this.paused = false;
       this._stopWatch.pause();

@@ -152,7 +152,7 @@
         <div class="bottom-row" [style.width.px]="letterBoxSize * gameService.board.numLetters + (2 * (gameService.board.numLetters))">
           <div class="gamestats left"><ng-container *ngIf="gameService.gameStatus == enumGameStatus.Run">{{ gameService.solutionMessage }}</ng-container></div>
           <div class="gamestats right">
-            <fa-icon *ngIf="gameService.gameStatus == enumGameStatus.Run && !paused" class="icon" [icon]="faPause" (click)="pause()"></fa-icon>
+            <fa-icon *ngIf="gameService.gameStatus == enumGameStatus.Run && !paused" class="icon" [icon]="faPause" (click)="pauseButtonPushed()"></fa-icon>
             &nbsp;&nbsp;
             <fa-icon class="icon" [ngClass]="{'fa-beat-fade': (gameService.gameStatus == enumGameStatus.Run) && !paused}" [icon]="faClock"></fa-icon> {{ formatElapsedTime(gameTimeElapsed) }}s
           </div>
