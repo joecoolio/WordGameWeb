@@ -237,7 +237,7 @@ export class GameWorkflowService {
         // A popup was opened (need to pause the game)
         this._subscriptions.add(this.eventBusService.onNotification(
             'popupOpened', () => {
-                if (this._state.gameRunning) {
+                if (this._state.gameRunning && !this._state.gamePaused) {
                     this._state.gamePaused = true;
                     this.eventBusService.emitCommand("pauseGame", null);
                 }
@@ -247,7 +247,7 @@ export class GameWorkflowService {
         // A popup was closed (need to resume the game)
         this._subscriptions.add(this.eventBusService.onNotification(
             'popupClosed', () => {
-                if (this._state.gameRunning) {
+                if (this._state.gameRunning && this._state.gamePaused) {
                     this._state.gamePaused = false;
                     this.eventBusService.emitCommand("resumeGame", null);
                 }

@@ -1,7 +1,7 @@
 import { Component, HostListener, VERSION } from '@angular/core';
 import Keyboard from 'simple-keyboard';
 import { GameService } from './services/game.service';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
 import { LoginComponent } from './account/login/login.component';
 import { Subscription } from 'rxjs';
@@ -105,12 +105,12 @@ export class AppComponent {
     const modalRef = this.modalService.open(LoginComponent);
   }
 
-  openPopup(component) : NgbModalRef {
+  private openPopup(component, options?: NgbModalOptions) : NgbModalRef {
     // Inform that a popup is open
     this.eventBusService.emitNotification('popupOpened', null);
 
     // Show the user stats
-    const modalRef = this.modalService.open(component);
+    const modalRef = this.modalService.open(component, options);
     modalRef.result.then(
       () => {
         // When the window closes, send a resume request
@@ -157,21 +157,10 @@ export class AppComponent {
   }
 
   openPauseDialog() {
-    const modalRef = this.modalService.open(PauseComponent, {
+    this.openPopup(PauseComponent, {
       ariaLabelledBy: 'modal-basic-title',
       windowClass: 'transparent-modal-content'
     });
-
-    modalRef.result.then(
-      () => {
-        // When the window closes, send a resume request
-        this.eventBusService.emitNotification('gameResumed', null);
-      },
-      (err) => {
-        // When the window closes, send a resume request
-        this.eventBusService.emitNotification('gameResumed', null);
-      }
-    )
   }
 
   openWinLoseDialog(showWin: boolean = true) {
