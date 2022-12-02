@@ -62,7 +62,8 @@
             'wrong': gameService.gameStatus == enumGameStatus.Lose,
             'broken': gameService.gameStatus == enumGameStatus.Broken,
             'unverified': gameService.gameStatus == enumGameStatus.Run,
-            'fa-spin': gameService.gameStatus == enumGameStatus.Initialize
+            'fa-spin': gameService.gameStatus == enumGameStatus.Initialize,
+            'fa-beat-fade': (gameService.gameStatus == enumGameStatus.Win || gameService.gameStatus == enumGameStatus.Lose || gameService.gameStatus == enumGameStatus.Broken)
           }"
           *ngIf="word.pairWord && i === 0" (click)="newGame()" [icon]="faRepeat"></fa-icon>
 
