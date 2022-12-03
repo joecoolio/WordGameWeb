@@ -7,10 +7,10 @@ Tasks:
 --Done:  load 4/6 to wordgame_pairs
 
 --Done:  extract 5 pairs on neo -- pairs in 5letter6hop_pairs_bak.csv
---Running in screen:  extract 5 paths on neo
-load 5 paths to pair5 db
-copy 5 routine from 3letterwords.sql
-load 5/6 to wordpairs
+--Done:  extract 5 paths on neo
+--Done:  load 5 paths to pair5 db
+--Done:  copy 5 routine from 3letterwords.sql
+--Running in screen:  load 5/6 to wordpairs
 load 5/6 to wordgame_pairs
 
 --Done:  load 6/6 to wordpairs
