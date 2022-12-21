@@ -261,7 +261,7 @@ export class PlayerService {
                 },
                 // Failure
                 (err) => {
-                // API call for login failed, nothing to be done here
+                    // API call for settings failed
                     console.log("PlayerService: Get settings failed", err);
 
                     this._playerInfo.status = PlayerStatus.NOT_INITIALIZED;

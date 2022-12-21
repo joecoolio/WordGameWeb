@@ -21,17 +21,17 @@ and p_longer.minpathlength = 6
 ;
 
 select pair, fullpath, minpathlength
-INTO OUTFILE '/var/lib/mysql/4_toload.csv'
+INTO OUTFILE '/var/lib/mysql/4_toload_6.csv'
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 from pair4
 where keep = 1
-and minpathlength > 1
+and minpathlength = 6
 order by minpathlength, pair, fullpath
 ;
 
 select distinct pair, minpathlength
-INTO OUTFILE '/var/lib/mysql/4_pairs.csv'
+INTO OUTFILE '/var/lib/mysql/4_pairs_uniq.csv'
 FIELDS TERMINATED BY ','
 LINES TERMINATED BY '\n'
 from pair4

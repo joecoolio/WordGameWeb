@@ -1,7 +1,7 @@
 import { Component, HostListener, VERSION } from '@angular/core';
 import Keyboard from 'simple-keyboard';
 import { GameService } from './services/game.service';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { SettingsComponent } from './settings/settings.component';
 import { LoginComponent } from './account/login/login.component';
 import { Subscription } from 'rxjs';
@@ -71,8 +71,8 @@ export class AppComponent {
     }));
 
     // Watch for pause show overlay
-    this._subscriptions.add(this.eventBusService.onCommand('pauseGame', () => {
-      console.log("AppComponent: pause")
+    this._subscriptions.add(this.eventBusService.onCommand('showPauseScreen', () => {
+      console.log("AppComponent: show pause screen")
       this.openPauseDialog();
     }));
   }
@@ -105,18 +105,39 @@ export class AppComponent {
     const modalRef = this.modalService.open(LoginComponent);
   }
 
-  openStats() {
+  private openPopup(component, options?: NgbModalOptions) : NgbModalRef {
+    // Inform that a popup is open
+    this.eventBusService.emitNotification('popupOpened', null);
+
     // Show the user stats
-    const modalRef = this.modalService.open(StatsComponent);
+    const modalRef = this.modalService.open(component, options);
+    modalRef.result.then(
+      () => {
+        // When the window closes, send a resume request
+        this.eventBusService.emitNotification('popupClosed', null);
+      },
+      (err) => {
+        // When the window closes, send a resume request
+        this.eventBusService.emitNotification('popupClosed', null);
+      }
+    )
+
+    return modalRef;
   }
 
+  // Show the user stats
+  openStats() {
+    this.openPopup(StatsComponent);
+  }
+
+  // Show the leaderboard screen
   openLeaderboard() {
-    // Show the leaderboard screen
-    const modalRef = this.modalService.open(LeaderboardComponent);
+    this.openPopup(LeaderboardComponent);
   }
 
+  // Show settings
   openSettings() {
-    const modalRef = this.modalService.open(SettingsComponent);
+    const modalRef = this.openPopup(SettingsComponent);
     modalRef.componentInstance.gameService = this.gameService;
   }
 
@@ -136,21 +157,10 @@ export class AppComponent {
   }
 
   openPauseDialog() {
-    const modalRef = this.modalService.open(PauseComponent, {
+    this.openPopup(PauseComponent, {
       ariaLabelledBy: 'modal-basic-title',
       windowClass: 'transparent-modal-content'
     });
-
-    modalRef.result.then(
-      () => {
-        // When the window closes, send a resume request
-        this.eventBusService.emitNotification('gameResumed', null);
-      },
-      (err) => {
-        // When the window closes, send a resume request
-        this.eventBusService.emitNotification('gameResumed', null);
-      }
-    )
   }
 
   openWinLoseDialog(showWin: boolean = true) {

@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { fromEvent, last, Observable, Subscription, timer } from "rxjs";
+import { fromEvent, Observable, Subscription } from "rxjs";
 import { GameService, GameStatus } from '../services//game.service';
 
 import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
@@ -26,8 +26,8 @@ import { Stopwatch } from '../helper/stopwatch';
 // How often to get timer ticks (in ms)
 const TICK_TIME = 100;
 
-// Sends: newGameRequested, pauseGame
-// Receives: newGame, recordGameWon, recordGameLoss, recordGameAbandon, resumeGame
+// Sends: newGameRequested, gamePaused
+// Receives: newGame, recordGameWon, recordGameLoss, recordGameAbandon, pauseGame, resumeGame
 @Component({
   selector: 'game',
   templateUrl: './game.component.html',
@@ -66,9 +66,6 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Subscription Stuff
   private subscriptions: Subscription;
 
-  // Game timer value
-  gameTimeElapsed: number;
-
   // True/false showing if the game is paused right now
   paused: boolean;
 
@@ -106,12 +103,14 @@ export class GameComponent implements OnInit, AfterViewInit {
         }
       ));
 
-      // Watch for game end to be fired and stop the timer
-      let stopTimerFunction = () => {
-        console.log("GameComponent: game over (win|lose|abandon)");
-        this._stopWatch.stop();
-      };
-
+      // Watch for the game to become paused
+      this.subscriptions.add(
+        this.eventBusService.onCommand('pauseGame', () => {
+          console.log("GameComponent: game paused");
+          this.pause();
+        })
+      )
+      
       // Watch for the game to become un-paused
       this.subscriptions.add(
         this.eventBusService.onCommand('resumeGame', () => {
@@ -120,18 +119,22 @@ export class GameComponent implements OnInit, AfterViewInit {
         })
       )
 
-      this.subscriptions.add(this.eventBusService.onCommand('recordGameWon', stopTimerFunction));
-      this.subscriptions.add(this.eventBusService.onCommand('recordGameLoss', stopTimerFunction));
-      this.subscriptions.add(this.eventBusService.onCommand('recordGameAbandon', stopTimerFunction));
+      this.subscriptions.add(this.eventBusService.onCommand('recordGameWon', () => {
+        console.log("GameComponent: game over (win)");
+        this._stopWatch.stop();
+      }));
+      this.subscriptions.add(this.eventBusService.onCommand('recordGameLoss', () => {
+        console.log("GameComponent: game over (lose)");
+        this._stopWatch.stop();
+        this._stopWatch.reset();
+      }));
+      this.subscriptions.add(this.eventBusService.onCommand('recordGameAbandon', () => {
+        console.log("GameComponent: game over (abandon)");
+        this._stopWatch.stop();
+      }));
   
       // Setup the stop watch
       this._stopWatch = new Stopwatch(100);
-      this.subscriptions.add(
-        this._stopWatch.tick.subscribe(timeElapsed => {
-          this.gameTimeElapsed = timeElapsed;
-        })
-      );
-      this.gameTimeElapsed = 0.0;
       this.paused = false;
 
       this._doResize = false;
@@ -313,18 +316,24 @@ export class GameComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // Pause the current game
-  pause() {
+  pauseButtonPushed() {
     if (!this.paused) {
-      this.paused = true;
-      this._stopWatch.pause();
-
+      // Report that pause was requeted by the user
+      console.log("GameComponent: pause requested");
       this.eventBusService.emitNotification('gamePaused', null);
     }
   }
 
+  // Pause the current game
+  private pause() {
+    if (!this.paused) {
+      this.paused = true;
+      this._stopWatch.pause();
+    }
+  }
+
   // Resume the current game
-  resume() {
+  private resume() {
     if (this.paused) {
       this.paused = false;
       this._stopWatch.pause();
@@ -334,6 +343,10 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Get a hint for this word
   hint() {
     this.gameService.getHint();
+  }
+
+  public get gameTimeElapsed(): number {
+    return this._stopWatch.timeElapsed;
   }
 
   // Change the highlighted/current cell
