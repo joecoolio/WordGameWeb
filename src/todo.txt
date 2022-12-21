@@ -6,9 +6,8 @@ Move api to AWS
 Test that login pops up when your refresh token expires
 Allow user to wipe their records?  Not sure on that.
 Draw entire state flow of game workflow
--- Add 6-hop words?
--- Add 6-letter words?
 Weird bug on phone when left cell is highlighted.
 Review the event bus to see if there's a more standard way
 Change API to throw exceptions when needed
 Revisit how games are timed.
+Add French words?

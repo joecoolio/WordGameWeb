@@ -3,6 +3,7 @@ import { EventBusService } from '../services/eventbus.service';
 import { TokenService } from '../services/token.service';
 import { ConfirmationComponent } from '../confirmation/confirmation.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-header',
@@ -14,6 +15,8 @@ export class HeaderComponent implements OnInit {
   @Output() parentOpenStats = new EventEmitter();
   @Output() parentOpenLeaderboard = new EventEmitter();
   @Output() parentOpenSettings = new EventEmitter();
+
+  faGear = faGear;
 
   public isCollapsed = true;
 

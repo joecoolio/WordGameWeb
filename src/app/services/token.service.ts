@@ -52,7 +52,7 @@ export class TokenService {
     }
 
     public get email(): string {
-        return localStorage.getItem(USER_KEY);
+        return JSON.parse(localStorage.getItem(USER_KEY));
     }
 
     public get lastAPIExecutionTime(): number {
