@@ -13,3 +13,4 @@ Use https://api.dictionaryapi.dev/api/v2/entries/en/hello to lookup words
 Revisit how games are timed.
 Add French words?
 Login should not disappear when you click away unless you're already logged on.
+On login/register, if you push the eyeball button on password, it shows a login error.
