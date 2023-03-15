@@ -12,3 +12,4 @@ Change API to throw exceptions when needed
 Use https://api.dictionaryapi.dev/api/v2/entries/en/hello to lookup words
 Revisit how games are timed.
 Add French words?
+Login should not disappear when you click away unless you're already logged on.

@@ -1,5 +1,4 @@
 /* Add application styles & imports to this file! */
-@import '~bootstrap/dist/css/bootstrap.min.css';
 @import 'simple-keyboard/build/css/index.css';
 @import '@angular/material/prebuilt-themes/deeppurple-amber.css';
 

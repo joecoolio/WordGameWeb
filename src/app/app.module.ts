@@ -26,6 +26,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatIconModule } from '@angular/material/icon';
+
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AuthInterceptor } from './services/auth.interceptor';
@@ -51,6 +54,9 @@ import { PauseComponent } from './pausedialog/pause.component';
     MatCardModule,
     MatTooltipModule,
     MatRadioModule,
+    MatIconModule,
+
+    NgbDropdownModule,
   ],
 
   declarations: [
