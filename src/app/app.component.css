@@ -47,6 +47,7 @@ header {
   align-items: center;
   justify-content: center;
   background-color: silver;
+  /* border: 2px solid red; */
 }
 
 .simple-keyboard {
@@ -61,7 +62,21 @@ header {
 }
 
 .errormessage {
+  display: inline-block;
+  line-height: normal;
   height: 6vmin;
-  font-size: 4vmin;
+  width: 90%;
+  position: relative;
   /* border: 1px solid orange; */
+}
+
+.errormessage_inner {
+  height: 85%;
+  width: 100%;
+  text-align: center;
+  /* Center vertically */
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+  /* border: 1px solid purple; */
 }

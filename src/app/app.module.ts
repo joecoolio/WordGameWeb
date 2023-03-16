@@ -37,6 +37,8 @@ import { StatsComponent } from './account/stats/stats.component';
 import { PregameComponent } from './pregame/pregame.component';
 import { PauseComponent } from './pausedialog/pause.component';
 
+import {Ng2FittextModule} from "ng2-fittext";
+
 @NgModule({
   imports: [
     BrowserModule,
@@ -57,6 +59,8 @@ import { PauseComponent } from './pausedialog/pause.component';
     MatIconModule,
 
     NgbDropdownModule,
+
+    Ng2FittextModule
   ],
 
   declarations: [

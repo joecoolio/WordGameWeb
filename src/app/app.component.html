@@ -14,7 +14,12 @@
   </div>
 
   <div class="bottom-of-screen">
-    <label class="errormessage">{{ gameService.message }}</label>
+    <div class="errormessage">
+      <div class="errormessage_inner">
+        <!-- fittext from https://github.com/lokenxo/ng2-fittext#readme -->
+        <label [fittext]="true" [activateOnResize]="true" [modelToWatch]="gameService.message">{{ gameService.message }}</label>
+      </div>
+    </div>
     <div class="simple-keyboard" [ngClass]="!playerService.showKeyboard ? 'hide-keyboard' : ''"></div>
   </div>
 
