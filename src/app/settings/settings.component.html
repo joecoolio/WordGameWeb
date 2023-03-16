@@ -29,31 +29,24 @@
     <!-- Number of letters -->
     <div class="item">
       <div class="headertext">Number Of Letters: <span class="headervalue">{{ playerService.numLetters }}</span></div>
-      <mat-slider
-        thumbLabel tickInterval="1" aria-label="units"
-        [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS" step="1"
-        [ngModel]="playerService.numLetters" (ngModelChange)="playerService.numLetters = $event">
+      <mat-slider discrete step="1" showTickMarks aria-label="units" [min]="gameService.MIN_LETTERS" [max]="gameService.MAX_LETTERS">
+        <input matSliderThumb [value]="playerService.numLetters" (valueChange)="playerService.numLetters = $event">
       </mat-slider>
     </div>
   
     <!-- Number of hops -->
     <div class="item">
       <div class="headertext">Number Of Hops: <span class="headervalue">{{ playerService.numHops }}</span></div>
-      <mat-slider
-        thumbLabel tickInterval="1" aria-label="units"
-        [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS" step="1"
-        [ngModel]="playerService.numHops" (ngModelChange)="playerService.numHops = $event">
+      <mat-slider discrete step="1" showTickMarks aria-label="units" [min]="gameService.MIN_HOPS" [max]="gameService.MAX_HOPS">
+        <input matSliderThumb [value]="playerService.numHops" (valueChange)="playerService.numHops = $event">
       </mat-slider>
     </div>
 
     <!-- Difficulty Level -->
     <div class="item">
       <div class="headertext">Difficulty: <span class="headervalue">{{ formatDifficulty(playerService.difficultyLevel) }}</span></div>
-      <mat-slider
-        thumbLabel tickInterval="1" aria-label="units"
-        [min]="getMinDifficulty()" [max]="getMaxDifficulty()" step="1"
-        [displayWith]="formatDifficulty"
-        [ngModel]="playerService.difficultyLevel" (ngModelChange)="playerService.difficultyLevel = $event">
+      <mat-slider discrete step="1" showTickMarks aria-label="units" [min]="getMinDifficulty()" [max]="getMaxDifficulty()" [displayWith]="formatDifficulty">
+        <input matSliderThumb [value]="playerService.difficultyLevel" (valueChange)="playerService.difficultyLevel = $event">
       </mat-slider>
     </div>
 
