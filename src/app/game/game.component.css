@@ -50,12 +50,8 @@
 }
 
 .letter-box img {
-  max-width: 80%;
   max-height: 80%;
-  width: auto;
   height: auto;
-  aspect-ratio: 1;
-  justify-content: center;
 }
 
 .letter-box.letter {
