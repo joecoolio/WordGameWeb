@@ -16,6 +16,7 @@ import { StatsComponent } from './account/stats/stats.component';
 import { PregameComponent } from './pregame/pregame.component';
 import { WinLoseComponent } from './winlosedialog/winlose.component';
 import { PauseComponent } from './pausedialog/pause.component';
+import { DictionaryService } from './services/dictionary.service';
 
 // Sends: applicationStart, gameResumed
 // Receives: showLogin, showPregame, newGame, recordGameWon, pauseGame
@@ -40,6 +41,7 @@ export class AppComponent {
     private modalService: NgbModal,
     public playerService: PlayerService,
     private eventBusService: EventBusService,
+    public dictionaryService: DictionaryService,
     // These have to be referenced to get them running
     private gameWorkflowService: GameWorkflowService,
     private gameTrackerService: GameTrackerService

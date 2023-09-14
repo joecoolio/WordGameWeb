@@ -33,7 +33,11 @@
         <ng-container *ngIf=
           "i == 0 || i == gameService.numHops
           || gameService.difficultyLevel != enumDifficultyLevel.Insane || isLetterOnPath(letter, i, j)"
-        >{{ !paused ? letter.character : null }}</ng-container>
+        >
+          <ng-container *ngIf="!paused && letter.character != null">
+            <img src="{{ getLetterImage(letter.character) }}">
+          </ng-container>
+        </ng-container>
 
         <!-- In insane mode on middle rows with a non-matching letter, show an icon -->
         <ng-container *ngIf=

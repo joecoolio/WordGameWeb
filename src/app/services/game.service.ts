@@ -7,6 +7,7 @@ import { Board, WordStatus } from '../model/board';
 import { EventBusService } from './eventbus.service';
 import { Stopwatch } from '../helper/stopwatch';
 import { CountdownTimer } from '../helper/countdowntimer';
+import { DictionaryResult, DictionaryService } from './dictionary.service';
 
 export enum GameStatus {
   Initialize,  // The game isn't setup yet
@@ -83,7 +84,8 @@ export class GameService {
     private _dataService: DataService,
     private _audioService: AudioService,
     private _playerService: PlayerService,
-    private _eventBusService: EventBusService)
+    private _eventBusService: EventBusService,
+    private _dictionaryService: DictionaryService)
   {
     this._subscriptions = new Subscription();
 
@@ -514,6 +516,14 @@ export class GameService {
             } else {
               // Play a sound (yay!)
               this._audioService.wordCorrect();
+
+this._dictionaryService.lookup(testWord)
+.then(
+  // Success
+  (dictionaryResults: DictionaryResult[]) => {
+console.log("Result: " + JSON.stringify(dictionaryResults));
+  }
+);
 
               // Move to the next word (unless the user has already moved)
               if (this._selectedWord == testedWord.testPosition) {

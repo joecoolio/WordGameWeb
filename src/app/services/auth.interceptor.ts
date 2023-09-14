@@ -29,8 +29,8 @@ export class AuthInterceptor implements HttpInterceptor {
             // Watch responses for 400 statuses.  If you find one, refresh the token and try again.
             return next.handle(authReq).pipe(
                 catchError((error: HttpErrorResponse) => {
-                    // 400 is returned when an access token is no good
-                    if (error.status === 400) {
+                    // 401 is returned when an access token is no good
+                    if (error.status === 401) {
                         return this.refreshToken(authReq, next);
                     }
 

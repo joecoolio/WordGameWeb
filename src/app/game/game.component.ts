@@ -170,6 +170,10 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.subscriptions.unsubscribe()
   }
 
+  getLetterImage(character: string) : string {
+    return "../../assets/images/letters/letter_" + character.toLowerCase() + ".png";
+  }
+
   isLetterOnPath(letter: Letter, wordIndex: number, letterIndex: number): boolean {
     const priorLetter: Letter = (wordIndex > 0) ? this.gameService.board.words[wordIndex - 1].letters[letterIndex] : letter;
     // const nextLetter: string = (wordIndex < this.gameService.board.length) ? this.gameService.board[wordIndex + 1].letters[letterIndex] : letterToTest;
