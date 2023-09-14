@@ -517,13 +517,14 @@ export class GameService {
               // Play a sound (yay!)
               this._audioService.wordCorrect();
 
-this._dictionaryService.lookup(testWord)
-.then(
-  // Success
-  (dictionaryResults: DictionaryResult[]) => {
-console.log("Result: " + JSON.stringify(dictionaryResults));
-  }
-);
+              // // Lookup the definition of the word
+              // this._dictionaryService.lookup(testWord)
+              // .then(
+              //   // Success
+              //   (dictionaryResults: DictionaryResult[]) => {
+              // console.log("Result: " + JSON.stringify(dictionaryResults));
+              //   }
+              // );
 
               // Move to the next word (unless the user has already moved)
               if (this._selectedWord == testedWord.testPosition) {
