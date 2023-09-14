@@ -49,6 +49,15 @@
   text-transform: uppercase;
 }
 
+.letter-box img {
+  max-width: 80%;
+  max-height: 80%;
+  width: auto;
+  height: auto;
+  aspect-ratio: 1;
+  justify-content: center;
+}
+
 .letter-box.letter {
   border: 1px solid black;
 }
@@ -71,7 +80,7 @@
   /* font-style: italic; */
 }
 .letter-box.letter.on-path {
-  color: yellow;
+  background-color: yellow;
 }
 
 .bottom-row {
@@ -138,11 +147,6 @@
   color: red;
 }
 
-.letter-box img {
-  width:80%;
-  height:80%;
-  justify-content: center;
-}
 
 
 /* Animations */
