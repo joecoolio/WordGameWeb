@@ -63,7 +63,7 @@ export class AppComponent {
     // Watch for newGame and show the keyboard
     this._subscriptions.add(this.eventBusService.onCommand('newGame', () => {
       console.log("AppComponent: game start requested")
-      this.showKeyboard();
+      // this.showKeyboard();
     }));
 
     // Watch for win & lose and show overlay
@@ -77,6 +77,10 @@ export class AppComponent {
       console.log("AppComponent: show pause screen")
       this.openPauseDialog();
     }));
+  }
+
+  ngOnInit() {
+    this.showKeyboard();
   }
 
   showKeyboard() {

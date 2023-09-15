@@ -53,7 +53,8 @@ export interface SettingsResult {
   difficultyLevel: number,
   hintType: number,
   enableSounds: boolean,
-  showKeyboard: boolean
+  showKeyboard: boolean,
+  showDefinitions: boolean,
 }
 
 export interface Leader {

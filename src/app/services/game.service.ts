@@ -196,8 +196,10 @@ export class GameService {
             this.toastr.clear();
 
             // Show the definition of the word
-            this.showDefinition(this._wordPair.startWord);
-            this.showDefinition(this._wordPair.endWord);
+            // End word first so it's on the bottom
+            // 8 seconds since there are 2 words
+            this.showDefinition(this._wordPair.endWord, 8000);
+            this.showDefinition(this._wordPair.startWord, 8000);
 
             // Reset the current word/cell to the top
             this._selectedWord = 1;
@@ -602,7 +604,7 @@ export class GameService {
   }
 
   // Show the definition of a word as a toast
-  private showDefinition(word: string): void {
+  private showDefinition(word: string, timeout: number = 4000): void {
     if (this._playerService.showDefinitions) {
       // Lookup the definition of the word
       this._dictionaryService.lookup(word)
@@ -611,13 +613,15 @@ export class GameService {
         (dictionaryWord: DictionaryWord) => {
           this.toastr.info("use payload", "use payload", {
             toastComponent: DefinitionToast,
-            timeOut: 3000,
+            timeOut: timeout,
             enableHtml: true,
             payload: dictionaryWord,
             toastClass: 'ngx-toastr dictionary-toastr',
           });
         }
-      );
+      ),
+      // Failure
+      (err) => {};
     }
   }
 

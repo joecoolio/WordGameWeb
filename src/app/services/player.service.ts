@@ -253,8 +253,10 @@ export class PlayerService {
                     this._playerInfo.settings.name = settingsResult && settingsResult.name ? settingsResult.name : DEFAULT_NAME;
                     this._playerInfo.settings.numHops = settingsResult && settingsResult.numHops ? settingsResult.numHops : DEFAULT_NUM_HOPS;
                     this._playerInfo.settings.numLetters = settingsResult && settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
-                    this._playerInfo.settings.showKeyboard = settingsResult && settingsResult.showKeyboard ? settingsResult.showKeyboard : DEFAULT_SHOWKEYBOARD;
-
+                    this._playerInfo.settings.showKeyboard = settingsResult ? settingsResult.showKeyboard : DEFAULT_SHOWKEYBOARD;
+                    this._playerInfo.settings.showDefinitions = settingsResult ? settingsResult.showDefinitions : DEFAULT_SHOWDEFINITIONS;
+console.log("Keyboard: " + this._playerInfo.settings.showKeyboard);
+console.log("Keyboard: " + this.showKeyboard);
                     this._playerInfo.status = PlayerStatus.OK;
 
                     // Tell the game service
