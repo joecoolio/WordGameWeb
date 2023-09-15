@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { DataService, Leader } from 'src/app/services/data.service';
-import { GameService } from 'src/app/services/game.service';
+import { DataService, Leader } from '../../services/data.service';
+import { GameService } from '../../services/game.service';
 
 
 @Component({

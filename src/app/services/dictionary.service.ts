@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
-import { filter, firstValueFrom, Observable, tap, timeout } from 'rxjs';
+import { filter, firstValueFrom, map, Observable, tap, timeout } from 'rxjs';
 
 const DICTIONARY_API = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
 
@@ -21,7 +21,7 @@ export interface DictionaryResult {
     origin: string,
     meanings: [
         {
-            partofSpeech: string,
+            partOfSpeech: string,
             definitions: {
                 definition: string,
                 example: string,
@@ -32,17 +32,17 @@ export interface DictionaryResult {
     ],
 }
 
-// export interface WordMeaning {
-//     partofSpeech: string,
-//     definition: string,
-//     synonyms: string,
-//     antonyms: string
-// }
-// export interface DictionaryWord {
-//     word: string,
-//     phonetic: string,
-//     meanings: WordMeaning[]
-// }
+// An individual word meaning
+export interface WordMeaning {
+    partofSpeech: string, // Noun, Verb, Adjective, Adverb, Conjunction, Interjection
+    posShorthand: string, // N, V, ADJ, ADV, CON, INT
+    definition: string,
+}
+// A dictionary word and all the meanings of it
+export interface DictionaryWord {
+    word: string,
+    meanings: WordMeaning[]
+}
 
 @Injectable({
   providedIn: 'root'
@@ -50,42 +50,59 @@ export interface DictionaryResult {
 export class DictionaryService {
     constructor(private http: HttpClient) { }
 
-    async lookup(word: string): Promise<DictionaryResult[]> {
+    async lookup(word: string): Promise<DictionaryWord> {
         return await firstValueFrom(
             this.http.get<DictionaryResult[]>(
-            DICTIONARY_API + word,
+                DICTIONARY_API + word,
+                { observe: 'response' }
             ).pipe(
-                timeout(HTTP_TIMEOUT)
+                timeout(HTTP_TIMEOUT),
+                filter(event => event instanceof HttpResponse),
+                map(response => {
+                    if (response.status == 200) {
+                        // Word to return
+                        let returnWord: DictionaryWord = { word: word, meanings: [] };
+
+                        // I only want 1 noun, 1 verb, etc. regardless of how many definitions there are.
+                        // As I find one, put it in here so I don't add another
+                        let foundTypes: string[] = [];
+
+                        let result: DictionaryResult[] = response.body;
+                        result.forEach((toplevel) => {
+                            toplevel.meanings.forEach((meaning) => {
+                                let partOfSpeech: string = meaning.partOfSpeech;
+
+                                meaning.definitions.forEach((definition) => {
+                                    // Not sure what these are, but they're not legit definitions
+                                    if (!definition.definition.startsWith("(auxiliary)")) {
+                                        // Only keep the first of each type
+                                        if (!foundTypes.includes(partOfSpeech)) {
+                                            foundTypes.push(partOfSpeech);
+
+                                            // Build a word meaning
+                                            let wordMeaning: WordMeaning = { partofSpeech: partOfSpeech, posShorthand: "", definition: definition.definition };
+                                            // Shorthand part of speech for the UI
+                                            switch(partOfSpeech) {
+                                                case "noun": wordMeaning.posShorthand = "N"; break;
+                                                case "verb": wordMeaning.posShorthand = "V"; break;
+                                                case "adjective": wordMeaning.posShorthand = "ADJ"; break;
+                                                case "adverb": wordMeaning.posShorthand = "ADV"; break;
+                                                case "conjunction": wordMeaning.posShorthand = "CON"; break;
+                                                case "interjection": wordMeaning.posShorthand = "INT"; break;
+                                                default: wordMeaning.posShorthand = "?";
+                                            }
+
+                                            returnWord.meanings.push(wordMeaning);
+                                        }
+                                    }
+                                });
+                            });
+                        });
+
+                        return returnWord;
+                    }
+                })
             )
         );
-
-        // // Words to return
-        // let returnWords:DictionaryWord[] = [];
-
-        // // A single word
-        // let returnWord: DictionaryWord = {
-        //     word: "", phonetic: "", meanings: []
-        // };
-
-        // if (result.length > 0) {
-        //     returnWord.word = result[0].word ? result[0].word : "";
-        //     returnWord.phonetic = result[0].phonetic ? result[0].phonetic : "";
-            
-
-        //     result[0].meanings.forEach((meaning) => {
-        //         let wordMeaning: WordMeaning = {
-        //             partofSpeech: "", definition: "", synonyms: "", antonyms: ""
-        //         };
-        //         wordMeaning.partofSpeech = meaning.partofSpeech ? result[0].meanings[0].partofSpeech : "";
-        //         wordMeaning.definition = meaning.definitions[0].definition ? result[0].meanings[0].definitions[0].definition : "";
-        //         wordMeaning.synonyms = meaning.definitions[0].synonyms ? result[0].meanings[0].definitions[0].synonyms : "";
-        //         wordMeaning.antonyms = meaning.definitions[0].antonyms ? result[0].meanings[0].definitions[0].antonyms : "";
-
-        //         returnWord.meanings.push(wordMeaning);
-        //     });
-        // }
-
-        // return returnWord;
     }
-
 }

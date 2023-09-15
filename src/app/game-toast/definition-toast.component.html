@@ -1,0 +1,15 @@
+<div class="row" [style.display]="state.value === 'inactive' ? 'none' : ''">
+    <div *ngIf="dictionaryWord != null">
+      <div [class]="options.titleClass" [attr.aria-label]="title">
+        {{ dictionaryWord.word }}
+      </div>
+      <ul>
+        <li *ngFor="let meaning of dictionaryWord.meanings">
+          ({{ meaning.posShorthand }}) {{ meaning.definition }}
+        </li>
+      </ul>
+    </div>
+</div>
+<div *ngIf="options.progressBar">
+  <div class="toast-progress" [style.width]="width + '%'"></div>
+</div>

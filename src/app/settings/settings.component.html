@@ -78,6 +78,13 @@
       Show Onscreen Keyboard?
     </mat-slide-toggle>
 
+    <!-- Show Definitions -->
+    <mat-slide-toggle
+      [ngModel]="playerService.showDefinitions" (ngModelChange)="playerService.showDefinitions = $event"
+    >
+      Show Word Definitions?
+    </mat-slide-toggle>
+  
 </div>
 <div class="modal-footer">
   <button

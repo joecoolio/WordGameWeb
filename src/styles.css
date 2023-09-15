@@ -71,3 +71,9 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   border: 0 !important;
 }
 
+/* This is for definition-toast component.  It's inherited so it needs global styling. */
+.toast-container .dictionary-toastr {
+    background-color: blue;
+	border-radius: 5px;
+	opacity: 0.6;
+}

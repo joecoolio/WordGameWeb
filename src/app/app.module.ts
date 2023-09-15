@@ -40,6 +40,7 @@ import { PauseComponent } from './pausedialog/pause.component';
 import {Ng2FittextModule} from "ng2-fittext";
 
 import { ToastrModule } from 'ngx-toastr';
+import { DefinitionToast } from './game-toast/definition-toast.component';
 
 @NgModule({
   imports: [
@@ -65,7 +66,7 @@ import { ToastrModule } from 'ngx-toastr';
     Ng2FittextModule,
 
     ToastrModule.forRoot({
-      preventDuplicates: true
+      preventDuplicates: false
     }),
   ],
 
@@ -79,7 +80,8 @@ import { ToastrModule } from 'ngx-toastr';
     LeaderboardComponent,
     StatsComponent,
     PregameComponent,
-    PauseComponent
+    PauseComponent,
+    DefinitionToast
   ],
   bootstrap: [AppComponent],
   providers: [

@@ -7,8 +7,9 @@ import { Board, WordStatus } from '../model/board';
 import { EventBusService } from './eventbus.service';
 import { Stopwatch } from '../helper/stopwatch';
 import { CountdownTimer } from '../helper/countdowntimer';
-import { DictionaryResult, DictionaryService } from './dictionary.service';
+import { DictionaryService, DictionaryWord } from './dictionary.service';
 import { ToastrService } from 'ngx-toastr';
+import { DefinitionToast } from '../game-toast/definition-toast.component';
 
 export enum GameStatus {
   Initialize,  // The game isn't setup yet
@@ -193,6 +194,10 @@ export class GameService {
             this._board.initialize(this._wordPair.startWord, this._wordPair.endWord);
             this._message = '';
             this.toastr.clear();
+
+            // Show the definition of the word
+            this.showDefinition(this._wordPair.startWord);
+            this.showDefinition(this._wordPair.endWord);
 
             // Reset the current word/cell to the top
             this._selectedWord = 1;
@@ -532,25 +537,16 @@ export class GameService {
                 puzzleFilledIn = false;
               }
             }
+
+            // Show the definition of the word
+            this.showDefinition(testWord);
+
             if (puzzleFilledIn) {
               // You win!  Call this to report the completion.
               this.win();
             } else {
               // Play a sound (yay!)
               this._audioService.wordCorrect();
-
-              // // Lookup the definition of the word
-              // this._dictionaryService.lookup(testWord)
-              // .then(
-              //   // Success
-              //   (dictionaryResults: DictionaryResult[]) => {
-              //     console.log("Result: " + JSON.stringify(dictionaryResults));
-              //     this.toastr.error(JSON.stringify(dictionaryResults), null, {
-              //       timeOut: 5000
-              //     });
-
-              //   }
-              // );
 
               // Move to the next word (unless the user has already moved)
               if (this._selectedWord == testedWord.testPosition) {
@@ -600,6 +596,26 @@ export class GameService {
           });
 
           console.log('Error testing word: ' + JSON.stringify(err));
+        }
+      );
+    }
+  }
+
+  // Show the definition of a word as a toast
+  private showDefinition(word: string): void {
+    if (this._playerService.showDefinitions) {
+      // Lookup the definition of the word
+      this._dictionaryService.lookup(word)
+      .then(
+        // Success
+        (dictionaryWord: DictionaryWord) => {
+          this.toastr.info("use payload", "use payload", {
+            toastComponent: DefinitionToast,
+            timeOut: 3000,
+            enableHtml: true,
+            payload: dictionaryWord,
+            toastClass: 'ngx-toastr dictionary-toastr',
+          });
         }
       );
     }

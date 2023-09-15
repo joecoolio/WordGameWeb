@@ -36,6 +36,7 @@ const DEFAULT_SHOWKEYBOARD: boolean = true;
 const DEFAULT_HINTTYPE: HintType = HintType.Basic;
 const DEFAULT_NAME: string = "Guest";
 const DEFAULT_EMAIL: string = "guest@guest.com";
+const DEFAULT_SHOWDEFINITIONS: boolean = true;
 
 // Status of the player settings
 export enum PlayerStatus {
@@ -53,7 +54,8 @@ export interface PlayerSettings {
     difficultyLevel: DifficultyLevel,
     hintType: HintType,
     enableSounds: boolean,
-    showKeyboard: boolean
+    showKeyboard: boolean,
+    showDefinitions: boolean,
 }
 
 // Set of all player info
@@ -103,7 +105,8 @@ export class PlayerService {
                 difficultyLevel: DEFAULT_DIFFICULTYLEVEL,
                 hintType: DEFAULT_HINTTYPE,
                 enableSounds: DEFAULT_ENABLESOUNDS,
-                showKeyboard: DEFAULT_SHOWKEYBOARD
+                showKeyboard: DEFAULT_SHOWKEYBOARD,
+                showDefinitions: DEFAULT_SHOWDEFINITIONS,
             }
         }
 
@@ -438,4 +441,17 @@ export class PlayerService {
             this.eventBusService.emitNotification('settingsChanged', null);
         }
     }
+
+    public get showDefinitions(): boolean {
+        return this._playerInfo.settings.showDefinitions;
+    }
+    public set showDefinitions(value: boolean) {
+        let oldval = this._playerInfo.settings.showDefinitions;
+        this._playerInfo.settings.showDefinitions = value;
+        if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('showDefinitions', value));
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
+    }
+
 }

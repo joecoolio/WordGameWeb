@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { PlayerService } from 'src/app/services/player.service';
+import { PlayerService } from '../../services/player.service';
 
 @Component({
   selector: 'app-login',
