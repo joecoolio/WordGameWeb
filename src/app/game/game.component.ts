@@ -22,6 +22,7 @@ import { Letter, WordStatus } from '../model/board';
 import { EventBusService } from '../services/eventbus.service';
 import { ConfirmationComponent } from '../confirmation/confirmation.component';
 import { Stopwatch } from '../helper/stopwatch';
+import { ToastrService } from 'ngx-toastr';
 
 // How often to get timer ticks (in ms)
 const TICK_TIME = 100;
@@ -84,7 +85,8 @@ export class GameComponent implements OnInit, AfterViewInit {
     private playerService: PlayerService,
     private modalService: NgbModal,
     private eventBusService: EventBusService,
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private toastr: ToastrService,
   ) {
       this.subscriptions = new Subscription();
 

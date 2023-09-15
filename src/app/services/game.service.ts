@@ -8,6 +8,7 @@ import { EventBusService } from './eventbus.service';
 import { Stopwatch } from '../helper/stopwatch';
 import { CountdownTimer } from '../helper/countdowntimer';
 import { DictionaryResult, DictionaryService } from './dictionary.service';
+import { ToastrService } from 'ngx-toastr';
 
 export enum GameStatus {
   Initialize,  // The game isn't setup yet
@@ -85,7 +86,8 @@ export class GameService {
     private _audioService: AudioService,
     private _playerService: PlayerService,
     private _eventBusService: EventBusService,
-    private _dictionaryService: DictionaryService)
+    private _dictionaryService: DictionaryService,
+    private toastr: ToastrService)
   {
     this._subscriptions = new Subscription();
 
@@ -169,6 +171,11 @@ export class GameService {
       // Setup a new board
       this._board = new Board(this._numLetters, this._numHops);
       this._message = 'Requesting a pair of words...';
+      // Show a toast
+      this.toastr.info('Requesting a pair of words...', null, {
+        disableTimeOut: true
+      });
+      
       var execStartTime = performance.now();
 
       // Flag puzzle as loading
@@ -185,6 +192,7 @@ export class GameService {
             console.log('Got wordpair: ' + JSON.stringify(this._wordPair));
             this._board.initialize(this._wordPair.startWord, this._wordPair.endWord);
             this._message = '';
+            this.toastr.clear();
 
             // Reset the current word/cell to the top
             this._selectedWord = 1;
@@ -227,9 +235,19 @@ export class GameService {
             // Show a message
             if (err.error) {
               this._message = err.error;
+              // Show a toast
+              this.toastr.clear();
+              this.toastr.info(err.error, null, {
+                timeOut: 2000
+              });
             } else {
               this._message =
                 'Failed to communicate with the server, please try again later.';
+              // Show a toast
+              this.toastr.clear();
+              this.toastr.info('Failed to communicate with the server, please try again later.', null, {
+                timeOut: 2000
+              });
             }
 
             console.log('Error getting words: ' + JSON.stringify(err));
@@ -361,6 +379,7 @@ export class GameService {
       ) {
         // When you change a letter, the previous message goes away
         this._message = '';
+        this.toastr.clear();
 
         // If the cell is blank, back up to the previous cell.
         if (this._board.words[this._selectedWord].letters[this._selectedLetter].character == null) {
@@ -393,6 +412,7 @@ export class GameService {
           if (this._board.words[this._selectedWord].populated) {
             // When you hit enter, the previous message goes away
             this._message = '';
+            this.toastr.clear();
 
             // We know the current word is filled in
             // Need to determine if you test 1 word or all of them
@@ -411,6 +431,7 @@ export class GameService {
           if (boardFullyPopulated) {
             // When you hit enter, the previous message goes away
             this._message = '';
+            this.toastr.clear();
 
             // Validate the whole puzzle
             this.testEntirePuzzle();
@@ -429,6 +450,7 @@ export class GameService {
 
         // When you change a letter, the previous message goes away
         this._message = '';
+        this.toastr.clear();
 
         // Move the input to the next appropriate cell
         if (this._selectedLetter === this._numLetters - 1) {
@@ -522,7 +544,11 @@ export class GameService {
               // .then(
               //   // Success
               //   (dictionaryResults: DictionaryResult[]) => {
-              // console.log("Result: " + JSON.stringify(dictionaryResults));
+              //     console.log("Result: " + JSON.stringify(dictionaryResults));
+              //     this.toastr.error(JSON.stringify(dictionaryResults), null, {
+              //       timeOut: 5000
+              //     });
+
               //   }
               // );
 
@@ -549,6 +575,10 @@ export class GameService {
             this._board.words[testedWord.testPosition].status = WordStatus.Wrong;
 
             this._message = testedWord.error;
+            // Show a toast
+            this.toastr.error(testedWord.error, null, {
+              timeOut: 2000
+            });
 
             // Play a sound (boo!)
             this._audioService.wordWrong();
@@ -564,6 +594,10 @@ export class GameService {
           // Show a message
           this._message =
             'Failed to communicate with the server, please try again later.';
+          // Show a toast
+          this.toastr.error('Failed to communicate with the server, please try again later.', null, {
+            timeOut: 2000
+          });
 
           console.log('Error testing word: ' + JSON.stringify(err));
         }
@@ -612,6 +646,10 @@ export class GameService {
             this._board.words[this._numHops - 1].status = WordStatus.Wrong;
 
             this._message = validatedPuzzle.error;
+            // Show a toast
+            this.toastr.error(validatedPuzzle.error, null, {
+              timeOut: 2000
+            });
 
             // Play a sound (boo!)
             this._audioService.wordWrong();
@@ -628,6 +666,10 @@ export class GameService {
           // Show a message
           this._message =
             'Failed to communicate with the server, please try again later.';
+          // Show a toast
+          this.toastr.error('Failed to communicate with the server, please try again later.', null, {
+            timeOut: 2000
+          });
 
           console.log('Error testing word: ' + JSON.stringify(err));
         }
@@ -706,6 +748,10 @@ export class GameService {
     }
     
     this._message = "Game over! You lose!";
+    // Show a toast
+    this.toastr.error("Game over! You lose!", null, {
+      timeOut: 5000
+    });
     this._audioService.puzzleLost();
     this._gameStatus = GameStatus.Lose;
 
@@ -845,6 +891,10 @@ export class GameService {
             } else {
               // Couldn't get a hint, tell the player
               this._message = basicHint.error;
+              // Show a toast
+              this.toastr.error(basicHint.error, null, {
+                timeOut: 2000
+              });
 
               // Word is reset
               this._board.words[basicHint.hintWord].status = WordStatus.Initialized;
@@ -863,6 +913,10 @@ export class GameService {
             // Show a message
             this._message =
               'Failed to communicate with the server, please try again later.';
+            // Show a toast
+            this.toastr.error('Failed to communicate with the server, please try again later.', null, {
+              timeOut: 2000
+            });
 
             console.log('Error testing word: ' + JSON.stringify(err));
           }
@@ -895,6 +949,10 @@ export class GameService {
             } else {
               // Couldn't get a hint, tell the player
               this._message = wordHint.error;
+              // Show a toast
+              this.toastr.error(wordHint.error, null, {
+                timeOut: 2000
+              });
 
               // Play a sound
               this._audioService.hintUnavailable();
@@ -910,6 +968,10 @@ export class GameService {
             // Show a message
             this._message =
               'Failed to communicate with the server, please try again later.';
+            // Show a toast
+            this.toastr.error('Failed to communicate with the server, please try again later.', null, {
+              timeOut: 2000
+            });
 
             console.log('Error testing word: ' + JSON.stringify(err));
           },

@@ -39,6 +39,8 @@ import { PauseComponent } from './pausedialog/pause.component';
 
 import {Ng2FittextModule} from "ng2-fittext";
 
+import { ToastrModule } from 'ngx-toastr';
+
 @NgModule({
   imports: [
     BrowserModule,
@@ -60,7 +62,11 @@ import {Ng2FittextModule} from "ng2-fittext";
 
     NgbDropdownModule,
 
-    Ng2FittextModule
+    Ng2FittextModule,
+
+    ToastrModule.forRoot({
+      preventDuplicates: true
+    }),
   ],
 
   declarations: [
@@ -88,6 +94,5 @@ import {Ng2FittextModule} from "ng2-fittext";
       multi: true,
     }
   ],
-  entryComponents: [],
 })
 export class AppModule {}
