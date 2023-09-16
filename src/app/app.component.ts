@@ -5,7 +5,7 @@ import { NgbModal, NgbModalOptions, NgbModalRef } from '@ng-bootstrap/ng-bootstr
 import { SettingsComponent } from './settings/settings.component';
 import { LoginComponent } from './account/login/login.component';
 import { Subscription } from 'rxjs';
-import { PlayerService } from './services/player.service';
+import { PlayerService, PlayerStatus } from './services/player.service';
 import { DataService } from './services/data.service';
 import { TokenService } from './services/token.service';
 import { EventBusService } from './services/eventbus.service';
@@ -26,13 +26,47 @@ import { DictionaryService } from './services/dictionary.service';
   styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  name = 'Angular ' + VERSION.major;
+
+  // Capture full screen toggles
+  // This is informational only used to keep my variables in sync with reality
+  @HostListener('window:resize', ['$event'])
+  onResize(event) {
+    if (this.isFullscreenNow()) {
+      // We just went to fullscreen
+      if (!this._fullscreen) {
+        // We were previously not fullscreen
+        console.log("AppComponent onResize: Fullscreen Off -> On")
+        this._fullscreen = true;
+        this.eventBusService.emitNotification('fullscreenEnabled', null);
+        this.playerService.fullscreen = true;
+        // this._value = "Fullscreen: On";
+      } else {
+        // We were previously fullscreen
+        console.log("AppComponent onResize: Fullscreen On -> On")
+      }
+    } else {
+      // We just went to not fullscreen
+      if (this._fullscreen) {
+        // We were previously fullscreen
+        console.log("AppComponent onResize: Fullscreen On -> Off")
+        this._fullscreen = false;
+        this.eventBusService.emitNotification('fullscreenDisabled', null);
+        this.playerService.fullscreen = false;
+        // this._value = "Fullscreen: Off";
+      } else {
+        console.log("AppComponent onResize: Fullscreen Off -> Off")
+      }
+    }
+  }
+
+  name = 'WordHop ' + VERSION.major;
 
   private _subscriptions: Subscription;
 
-  private _value: string = '';
+  // _value: string = '';
   private _keyboard: Keyboard;
   private _dialogOpen: boolean;
+  private _fullscreen: boolean;
 
   constructor(
     public tokenService: TokenService,
@@ -48,6 +82,10 @@ export class AppComponent {
   ) {
     this._subscriptions = new Subscription();
 
+    // Check fullscreen status
+    this._fullscreen = this.isFullscreenNow();
+    console.log("AppComponent: fullscreen initially: ", this._fullscreen);
+
     // Watch for showLogin events to be fired to open the login screen
     this._subscriptions.add(this.eventBusService.onCommand('showLogin', () => {
       console.log("AppComponent: open login requested")
@@ -58,12 +96,6 @@ export class AppComponent {
     this._subscriptions.add(this.eventBusService.onCommand('showPregame', () => {
       console.log("AppComponent: show pregame requested")
       this.openPregame();
-    }));
-
-    // Watch for newGame and show the keyboard
-    this._subscriptions.add(this.eventBusService.onCommand('newGame', () => {
-      console.log("AppComponent: game start requested")
-      // this.showKeyboard();
     }));
 
     // Watch for win & lose and show overlay
@@ -77,6 +109,25 @@ export class AppComponent {
       console.log("AppComponent: show pause screen")
       this.openPauseDialog();
     }));
+
+    // Watch for enableFullscreen events to turn on fullscreen
+    this._subscriptions.add(this.eventBusService.onCommand('enableFullscreen', () => {
+      console.log("AppComponent: fullscreen on requested")
+      this.setFullscreen(true);
+    }));
+
+    // Watch for disableFullscreen events to turn off fullscreen
+    this._subscriptions.add(this.eventBusService.onCommand('disableFullscreen', () => {
+      console.log("AppComponent: fullscreen off requested")
+      this.setFullscreen(false);
+    }));
+
+    // Watch for newGame events to toggle fullscreen
+    this._subscriptions.add(this.eventBusService.onCommand('newGame', () => {
+      console.log("AppComponent: newGame requested, checking fullscreen")
+      this.setFullscreen(playerService.fullscreen);
+    }));
+    
   }
 
   ngOnInit() {
@@ -176,6 +227,52 @@ export class AppComponent {
     });
   }
 
+  // Check fullscreen status
+  // This has to handle the fullscreen api AND f11.  It's a pita.
+  isFullscreenNow(): boolean {
+    const windowWidth = window.innerWidth/* * window.devicePixelRatio*/;
+    const windowHeight = window.innerHeight/* * window.devicePixelRatio*/;
+    const screenWidth = window.screen.width;
+    const screenHeight = window.screen.height;
+    
+    return (windowWidth/screenWidth) >= 0.95 && (windowHeight/screenHeight) >= 0.95;
+  }
+
+  // Turn on/off fullscreen
+  // This fails if the user has not done any inputs yet.
+  setFullscreen(turnon: boolean) {
+    // Only run if it would change the current fullscreen status
+    if (this.isFullscreenNow() != turnon) {
+      if (turnon) {
+        // Turn on
+        if (document.fullscreenElement == null) {
+          document.documentElement.requestFullscreen().then(
+            // Success  
+            () => {
+              console.log("AppComponent: Fullscreen turned ON");
+            },
+            // Failure
+            (reason) => {
+              console.log("AppComponent: Fullscreen on failed", reason);
+            }
+          );
+        }
+      } else {
+        // Turn off
+        document.exitFullscreen().then(
+          // Success  
+          () => {
+            console.log("AppComponent: Fullscreen turned OFF");
+          },
+          // Failure
+          (reason) => {
+            console.log("AppComponent: Fullscreen off failed", reason);
+          }
+        );
+      }
+    }
+  }
+
   ngAfterViewInit() {
     // Register subscription to the modal service to keep an eye on it
     // When a dialog is open, keystrokes won't be sent to the game
@@ -211,7 +308,7 @@ export class AppComponent {
 
   // Onscreen keyboard events
   onChange = (input: string) => {
-    this._value = input;
+    // this._value = input;
   };
 
   onKeyPress = (button: string) => {
@@ -238,4 +335,5 @@ export class AppComponent {
       layoutName: shiftToggle,
     });
   };
+
 }

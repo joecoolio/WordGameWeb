@@ -55,6 +55,7 @@ export interface SettingsResult {
   enableSounds: boolean,
   showKeyboard: boolean,
   showDefinitions: boolean,
+  fullscreen: boolean,
 }
 
 export interface Leader {

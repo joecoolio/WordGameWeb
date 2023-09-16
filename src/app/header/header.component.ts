@@ -15,6 +15,7 @@ export class HeaderComponent implements OnInit {
   @Output() parentOpenStats = new EventEmitter();
   @Output() parentOpenLeaderboard = new EventEmitter();
   @Output() parentOpenSettings = new EventEmitter();
+  @Output() parentToggleFullscreen = new EventEmitter();
 
   faGear = faGear;
 
@@ -62,6 +63,10 @@ export class HeaderComponent implements OnInit {
 
   openLeaderboard() {
     this.parentOpenLeaderboard.emit();
+  }
+
+  toggleFullscreen() {
+    this.parentToggleFullscreen.emit();
   }
 
   public get loggedIn(): boolean {

@@ -25,6 +25,10 @@ import { TokenService } from './token.service';
   popupOpened:         A popup window was opened (over the game)
   popupClosed:         A popup window was closed
   authTokenExpired:    User's auth refresh token is expired (need to relogin)
+  fullScreenPrefOn:    User changed their fullscreen preference to On
+  fullScreenPrefOff:   User changed their fullscreen preference to Off
+  fullscreenEnabled:   User just went to fullscreen
+  fullscreenDisabled:  User just left fullscreen
 
  Outgoing commands:
   getSettings:         Load user settings from remote
@@ -42,7 +46,10 @@ import { TokenService } from './token.service';
   pauseGame:           Do stuff needed for a game pause
   resumeGame:          Do stuff needed for a game resume
   forgetAuthTokens:    Discard all authentication tokens
-
+  enableFullscreen:    Turn on fullscreen mode
+  disableFullscreen:   Turn off fullscreen mode
+  handleFullscreenOn:  Make any UI changes required for fullscreen
+  handleFullscreenOff: Make any UI changes required for fullscreen
 */
 
 // This is a structure containing all of the state that the
@@ -259,6 +266,34 @@ export class GameWorkflowService {
             'authTokenExpired', () => {
                 this.eventBusService.emitCommand("forgetAuthTokens", null);
                 this.eventBusService.emitCommand("showLogin", null);
+            }
+        ));
+
+        // User changed their preference to fullscreen = true
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'fullScreenPrefOn', () => {
+                this.eventBusService.emitCommand("enableFullscreen", null);
+            }
+        ));
+
+        // User changed their preference to fullscreen = false
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'fullScreenPrefOff', () => {
+                this.eventBusService.emitCommand("disableFullscreen", null);
+            }
+        ));
+        
+        // User just went to fullscreen mode, do any UI changes needed
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'fullscreenEnabled', () => {
+                this.eventBusService.emitCommand("handleFullscreenOn", null);
+            }
+        ));
+        
+        // User just left fullscreen mode, do any UI changes needed
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'fullscreenDisabled', () => {
+                this.eventBusService.emitCommand("handleFullscreenOff", null);
             }
         ));
         

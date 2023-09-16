@@ -37,6 +37,7 @@ const DEFAULT_HINTTYPE: HintType = HintType.Basic;
 const DEFAULT_NAME: string = "Guest";
 const DEFAULT_EMAIL: string = "guest@guest.com";
 const DEFAULT_SHOWDEFINITIONS: boolean = true;
+const DEFAULT_FULLSCREEN: boolean = false;
 
 // Status of the player settings
 export enum PlayerStatus {
@@ -56,6 +57,7 @@ export interface PlayerSettings {
     enableSounds: boolean,
     showKeyboard: boolean,
     showDefinitions: boolean,
+    fullscreen: boolean,
 }
 
 // Set of all player info
@@ -107,6 +109,7 @@ export class PlayerService {
                 enableSounds: DEFAULT_ENABLESOUNDS,
                 showKeyboard: DEFAULT_SHOWKEYBOARD,
                 showDefinitions: DEFAULT_SHOWDEFINITIONS,
+                fullscreen: DEFAULT_FULLSCREEN,
             }
         }
 
@@ -255,12 +258,14 @@ export class PlayerService {
                     this._playerInfo.settings.numLetters = settingsResult && settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
                     this._playerInfo.settings.showKeyboard = settingsResult ? settingsResult.showKeyboard : DEFAULT_SHOWKEYBOARD;
                     this._playerInfo.settings.showDefinitions = settingsResult ? settingsResult.showDefinitions : DEFAULT_SHOWDEFINITIONS;
-console.log("Keyboard: " + this._playerInfo.settings.showKeyboard);
-console.log("Keyboard: " + this.showKeyboard);
+                    this._playerInfo.settings.fullscreen = settingsResult ? settingsResult.fullscreen : DEFAULT_FULLSCREEN;
                     this._playerInfo.status = PlayerStatus.OK;
 
                     // Tell the game service
                     this.eventBusService.emitNotification('settingsLoaded', null);
+
+                    // User fullscreen settings need to be implemented immediately so go ahead and do that
+                    this.eventBusService.emitNotification(this._playerInfo.settings.fullscreen ? 'fullScreenPrefOn' : 'fullScreenPrefOff', null);
 
                     successCallback();
                 },
@@ -456,4 +461,17 @@ console.log("Keyboard: " + this.showKeyboard);
         }
     }
 
+    public get fullscreen(): boolean {
+        return this._playerInfo.settings.fullscreen;
+    }
+    public set fullscreen(value: boolean) {
+        let oldval = this._playerInfo.settings.fullscreen;
+        this._playerInfo.settings.fullscreen = value;
+        if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('fullscreen', value));
+            this.eventBusService.emitNotification('settingsChanged', null);
+            this.eventBusService.emitNotification(value ? 'fullScreenPrefOn' : 'fullScreenPrefOff', null);
+        }
+    }
+    
 }

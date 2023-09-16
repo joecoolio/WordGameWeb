@@ -84,6 +84,13 @@
     >
       Show Word Definitions?
     </mat-slide-toggle>
+
+    <!-- Fullscreen mode -->
+    <mat-slide-toggle
+      [ngModel]="playerService.fullscreen" (ngModelChange)="playerService.fullscreen = $event"
+    >
+      Fullscreen mode?
+    </mat-slide-toggle>
   
 </div>
 <div class="modal-footer">

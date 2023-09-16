@@ -10,8 +10,8 @@ Tasks:
 --Done:  extract 5 paths on neo
 --Done:  load 5 paths to pair5 db
 --Done:  copy 5 routine from 3letterwords.sql
---Running in screen:  load 5/6 to wordpairs
-load 5/6 to wordgame_pairs
+--Done:  load 5/6 to wordpairs
+--Done:  load 5/6 to wordgame_pairs
 
 --Done:  load 6/6 to wordpairs
 --Done:  load 3/6 to wordpairs
