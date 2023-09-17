@@ -102,20 +102,6 @@ export class GameComponent implements OnInit, AfterViewInit {
         })
       );
 
-      // // Watch for the "show keyboard" setting to change.  When it does, resize the screen.
-      // this.subscriptions.add(
-      //   playerService.onSettingChange('showKeyboard', (newValue: boolean) => {
-      //     this._doResize = true;
-      //   }
-      // ));
-
-      // // Watch for the "show definitions" setting to change.  When it does, resize the screen.
-      // this.subscriptions.add(
-      //   playerService.onSettingChange('showDefinitions', (newValue: boolean) => {
-      //     this._doResize = true;
-      //   }
-      // ));
-
       // Watch for the game to become paused
       this.subscriptions.add(
         this.eventBusService.onCommand('pauseGame', () => {
@@ -369,41 +355,6 @@ export class GameComponent implements OnInit, AfterViewInit {
   // Change the highlighted/current cell
   public setSelectedCell(i: number, j: number) {
     this.gameService.setSelectedCell(i, j);
-  }
-
-  XhandleScreenResize() {
-    // When the screen resizes, gather all the various sizing information
-
-    // Record the board size (w & h) and font size of letters & icons
-    var totWidth = this.gameContainer.nativeElement.offsetWidth;
-    var totHeight = this.gameContainer.nativeElement.offsetHeight;
-    // var totWidth = this.gameContainer.nativeElement.clientWidth;
-    // var totHeight = this.gameContainer.nativeElement.clientHeight;
-console.log("GameComponent Old", totHeight);
-
-    // Calculate number of cells to be drawn horizontal & vertical
-    var numHCells = this.gameService.numLetters + 2; // To account for icons on either side
-    var numVCells = this.gameService.numHops + 1; // There are 1 more rows than number of hops
-    
-    // Figure out ideal width/height size of a single letter square cell
-    var hSize = totWidth / numHCells;
-    var vSize = (totHeight - 2 * (numVCells-1)) / numVCells; // The +2 is to account for padding 
-    this.letterBoxSize = Math.min(hSize, vSize);
-    
-    // Calc the size of the board based on cell size
-    this.boardWidth =  this.letterBoxSize * numHCells;
-    this.boardHeight = this.letterBoxSize * numVCells + (2 * (numVCells-1));
-  
-    // Calc the ideal height of each row
-    // this.wordRowHeight = (totHeight - (2 * (numVCells-1))) /numVCells;    
-    this.wordRowHeight = this.letterBoxSize;
-
-    // Calc the font size for letters and icons
-    this.letterFontSize = this.letterBoxSize * 0.7;
-    this.iconFontSize = this.letterBoxSize * 0.5;
-
-    // console.log("tw: " + totWidth + " / " + totHeight);
-    // console.log("bh: " + this.boardHeight + " / " + (this.wordRowHeight * numVCells) + " / " + this.letterBoxSize);
   }
 
   // Game container was resized.  Record the size and do a resize.

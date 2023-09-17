@@ -452,6 +452,11 @@ export class GameService {
         // Valid letter, put it in the appropriate cell
         this._board.words[this._selectedWord].letters[this._selectedLetter].character = letter.toUpperCase();
 
+        // If word is now populated, test it automatically
+        if (this._board.words[this._selectedWord].populated) {
+          this.testSingleWord();
+        }
+
         // Reset the idle timer
         this._idleResetSubject.next();
 
