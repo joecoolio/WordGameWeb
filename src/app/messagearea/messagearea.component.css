@@ -1,0 +1,45 @@
+.mat-mdc-form-field + .mat-mdc-form-field {
+    margin-left: 8px;
+}
+
+.words {
+    overflow-y: scroll;
+    max-height: 120px;
+}
+
+.word {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: normal;
+    align-items: normal;
+    align-content: normal;
+    column-gap: 10px;
+}
+  
+.word .name {
+    font-size: small;
+    font-weight: bold;
+
+    display: block;
+    flex-grow: 0;
+    flex-shrink: 1;
+    flex-basis: auto;
+    align-self: auto;
+    order: 0;
+}
+  
+.word .definitions {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: auto;
+    align-self: auto;
+    order: 0;
+}
+
+.word .definitions .definition {
+    font-size: small;  
+    border-bottom: 1px dashed darkgray;
+}

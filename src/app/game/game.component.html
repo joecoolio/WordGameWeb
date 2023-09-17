@@ -1,4 +1,4 @@
-<div #gameContainer class="game-container">
+<div #gameContainer class="game-container" (resized)="gameContainerResized($event)">
   <div class="game-board" [style.width.px]="boardWidth" [style.height.px]="boardHeight">
     <div class="word-row" *ngFor="let word of gameService.board?.words; let i = index" [style.height.px]="wordRowHeight"
       [ngClass]="{ 'highlighted': gameService.selectedWord === i }">
@@ -151,7 +151,7 @@
     <!-- One more row to put the timer on the screen for untimed games -->
     <!-- Careful to align the words under the letter boxes -->
     <ng-container *ngIf="gameService.board">
-      <div class="word-row">
+      <div class="word-row" (resized)="bottomRowResized($event)">
         <div class="letter-box" [style.width.px]="letterBoxSize * .85"></div>
       
         <div class="bottom-row" [style.width.px]="letterBoxSize * gameService.board.numLetters + (2 * (gameService.board.numLetters))">

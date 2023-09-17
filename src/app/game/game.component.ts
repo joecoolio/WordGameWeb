@@ -23,6 +23,7 @@ import { EventBusService } from '../services/eventbus.service';
 import { ConfirmationComponent } from '../confirmation/confirmation.component';
 import { Stopwatch } from '../helper/stopwatch';
 import { ToastrService } from 'ngx-toastr';
+import { ResizedEvent } from 'angular-resize-event';
 
 // How often to get timer ticks (in ms)
 const TICK_TIME = 100;
@@ -57,6 +58,9 @@ export class GameComponent implements OnInit, AfterViewInit {
   gameContainer: ElementRef;
 
   // Stored sizing information from last resize event
+  private latestWidth: number;           // Last recorded width of game container div
+  private latestHeight: number;          // Last recorded height of game container div
+  private latestBottomRowHeight: number; // Last recorded height of bottom row div
   boardWidth: number = 100;    // Width of game board 
   boardHeight: number = 500;   // Height of game board
   wordRowHeight: number = 20;  // Height of a word row
@@ -98,12 +102,19 @@ export class GameComponent implements OnInit, AfterViewInit {
         })
       );
 
-      // Watch for the "show keyboard" setting to change.  When it does, resize the screen.
-      this.subscriptions.add(
-        playerService.onSettingChange('showKeyboard', (newValue: boolean) => {
-          this._doResize = true;
-        }
-      ));
+      // // Watch for the "show keyboard" setting to change.  When it does, resize the screen.
+      // this.subscriptions.add(
+      //   playerService.onSettingChange('showKeyboard', (newValue: boolean) => {
+      //     this._doResize = true;
+      //   }
+      // ));
+
+      // // Watch for the "show definitions" setting to change.  When it does, resize the screen.
+      // this.subscriptions.add(
+      //   playerService.onSettingChange('showDefinitions', (newValue: boolean) => {
+      //     this._doResize = true;
+      //   }
+      // ));
 
       // Watch for the game to become paused
       this.subscriptions.add(
@@ -360,12 +371,15 @@ export class GameComponent implements OnInit, AfterViewInit {
     this.gameService.setSelectedCell(i, j);
   }
 
-  handleScreenResize() {
+  XhandleScreenResize() {
     // When the screen resizes, gather all the various sizing information
 
     // Record the board size (w & h) and font size of letters & icons
     var totWidth = this.gameContainer.nativeElement.offsetWidth;
     var totHeight = this.gameContainer.nativeElement.offsetHeight;
+    // var totWidth = this.gameContainer.nativeElement.clientWidth;
+    // var totHeight = this.gameContainer.nativeElement.clientHeight;
+console.log("GameComponent Old", totHeight);
 
     // Calculate number of cells to be drawn horizontal & vertical
     var numHCells = this.gameService.numLetters + 2; // To account for icons on either side
@@ -390,5 +404,47 @@ export class GameComponent implements OnInit, AfterViewInit {
 
     // console.log("tw: " + totWidth + " / " + totHeight);
     // console.log("bh: " + this.boardHeight + " / " + (this.wordRowHeight * numVCells) + " / " + this.letterBoxSize);
+  }
+
+  // Game container was resized.  Record the size and do a resize.
+  gameContainerResized(event: ResizedEvent) {
+    this.latestWidth = event.newRect.width;
+    this.latestHeight = event.newRect.height;
+    this._doResize = true;
+    // console.log("GameComponent game container resize: width/height", this.latestWidth, this.latestHeight);
+  }
+
+  // Bottom row was resized.  Record the size and do a resize.
+  bottomRowResized(event: ResizedEvent) {
+    this.latestBottomRowHeight = event.newRect.height;
+    this._doResize = true;
+    // console.log("GameComponent bottom row resize: height", this.latestBottomRowHeight);
+  }
+
+  // This resets all the various component sizes.
+  handleScreenResize() {
+    var totWidth = this.latestWidth;
+    var totHeight = this.latestHeight - this.latestBottomRowHeight;
+
+    // Calculate number of cells to be drawn horizontal & vertical
+    var numHCells = this.gameService.numLetters + 2; // To account for icons on either side
+    var numVCells = this.gameService.numHops + 1; // There are 1 more rows than number of hops
+    
+    // Figure out ideal width/height size of a single letter square cell
+    var hSize = totWidth / numHCells;
+    var vSize = (totHeight - 2 * numVCells) / numVCells; // The +2 is to account for padding 
+    this.letterBoxSize = Math.min(hSize, vSize);
+    
+    // Calc the size of the board based on cell size
+    this.boardWidth =  this.letterBoxSize * numHCells;
+    this.boardHeight = this.letterBoxSize * numVCells + (2 * numVCells) + this.latestBottomRowHeight;
+  
+    // Calc the ideal height of each row
+    // this.wordRowHeight = (totHeight - (2 * (numVCells-1))) /numVCells;    
+    this.wordRowHeight = this.letterBoxSize;
+
+    // Calc the font size for letters and icons
+    this.letterFontSize = this.letterBoxSize * 0.7;
+    this.iconFontSize = this.letterBoxSize * 0.5;
   }
 }

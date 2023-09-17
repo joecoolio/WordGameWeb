@@ -1,0 +1,21 @@
+  <mat-accordion *ngIf="playerService.showDefinitions">
+    <mat-expansion-panel (opened)="panelOpenState = true"
+                          (closed)="panelOpenState = false">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Definitions
+        </mat-panel-title>
+        <mat-panel-description>
+          {{ panelOpenState ? 'Click to hide' : 'Click to view' }}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <div class="words">
+        <div class="word" *ngFor="let word of words">
+          <div class="name">{{ word.word }}</div>
+          <div class="definitions">
+            <div class="definition" *ngFor="let meaning of word.meanings">({{ meaning.posShorthand }}) {{ meaning.definition }}</div>
+          </div>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>

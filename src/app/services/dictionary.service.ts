@@ -34,8 +34,8 @@ export interface DictionaryResult {
 
 // An individual word meaning
 export interface WordMeaning {
-    partofSpeech: string, // Noun, Verb, Adjective, Adverb, Conjunction, Interjection
-    posShorthand: string, // N, V, ADJ, ADV, CON, INT
+    partofSpeech: string, // Noun, Verb, Adjective, Adverb, Conjunction, Interjection, Numeral, Pronoun, Preposition
+    posShorthand: string, // N, V, ADJ, ADV, CON, INT, NUM, PRO, PRE
     definition: string,
 }
 // A dictionary word and all the meanings of it
@@ -89,6 +89,9 @@ export class DictionaryService {
                                                 case "adverb": wordMeaning.posShorthand = "ADV"; break;
                                                 case "conjunction": wordMeaning.posShorthand = "CON"; break;
                                                 case "interjection": wordMeaning.posShorthand = "INT"; break;
+                                                case "numeral": wordMeaning.posShorthand = "NUM"; break;
+                                                case "pronoun": wordMeaning.posShorthand = "PRO"; break;
+                                                case "preposition": wordMeaning.posShorthand = "PRE"; break;
                                                 default: wordMeaning.posShorthand = "?";
                                             }
 

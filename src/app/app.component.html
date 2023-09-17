@@ -13,16 +13,19 @@
 
   </div>
 
-  <div class="bottom-of-screen">
-    <!-- <div class="errormessage"> -->
-      <!-- <div class="errormessage_inner"> -->
-        <!-- fittext from https://github.com/lokenxo/ng2-fittext#readme -->
-        <!-- <label [fittext]="true" [activateOnResize]="true" [modelToWatch]="gameService.message">{{ gameService.message }}</label> -->
+  <div class="bottom-wrapper">
+    <div class="bottom-of-screen">
+      <!-- <div class="errormessage"> -->
+        <!-- <div class="errormessage_inner"> -->
+          <!-- fittext from https://github.com/lokenxo/ng2-fittext#readme -->
+          <!-- <label [fittext]="true" [activateOnResize]="true" [modelToWatch]="gameService.message">{{ gameService.message }}</label> -->
+        <!-- </div> -->
       <!-- </div> -->
-    <!-- </div> -->
-    <div class="simple-keyboard" [ngClass]="!playerService.showKeyboard ? 'hide-keyboard' : ''"></div>
+      <app-messagearea class="messagearea"></app-messagearea>
+      <div class="simple-keyboard" [ngClass]="!playerService.showKeyboard ? 'hide-keyboard' : ''"></div>
+    </div>
   </div>
-
+  
   <!-- <app-footer></app-footer> -->
 
 </div>

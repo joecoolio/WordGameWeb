@@ -604,6 +604,7 @@ export class GameService {
   }
 
   // Show the definition of a word as a toast
+  // Changed to send them to the message area
   private showDefinition(word: string, timeout: number = 4000): void {
     if (this._playerService.showDefinitions) {
       // Lookup the definition of the word
@@ -611,13 +612,15 @@ export class GameService {
       .then(
         // Success
         (dictionaryWord: DictionaryWord) => {
-          this.toastr.info("use payload", "use payload", {
-            toastComponent: DefinitionToast,
-            timeOut: timeout,
-            enableHtml: true,
-            payload: dictionaryWord,
-            toastClass: 'ngx-toastr dictionary-toastr',
-          });
+          this._eventBusService.emitNotification('definitionReceived', dictionaryWord);
+
+          // this.toastr.info("use payload", "use payload", {
+          //   toastComponent: DefinitionToast,
+          //   timeOut: timeout,
+          //   enableHtml: true,
+          //   payload: dictionaryWord,
+          //   toastClass: 'ngx-toastr dictionary-toastr',
+          // });
         }
       ),
       // Failure

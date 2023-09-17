@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { EventBusService } from './eventbus.service';
 import { TokenService } from './token.service';
+import { DictionaryWord } from './dictionary.service';
 
 /*
  Incoming notifications:
@@ -29,6 +30,7 @@ import { TokenService } from './token.service';
   fullScreenPrefOff:   User changed their fullscreen preference to Off
   fullscreenEnabled:   User just went to fullscreen
   fullscreenDisabled:  User just left fullscreen
+  definitionReceived:  A word definition was just looked up
 
  Outgoing commands:
   getSettings:         Load user settings from remote
@@ -50,6 +52,7 @@ import { TokenService } from './token.service';
   disableFullscreen:   Turn off fullscreen mode
   handleFullscreenOn:  Make any UI changes required for fullscreen
   handleFullscreenOff: Make any UI changes required for fullscreen
+  handlDefinition:     Handle a new word definition
 */
 
 // This is a structure containing all of the state that the
@@ -297,6 +300,12 @@ export class GameWorkflowService {
             }
         ));
         
+        // User just left fullscreen mode, do any UI changes needed
+        this._subscriptions.add(this.eventBusService.onNotification(
+            'definitionReceived', (definition: DictionaryWord) => {
+                this.eventBusService.emitCommand("handleDefinition", definition);
+            }
+        ));
     }
 
 }

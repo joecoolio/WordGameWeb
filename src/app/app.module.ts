@@ -27,6 +27,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
+
 
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 
@@ -41,6 +43,9 @@ import {Ng2FittextModule} from "ng2-fittext";
 
 import { ToastrModule } from 'ngx-toastr';
 import { DefinitionToast } from './game-toast/definition-toast.component';
+import { MessageareaComponent } from './messagearea/messagearea.component';
+
+import { AngularResizeEventModule } from 'angular-resize-event';
 
 @NgModule({
   imports: [
@@ -60,6 +65,7 @@ import { DefinitionToast } from './game-toast/definition-toast.component';
     MatTooltipModule,
     MatRadioModule,
     MatIconModule,
+    MatExpansionModule,
 
     NgbDropdownModule,
 
@@ -68,6 +74,8 @@ import { DefinitionToast } from './game-toast/definition-toast.component';
     ToastrModule.forRoot({
       preventDuplicates: false
     }),
+
+    AngularResizeEventModule,
   ],
 
   declarations: [
@@ -81,7 +89,8 @@ import { DefinitionToast } from './game-toast/definition-toast.component';
     StatsComponent,
     PregameComponent,
     PauseComponent,
-    DefinitionToast
+    DefinitionToast,
+    MessageareaComponent
   ],
   bootstrap: [AppComponent],
   providers: [
