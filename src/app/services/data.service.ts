@@ -16,11 +16,15 @@ export interface TestedWord {
   testPosition: number;
   valid: boolean;
   error: string;
+  errorCode: string;
+  errorData: string[][];
 }
 
 export interface ValidatedPuzzle {
   valid: boolean;
   error: string;
+  errorCode: string;
+  errorData: string[][];
 }
 
 export interface BasicHint {
@@ -134,7 +138,7 @@ export class DataService {
 
   // Test the whole puzzle
   testPuzzle(words: any[]): boolean {
-    return true;
+    return true; //TODO
   }
 
   // Test a single word
