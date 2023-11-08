@@ -20,7 +20,7 @@
 .word .name {
     font-size: small;
     font-weight: bold;
-
+    text-transform: uppercase;
     display: block;
     flex-grow: 0;
     flex-shrink: 1;
