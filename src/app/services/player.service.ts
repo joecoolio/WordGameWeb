@@ -38,6 +38,7 @@ const DEFAULT_NAME: string = "Guest";
 const DEFAULT_EMAIL: string = "guest@guest.com";
 const DEFAULT_SHOWDEFINITIONS: boolean = true;
 const DEFAULT_FULLSCREEN: boolean = false;
+const DEFAULT_LANGUAGE: string = "en";
 
 // Status of the player settings
 export enum PlayerStatus {
@@ -58,6 +59,7 @@ export interface PlayerSettings {
     showKeyboard: boolean,
     showDefinitions: boolean,
     fullscreen: boolean,
+    language: string,
 }
 
 // Set of all player info
@@ -110,6 +112,7 @@ export class PlayerService {
                 showKeyboard: DEFAULT_SHOWKEYBOARD,
                 showDefinitions: DEFAULT_SHOWDEFINITIONS,
                 fullscreen: DEFAULT_FULLSCREEN,
+                language: DEFAULT_LANGUAGE,
             }
         }
 
@@ -128,10 +131,10 @@ export class PlayerService {
     }
 
     // Register here to be notified immediately when settings are changed.
-    onSettingChange(settingName: string, newValue: any): Subscription {
+    onSettingChange(settingName: string, action: any): Subscription {
         return this._settingChangedSubject.pipe(
             filter((e: EventData) => e.name === settingName),
-            map((e: EventData) => e["value"])).subscribe(newValue);
+            map((e: EventData) => e["value"])).subscribe(action);
     }
 
     register(
@@ -259,6 +262,7 @@ export class PlayerService {
                     this._playerInfo.settings.showKeyboard = settingsResult ? settingsResult.showKeyboard : DEFAULT_SHOWKEYBOARD;
                     this._playerInfo.settings.showDefinitions = settingsResult ? settingsResult.showDefinitions : DEFAULT_SHOWDEFINITIONS;
                     this._playerInfo.settings.fullscreen = settingsResult ? settingsResult.fullscreen : DEFAULT_FULLSCREEN;
+                    this._playerInfo.settings.language = settingsResult ? settingsResult.language : DEFAULT_LANGUAGE;
                     this._playerInfo.status = PlayerStatus.OK;
 
                     // Tell the game service
@@ -474,4 +478,15 @@ export class PlayerService {
         }
     }
     
+    public get language(): string {
+        return this._playerInfo.settings.language;
+    }
+    public set language(value: string) {
+        let oldval = this._playerInfo.settings.language;
+        this._playerInfo.settings.language = value;
+        if (oldval != value) {
+            this._settingChangedSubject.next(new EventData('language', value));
+            this.eventBusService.emitNotification('settingsChanged', null);
+        }
+    }
 }

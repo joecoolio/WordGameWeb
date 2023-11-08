@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom, timeout } from 'rxjs';
 
 const API_ROOT = 'https://wordgameapi.mikebillings.com/api/v2';
@@ -60,6 +60,7 @@ export interface SettingsResult {
   showKeyboard: boolean,
   showDefinitions: boolean,
   fullscreen: boolean,
+  language: string,
 }
 
 export interface Leader {
@@ -76,6 +77,10 @@ export interface PlayerStats {
   losses: number,
   fastestWin: number
 }
+
+// HTTP options
+export const headers = new HttpHeaders();
+headers.append('Content-Type', 'application/json; charset=utf-8');
 
 // Timeout for remote calls
 const HTTP_TIMEOUT: number = 5000;
@@ -109,7 +114,7 @@ export class DataService {
       this.http.post<void>(
         API_ROOT + '/user/saveSettings',
         body,
-        { observe: 'response' }
+        { observe: 'response', headers: headers }
       ).pipe(
         // takeUntil(this.componentIsDestroyed$),
         // takeUntil(this.cancelRestCall$),
@@ -121,12 +126,25 @@ export class DataService {
 
 
   // Get a new pair of words to play
-  async getPair(numLetters: number, numHops: number): Promise<WordPair> {
-    const body = { letters: numLetters, hops: numHops };
+  async getPair(language: string, numLetters: number, numHops: number): Promise<WordPair> {
+    const body = {
+      language: language,
+      letters: numLetters,
+      hops: numHops
+    };
+
+    // return {
+    //   startWord: "OIT",
+    //   endWord: "SÛT",
+    //   letters: 3,
+    //   hops: 3,
+    //   words: 4
+    // }
     return await firstValueFrom(
       this.http.post<WordPair>(
         API_ROOT + '/game/getWordPair',
-        body
+        body,
+        { headers: headers }
       ).pipe(
         // takeUntil(this.componentIsDestroyed$),
         // takeUntil(this.cancelRestCall$),
@@ -137,17 +155,19 @@ export class DataService {
   }
 
   // Test the whole puzzle
-  testPuzzle(words: any[]): boolean {
+  testPuzzle(language: string, words: any[]): boolean {
     return true; //TODO
   }
 
   // Test a single word
   async testWord(
+    language: string,
     wordArray: string[],
     testWord: string,
     testPosition: number
   ): Promise<TestedWord> {
     const body = {
+      language: language,
       puzzle: wordArray,
       testPosition: testPosition,
       testWord: testWord,
@@ -155,32 +175,37 @@ export class DataService {
     return await firstValueFrom(
       this.http.post<TestedWord>(
         API_ROOT + '/game/testWord',
-        body
+        body,
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
     );
+
   }
 
   // Test full puzzle
   async validatePuzzle(
+    language: string,
     wordArray: string[]
   ): Promise<ValidatedPuzzle> {
     const body = {
+      language: language,
       puzzle: wordArray
     };
     return await firstValueFrom(
       this.http.post<ValidatedPuzzle>(
         API_ROOT + '/game/validatePuzzle',
-        body
+        body,
+        { headers: headers }
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
     );
   }
   
-  async getHint(wordArray: string[], hintPosition: number): Promise<BasicHint> {
+  async getHint(language: string, wordArray: string[], hintPosition: number): Promise<BasicHint> {
     const body = {
+      language: language,
       puzzle: wordArray,
       hintPosition: hintPosition,
     };
@@ -188,15 +213,17 @@ export class DataService {
     return await firstValueFrom(
       this.http.post<BasicHint>(
         API_ROOT + '/game/getHint',
-        body
+        body,
+        { headers: headers }
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
     );
   }
 
-  async getFullHint(wordArray: string[], hintPosition: number): Promise<WholeWordHint> {
+  async getFullHint(language: string, wordArray: string[], hintPosition: number): Promise<WholeWordHint> {
     const body = {
+      language: language,
       puzzle: wordArray,
       hintPosition: hintPosition,
     };
@@ -204,15 +231,17 @@ export class DataService {
     return await firstValueFrom(
       this.http.post<WholeWordHint>(
         API_ROOT + '/game/getFullHint',
-        body
+        body,
+        { headers: headers }
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
     );
   }
 
-  async getAllSolutions(wordArray: string[]): Promise<SolutionSet> {
+  async getAllSolutions(language: string, wordArray: string[]): Promise<SolutionSet> {
     const body = {
+      language: language,
       puzzle: wordArray,
       countOnly: false
     };
@@ -220,15 +249,17 @@ export class DataService {
     return await firstValueFrom(
       this.http.post<SolutionSet>(
         API_ROOT + '/game/getAllSolutions',
-        body
+        body,
+        { headers: headers }
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
     );
   }
 
-  async getSolutionCount(wordArray: string[]): Promise<SolutionSet> {
+  async getSolutionCount(language: string, wordArray: string[]): Promise<SolutionSet> {
     const body = {
+      language: language,
       puzzle: wordArray,
       countOnly: true
     };
@@ -236,16 +267,18 @@ export class DataService {
     return await firstValueFrom(
       this.http.post<SolutionSet>(
         API_ROOT + '/game/getAllSolutions',
-        body
+        body,
+        { headers: headers }
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
     );
   }
 
-  async recordNewGame(gameId: string, pair: string, letters: number, hops: number, gameMode: number, difficultyLevel: number): Promise<void> {
+  async recordNewGame(gameId: string, language: string, pair: string, letters: number, hops: number, gameMode: number, difficultyLevel: number): Promise<void> {
     const body = {
       gameId: gameId,
+      language: language,
       pair: pair,
       letters: letters,
       hops: hops,
@@ -257,6 +290,7 @@ export class DataService {
       this.http.post<void>(
         API_ROOT + '/game/recordNewGame',
         body,
+        { headers: headers }
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
@@ -280,6 +314,7 @@ export class DataService {
       this.http.post<void>(
         API_ROOT + '/game/' + apiPath,
         body,
+        { headers: headers }
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
@@ -301,6 +336,7 @@ export class DataService {
       this.http.post<Leader[]>(
         API_ROOT + '/game/leaderboard',
         body,
+        { headers: headers }
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )
@@ -312,7 +348,8 @@ export class DataService {
     return await firstValueFrom(
       this.http.post<PlayerStats[]>(
         API_ROOT + '/game/stats',
-        ""
+        "",
+        { headers: headers }
       ).pipe(
         timeout(HTTP_TIMEOUT)
       )

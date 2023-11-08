@@ -28,6 +28,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatChipsModule } from '@angular/material/chips';
 
 
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
@@ -66,6 +67,7 @@ import { AngularResizeEventModule } from 'angular-resize-event';
     MatRadioModule,
     MatIconModule,
     MatExpansionModule,
+    MatChipsModule,
 
     NgbDropdownModule,
 

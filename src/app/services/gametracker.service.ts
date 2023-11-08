@@ -22,6 +22,7 @@ export class GameTrackerService {
             console.log("GameTracker: game started")
             dataService.recordNewGame(
                 gameService.gameId,
+                gameService.language,
                 gameService.wordPair.startWord + "_" + gameService.wordPair.endWord,
                 gameService.numLetters,
                 gameService.numHops,

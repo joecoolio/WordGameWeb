@@ -17,6 +17,7 @@ import { PregameComponent } from './pregame/pregame.component';
 import { WinLoseComponent } from './winlosedialog/winlose.component';
 import { PauseComponent } from './pausedialog/pause.component';
 import { DictionaryService } from './services/dictionary.service';
+import { firstValueFrom } from 'rxjs';
 
 // Sends: applicationStart, gameResumed
 // Receives: showLogin, showPregame, newGame, recordGameWon, pauseGame
@@ -67,6 +68,9 @@ export class AppComponent {
   private _keyboard: Keyboard;
   private _dialogOpen: boolean;
   private _fullscreen: boolean;
+
+  // Keyboard layout
+  private lastKeyboardLanguage: string;
 
   constructor(
     public tokenService: TokenService,
@@ -127,14 +131,27 @@ export class AppComponent {
       console.log("AppComponent: newGame requested, checking fullscreen")
       this.setFullscreen(playerService.fullscreen);
     }));
+
+    // When a game starts, make sure it shows the proper keyboard language
+    this._subscriptions.add(this.eventBusService.onCommand('recordGameStart', () => {
+      console.log("AppComponent: game started, checking keyboard layout")
+      this.resetKeyboardLayout();
+    }));
     
   }
 
   ngOnInit() {
-    this.showKeyboard();
+    // Upon loading, wait for settings to get loaded to know which keyboard to draw
+    firstValueFrom(this.eventBusService.observe('settingsLoaded')).then(() => {
+      console.log("AppComponent: first load of settings / language: " + this.playerService.language);
+
+      this.showKeyboard(this.playerService.language);
+      this.lastKeyboardLanguage = this.playerService.language;
+    });
   }
 
-  showKeyboard() {
+  // Show the keyboard starting with the language provided
+  showKeyboard(language: string) {
     if (!this._keyboard) {
       console.log("AppComponent: creating keyboard")
       
@@ -143,18 +160,37 @@ export class AppComponent {
         onChange: (input) => this.onChange(input),
         onKeyPress: (button) => this.onKeyPress(button),
         layout: {
-          default: [
+          en: [
             'Q W E R T Y U I O P',
             'A S D F G H J K L',
             '{enter} Z X C V B N M {bksp}',
           ],
+          fr: [
+            'ç é â ê î ô û à è ì ò ù ë ï ü',
+            'Q W E R T Y U I O P',
+            'A S D F G H J K L',
+            '{enter} Z X C V B N M {bksp}',
+          ]
         },
         display: {
           '{bksp}': 'bksp',
           '{enter}': 'enter',
         },
+        layoutName: language,
       });
     }
+  }
+
+  // This resets the language based on the current game's language
+  resetKeyboardLayout() {
+    if (this.gameService.language != this.lastKeyboardLanguage) {
+      this.lastKeyboardLanguage = this.gameService.language;
+      
+      console.log("AppComponent: changing layout to: " + this.gameService.language);
+      this._keyboard.setOptions({
+        layoutName: this.gameService.language
+      });
+    } 
   }
 
   openLogin() {

@@ -35,7 +35,8 @@
           || gameService.difficultyLevel != enumDifficultyLevel.Insane || isLetterOnPath(letter, i, j)"
         >
           <ng-container *ngIf="!paused && letter.character != null">
-            <img src="{{ getLetterImage(letter.character) }}">
+            <!-- <img src="{{ getLetterImage(letter.character) }}"> -->
+            {{ letter.character.toLowerCase() }}
           </ng-container>
         </ng-container>
 

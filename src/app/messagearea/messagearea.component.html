@@ -1,4 +1,4 @@
-  <mat-accordion *ngIf="playerService.showDefinitions">
+  <mat-accordion *ngIf="gameService.dictionarySupported && playerService.showDefinitions">
     <mat-expansion-panel (opened)="panelOpenState = true"
                           (closed)="panelOpenState = false">
       <mat-expansion-panel-header>

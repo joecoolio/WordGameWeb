@@ -19,7 +19,7 @@ export class MessageareaComponent {
   words: DictionaryWord[]; // Words in the puzzle that have definitions (in order)
 
   constructor(
-    private _gameService: GameService,
+    public gameService: GameService,
     private _eventBusService: EventBusService,
     public playerService: PlayerService
   ) {
@@ -42,7 +42,7 @@ export class MessageareaComponent {
       this.words = [];
 
       // Loop through each puzzle word.  If it has a definition, add it.
-      this._gameService.board.words.forEach((word) => {
+      this.gameService.board.words.forEach((word) => {
         if (word.populated) { // Partial words don't qualify
           if (this._dictionaryWords.has(word.stringify())) {
             this.words.push(this._dictionaryWords.get(word.stringify()));

@@ -35,6 +35,7 @@ import { DictionaryWord } from './dictionary.service';
  Outgoing commands:
   getSettings:         Load user settings from remote
   saveSettings:        Save user settings
+  settingsLoaded:      Settings have been loaded
   showPregame:         Open the pregame screen
   newGame:             Start a new game
   terminateGame:       Terminate the current game
@@ -125,6 +126,8 @@ export class GameWorkflowService {
         // User settings were loaded from remote
         this._subscriptions.add(this.eventBusService.onNotification(
             'settingsLoaded', () => {
+                // Notify that settings were loaded
+                this.eventBusService.emitCommand("settingsLoaded", null);
                 // Start pregame
                 this.eventBusService.emitCommand("showPregame", null);
             }

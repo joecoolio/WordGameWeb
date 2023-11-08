@@ -25,7 +25,16 @@
         </button>
       </div>
     </div>
-  
+
+    <!-- Language -->
+    <div class="item">
+      <div class="headertext">Language:</div>
+      <mat-chip-listbox aria-label="Language" class="centered">
+        <mat-chip-option [selected]="playerService.language == 'en'" (click)="changeLanguage('en')">English</mat-chip-option>
+        <mat-chip-option [selected]="playerService.language == 'fr'" (click)="changeLanguage('fr')">French</mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+
     <!-- Number of letters -->
     <div class="item">
       <div class="headertext">Number Of Letters: <span class="headervalue">{{ playerService.numLetters }}</span></div>

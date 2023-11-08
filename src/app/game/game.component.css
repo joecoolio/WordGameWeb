@@ -47,7 +47,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
+  font-family: 'IttyBittyNotebook', 'arial', sans-serif;
 }
 
 .letter-box img {

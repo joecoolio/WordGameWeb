@@ -178,7 +178,7 @@ export class GameComponent implements OnInit, AfterViewInit {
     // const nextLetter: string = (wordIndex < this.gameService.board.length) ? this.gameService.board[wordIndex + 1].letters[letterIndex] : letterToTest;
 
     let retval: boolean =
-      (letter.character != null && priorLetter.character != null && letter.character != priorLetter.character)
+      (letter.character != null && priorLetter.character != null && letter.character.toLowerCase() != priorLetter.character.toLowerCase())
       // || 
       // (nextLetter != null && letterToTest != nextLetter)
     ;

@@ -77,3 +77,8 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 	border-radius: 5px;
 	opacity: 0.6;
 }
+
+@font-face {
+	font-family: IttyBittyNotebook;
+	src: url(assets/fonts/IttyBittyNotebook-2X7K.ttf) format("truetype");
+}

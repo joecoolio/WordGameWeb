@@ -22,6 +22,11 @@ body {
   gap: 5px;
   padding-bottom: 20px;
 }
+.item > .centered {
+  display: flex;
+  align-self: center;
+  align-items: center;
+}
 .headertext {
   display: flex;
   align-self: center;

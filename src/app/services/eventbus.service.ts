@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Subject, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 class EventData {
@@ -53,5 +53,12 @@ export class EventBusService {
     return this.commandSubject.pipe(
       filter((e: EventData) => e.name === eventName),
       map((e: EventData) => e["value"])).subscribe(action);
+  }
+
+  // If you want an Observable instead of a subscription
+  observe(eventName: string): Observable<EventData> {
+    return this.commandSubject.pipe(
+      filter((e: EventData) => e.name === eventName),
+      map((e: EventData) => e["value"]));
   }
 }

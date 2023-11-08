@@ -87,4 +87,10 @@ export class SettingsComponent implements OnInit {
     // console.log("Setting player game mode to: " + this.playerService.hintType);
   }
 
+  changeLanguage(value: string) {
+    if (value && value != this.playerService.language) {
+      this.playerService.language = value;
+    }
+  }
+
 }

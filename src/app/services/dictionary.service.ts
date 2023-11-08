@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { filter, firstValueFrom, map, Observable, tap, timeout } from 'rxjs';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
 const DICTIONARY_API = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
 
@@ -50,62 +51,72 @@ export interface DictionaryWord {
 export class DictionaryService {
     constructor(private http: HttpClient) { }
 
-    async lookup(word: string): Promise<DictionaryWord> {
-        return await firstValueFrom(
-            this.http.get<DictionaryResult[]>(
-                DICTIONARY_API + word,
-                { observe: 'response' }
-            ).pipe(
-                timeout(HTTP_TIMEOUT),
-                filter(event => event instanceof HttpResponse),
-                map(response => {
-                    if (response.status == 200) {
-                        // Word to return
-                        let returnWord: DictionaryWord = { word: word, meanings: [] };
+    // Is a particular language supported by this service
+    languageSupported(language: string) : boolean {
+        if (language == 'en') return true;
+        return false;
+    }
 
-                        // I only want 1 noun, 1 verb, etc. regardless of how many definitions there are.
-                        // As I find one, put it in here so I don't add another
-                        let foundTypes: string[] = [];
+    async lookup(language: string, word: string): Promise<DictionaryWord | void> {
+        if (language == "en") {
+            return await firstValueFrom(
+                this.http.get<DictionaryResult[]>(
+                    DICTIONARY_API + word,
+                    { observe: 'response' }
+                ).pipe(
+                    timeout(HTTP_TIMEOUT),
+                    filter(event => event instanceof HttpResponse),
+                    map(response => {
+                        if (response.status == 200) {
+                            // Word to return
+                            let returnWord: DictionaryWord = { word: word, meanings: [] };
 
-                        let result: DictionaryResult[] = response.body;
-                        result.forEach((toplevel) => {
-                            toplevel.meanings.forEach((meaning) => {
-                                let partOfSpeech: string = meaning.partOfSpeech;
+                            // I only want 1 noun, 1 verb, etc. regardless of how many definitions there are.
+                            // As I find one, put it in here so I don't add another
+                            let foundTypes: string[] = [];
 
-                                meaning.definitions.forEach((definition) => {
-                                    // Not sure what these are, but they're not legit definitions
-                                    if (!definition.definition.startsWith("(auxiliary)")) {
-                                        // Only keep the first of each type
-                                        if (!foundTypes.includes(partOfSpeech)) {
-                                            foundTypes.push(partOfSpeech);
+                            let result: DictionaryResult[] = response.body;
+                            result.forEach((toplevel) => {
+                                toplevel.meanings.forEach((meaning) => {
+                                    let partOfSpeech: string = meaning.partOfSpeech;
 
-                                            // Build a word meaning
-                                            let wordMeaning: WordMeaning = { partofSpeech: partOfSpeech, posShorthand: "", definition: definition.definition };
-                                            // Shorthand part of speech for the UI
-                                            switch(partOfSpeech) {
-                                                case "noun": wordMeaning.posShorthand = "N"; break;
-                                                case "verb": wordMeaning.posShorthand = "V"; break;
-                                                case "adjective": wordMeaning.posShorthand = "ADJ"; break;
-                                                case "adverb": wordMeaning.posShorthand = "ADV"; break;
-                                                case "conjunction": wordMeaning.posShorthand = "CON"; break;
-                                                case "interjection": wordMeaning.posShorthand = "INT"; break;
-                                                case "numeral": wordMeaning.posShorthand = "NUM"; break;
-                                                case "pronoun": wordMeaning.posShorthand = "PRO"; break;
-                                                case "preposition": wordMeaning.posShorthand = "PRE"; break;
-                                                default: wordMeaning.posShorthand = "?";
+                                    meaning.definitions.forEach((definition) => {
+                                        // Not sure what these are, but they're not legit definitions
+                                        if (!definition.definition.startsWith("(auxiliary)")) {
+                                            // Only keep the first of each type
+                                            if (!foundTypes.includes(partOfSpeech)) {
+                                                foundTypes.push(partOfSpeech);
+
+                                                // Build a word meaning
+                                                let wordMeaning: WordMeaning = { partofSpeech: partOfSpeech, posShorthand: "", definition: definition.definition };
+                                                // Shorthand part of speech for the UI
+                                                switch(partOfSpeech) {
+                                                    case "noun": wordMeaning.posShorthand = "N"; break;
+                                                    case "verb": wordMeaning.posShorthand = "V"; break;
+                                                    case "adjective": wordMeaning.posShorthand = "ADJ"; break;
+                                                    case "adverb": wordMeaning.posShorthand = "ADV"; break;
+                                                    case "conjunction": wordMeaning.posShorthand = "CON"; break;
+                                                    case "interjection": wordMeaning.posShorthand = "INT"; break;
+                                                    case "numeral": wordMeaning.posShorthand = "NUM"; break;
+                                                    case "pronoun": wordMeaning.posShorthand = "PRO"; break;
+                                                    case "preposition": wordMeaning.posShorthand = "PRE"; break;
+                                                    default: wordMeaning.posShorthand = "?";
+                                                }
+
+                                                returnWord.meanings.push(wordMeaning);
                                             }
-
-                                            returnWord.meanings.push(wordMeaning);
                                         }
-                                    }
+                                    });
                                 });
                             });
-                        });
 
-                        return returnWord;
-                    }
-                })
-            )
-        );
+                            return returnWord;
+                        }
+                    })
+                )
+            );
+        } else {
+            return Promise.reject("Unsupported language: " + language);
+        }
     }
 }

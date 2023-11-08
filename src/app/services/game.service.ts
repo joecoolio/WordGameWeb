@@ -37,6 +37,7 @@ export class GameService {
   private _gameStatus: GameStatus = GameStatus.Initialize;
 
   // Parameters of the current game
+  private _language: string;
   private _gameId: string;
   private _numLetters: number;
   private _numHops: number;
@@ -154,6 +155,7 @@ export class GameService {
     return new Promise((resolve, reject) => {
       // Reset game parameters to the user's preferences
       this._gameId = crypto.randomUUID();
+      this._language = this._playerService.language;
       this._numLetters = this._playerService.numLetters;
       this._numHops = this._playerService.numHops;
       this._gameMode = this._playerService.gameMode;
@@ -163,8 +165,8 @@ export class GameService {
       this._solutionMessage = '';
 
       console.log(
-        'Initialize new game: letters = ' + this._numLetters + ' / hops = ' + this._numHops +
-          " mode = " + this._gameMode
+        'Initialize new game: language: ' + this.language + ' / letters = ' + this._numLetters + ' / hops = ' + this._numHops +
+          " / mode = " + this._gameMode
       );
 
       console.log('Requesting word pair...');
@@ -183,7 +185,7 @@ export class GameService {
       this._board.setPairWordStatus(WordStatus.Loading);
 
       this._dataService
-        .getPair(this._numLetters, this._numHops)
+        .getPair(this._language, this._numLetters, this._numHops)
         .then(
           // Success
           (wordpair: WordPair) => {
@@ -447,10 +449,13 @@ export class GameService {
       }
 
       // Letters
-      let found = letter.match(/^[a-z]$/gi);
+      let found: RegExpMatchArray;
+      if (this.language == "en") found = letter.match(/^[a-z]$/gi);
+      else if (this.language == "fr") found = letter.match(/^[a-zçéâêîôûàèìòùëïü]$/gi);
+
       if (found) {
         // Valid letter, put it in the appropriate cell
-        this._board.words[this._selectedWord].letters[this._selectedLetter].character = letter.toUpperCase();
+        this._board.words[this._selectedWord].letters[this._selectedLetter].character = letter.toLowerCase();
 
         // If word is now populated, test it automatically
         if (this._board.words[this._selectedWord].populated) {
@@ -526,7 +531,7 @@ export class GameService {
       var execStartTime = performance.now();
 
       // Make the remote call
-      this._dataService.testWord(wordArray, testWord, testPosition)
+      this._dataService.testWord(this.language, wordArray, testWord, testPosition)
       .then(
         // Success
         (testedWord: TestedWord) => {
@@ -613,7 +618,7 @@ export class GameService {
   private showDefinition(word: string, timeout: number = 4000): void {
     if (this._playerService.showDefinitions) {
       // Lookup the definition of the word
-      this._dictionaryService.lookup(word)
+      this._dictionaryService.lookup(this.language, word)
       .then(
         // Success
         (dictionaryWord: DictionaryWord) => {
@@ -627,9 +632,9 @@ export class GameService {
           //   toastClass: 'ngx-toastr dictionary-toastr',
           // });
         }
-      ),
-      // Failure
-      (err) => {};
+      ).catch(e => {
+        console.log("Dictionary error", e);
+      })
     }
   }
 
@@ -655,7 +660,7 @@ export class GameService {
 
       // Make the remote call
       // console.log("Validate Puzzle request: " + JSON.stringify(wordArray));
-      this._dataService.validatePuzzle(wordArray)
+      this._dataService.validatePuzzle(this.language, wordArray)
       .then(
         // Success
         (validatedPuzzle: ValidatedPuzzle) => {
@@ -717,7 +722,7 @@ export class GameService {
     var execStartTime = performance.now();
 
     // Make the remote call
-    this._dataService.getSolutionCount(wordArray)
+    this._dataService.getSolutionCount(this.language, wordArray)
     .then(
       // Success
       (solutionSet: SolutionSet) => {
@@ -798,7 +803,7 @@ export class GameService {
     }
     
     // Get all the possible solutions so we can show the user why they lose
-    this._dataService.getAllSolutions(wordArray)
+    this._dataService.getAllSolutions(this.language, wordArray)
     .then(
       // Success
       (solutionSet : SolutionSet) => {
@@ -893,7 +898,7 @@ export class GameService {
 
       // Make the remote call -- Basic, 1-letter hint
       if (this._hintType == HintType.Basic) {
-        this._dataService.getHint(wordArray, hintPosition)
+        this._dataService.getHint(this.language, wordArray, hintPosition)
         .then(
           // Success
           (basicHint : BasicHint) => {
@@ -952,7 +957,7 @@ export class GameService {
       }
       // Make the remote call -- Whole-word hint
       if (this._hintType == HintType.WholeWord) {
-        this._dataService.getFullHint(wordArray, hintPosition)
+        this._dataService.getFullHint(this.language, wordArray, hintPosition)
         .then(
           // Success
           (wordHint : WholeWordHint) => {
@@ -1048,6 +1053,10 @@ export class GameService {
     this._selectedLetter = index;
   }
 
+  get language() {
+    return this._language;
+  }
+
   get numLetters() {
     return this._numLetters;
   }
@@ -1106,5 +1115,10 @@ export class GameService {
 
   public get solutionMessage(): string {
     return this._solutionMessage;
+  }
+
+  // Is the current game's language supported for dictionary lookups
+  public get dictionarySupported(): boolean {
+    return this._dictionaryService.languageSupported(this._language);
   }
 }
