@@ -166,7 +166,7 @@ export class AppComponent {
             '{enter} Z X C V B N M {bksp}',
           ],
           fr: [
-            'ç é â ê î ô û à è ì ò ù ë ï ü',
+            'ç é â ê î ô û à è ù ë ï ü',
             'Q W E R T Y U I O P',
             'A S D F G H J K L',
             '{enter} Z X C V B N M {bksp}',

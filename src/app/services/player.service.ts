@@ -27,8 +27,8 @@ export enum HintType {
 }
 
 // Defaults:
-const DEFAULT_NUM_LETTERS: number = 5;
-const DEFAULT_NUM_HOPS: number = 5;
+const DEFAULT_NUM_LETTERS: number = 3;
+const DEFAULT_NUM_HOPS: number = 3;
 const DEFAULT_GAMEMODE: GameMode = GameMode.Normal;
 const DEFAULT_DIFFICULTYLEVEL: DifficultyLevel = DifficultyLevel.Normal;
 const DEFAULT_ENABLESOUNDS: boolean = true;
@@ -251,18 +251,20 @@ export class PlayerService {
                 // Success
                 (resp : HttpResponse<SettingsResult>) => {
                     let settingsResult: SettingsResult = resp.body;
-                    this._playerInfo.email = this.tokenService.email ? this.tokenService.email : DEFAULT_EMAIL;
+
+                    this._playerInfo.email = this.tokenService.email;
+
                     this._playerInfo.settings.difficultyLevel = settingsResult && settingsResult.difficultyLevel ? settingsResult.difficultyLevel : DEFAULT_DIFFICULTYLEVEL;
-                    this._playerInfo.settings.enableSounds = settingsResult ? settingsResult.enableSounds : DEFAULT_ENABLESOUNDS;
-                    this._playerInfo.settings.gameMode = settingsResult && settingsResult.gameMode ? settingsResult.gameMode : DEFAULT_GAMEMODE;
-                    this._playerInfo.settings.hintType = settingsResult && settingsResult.hintType ? settingsResult.hintType : DEFAULT_HINTTYPE;
-                    this._playerInfo.settings.name = settingsResult && settingsResult.name ? settingsResult.name : DEFAULT_NAME;
-                    this._playerInfo.settings.numHops = settingsResult && settingsResult.numHops ? settingsResult.numHops : DEFAULT_NUM_HOPS;
-                    this._playerInfo.settings.numLetters = settingsResult && settingsResult.numLetters ? settingsResult.numLetters : DEFAULT_NUM_LETTERS;
-                    this._playerInfo.settings.showKeyboard = settingsResult ? settingsResult.showKeyboard : DEFAULT_SHOWKEYBOARD;
-                    this._playerInfo.settings.showDefinitions = settingsResult ? settingsResult.showDefinitions : DEFAULT_SHOWDEFINITIONS;
-                    this._playerInfo.settings.fullscreen = settingsResult ? settingsResult.fullscreen : DEFAULT_FULLSCREEN;
-                    this._playerInfo.settings.language = settingsResult ? settingsResult.language : DEFAULT_LANGUAGE;
+                    this._playerInfo.settings.enableSounds = settingsResult.enableSounds === undefined ? DEFAULT_ENABLESOUNDS : settingsResult.enableSounds;
+                    this._playerInfo.settings.gameMode = settingsResult.gameMode === undefined ? DEFAULT_GAMEMODE : settingsResult.gameMode;
+                    this._playerInfo.settings.hintType = settingsResult.hintType === undefined ? DEFAULT_HINTTYPE : settingsResult.hintType;
+                    this._playerInfo.settings.name = settingsResult.name === undefined ? DEFAULT_NAME : settingsResult.name;
+                    this._playerInfo.settings.numHops = settingsResult.numHops === undefined ? DEFAULT_NUM_HOPS : settingsResult.numHops;
+                    this._playerInfo.settings.numLetters = settingsResult.numLetters === undefined ? DEFAULT_NUM_LETTERS : settingsResult.numLetters;
+                    this._playerInfo.settings.showKeyboard = settingsResult.showKeyboard === undefined ? DEFAULT_SHOWKEYBOARD : settingsResult.showKeyboard;
+                    this._playerInfo.settings.showDefinitions = settingsResult.showDefinitions === undefined ? DEFAULT_SHOWDEFINITIONS : settingsResult.showDefinitions;
+                    this._playerInfo.settings.fullscreen = settingsResult.fullscreen === undefined ? DEFAULT_FULLSCREEN : settingsResult.fullscreen;
+                    this._playerInfo.settings.language = settingsResult.language === undefined ? DEFAULT_LANGUAGE : settingsResult.language;
                     this._playerInfo.status = PlayerStatus.OK;
 
                     // Tell the game service
