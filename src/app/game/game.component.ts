@@ -28,6 +28,23 @@ import { ResizedEvent } from 'angular-resize-event';
 // How often to get timer ticks (in ms)
 const TICK_TIME = 100;
 
+// Accent character replacements
+const accent_char_replacements = {
+  'ç': 'c',
+  'é': 'e',
+  'â': 'a',
+  'ê': 'e',
+  'î': 'i',
+  'ô': 'o',
+  'û': 'u',
+  'à': 'a',
+  'è': 'e',
+  'ù': 'u',
+  'ë': 'e',
+  'ï': 'i',
+  'ü': 'u'
+};
+
 // Sends: newGameRequested, gamePaused
 // Receives: newGame, recordGameWon, recordGameLoss, recordGameAbandon, pauseGame, resumeGame
 @Component({
@@ -173,12 +190,19 @@ export class GameComponent implements OnInit, AfterViewInit {
     return "../../assets/images/letters/letter_" + character.toLowerCase() + ".png";
   }
 
+  // Replace accent characters with their ascii equivalents
+  private convertAccentString(input: string) : string {
+    let output = input.replace(/[çéâêîôûàèùëïü]/g, m => accent_char_replacements[m]);
+
+    return output;
+  }
+
   isLetterOnPath(letter: Letter, wordIndex: number, letterIndex: number): boolean {
     const priorLetter: Letter = (wordIndex > 0) ? this.gameService.board.words[wordIndex - 1].letters[letterIndex] : letter;
     // const nextLetter: string = (wordIndex < this.gameService.board.length) ? this.gameService.board[wordIndex + 1].letters[letterIndex] : letterToTest;
 
     let retval: boolean =
-      (letter.character != null && priorLetter.character != null && letter.character.toLowerCase() != priorLetter.character.toLowerCase())
+      (letter.character != null && priorLetter.character != null && this.convertAccentString(letter.character.toLowerCase()) != this.convertAccentString(priorLetter.character.toLowerCase()))
       // || 
       // (nextLetter != null && letterToTest != nextLetter)
     ;
